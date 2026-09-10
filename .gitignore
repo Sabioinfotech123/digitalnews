@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+frontend/dist/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+frontend/.env
+backend/.env
+*.local
+*.pem
+*.key
+credentials.json
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/digitalnews.db
+
+# Uploads / media
+backend/uploads/
+uploads/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temp / scratch / accidental Vite reload triggers
+_doc_extract.txt
+**/info.html
+*.tmp
+*.temp
+
+# Large binary specs (keep markdown docs only)
+*.docx
+*.doc
+
+# Logs / coverage
+*.log
+coverage/
+.coverage
+htmlcov/
+.nyc_output/
+
+# Cursor / local agent
+.cursor/
+agent-transcripts/

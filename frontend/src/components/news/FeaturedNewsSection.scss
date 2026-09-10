@@ -1,0 +1,18 @@
+.featured-news {
+  &__layout {
+    display: grid;
+    gap: 1.5rem;
+
+    @media (min-width: 880px) {
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.75rem;
+      align-items: start;
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-border);
+  }
+}

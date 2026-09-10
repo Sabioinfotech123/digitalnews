@@ -1,0 +1,213 @@
+from datetime import datetime, timezone
+
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.models.content import ContentLanguage, ContentStatus, News, NewsType
+from app.repositories.content_repository import CategoryRepository, NewsRepository, TagRepository
+from app.schemas.content import (
+    CategoryCreate,
+    CategoryResponse,
+    CategoryUpdate,
+    NewsCreate,
+    NewsResponse,
+    NewsUpdate,
+    PaginatedNews,
+    TagCreate,
+    TagResponse,
+    TagUpdate,
+)
+
+
+def _news_response(item: News) -> NewsResponse:
+    return NewsResponse(
+        id=item.id,
+        title=item.title,
+        slug=item.slug,
+        language=item.language,
+        short_description=item.short_description,
+        content=item.content,
+        category_id=item.category_id,
+        category_name=item.category.name if item.category else None,
+        author_id=item.author_id,
+        author_name=item.author.full_name if item.author else None,
+        status=item.status,
+        news_type=item.news_type,
+        is_featured=item.is_featured,
+        is_breaking=item.is_breaking,
+        image_url=item.image_url,
+        seo_title=item.seo_title,
+        seo_description=item.seo_description,
+        seo_keywords=item.seo_keywords,
+        published_at=item.published_at,
+        view_count=item.view_count,
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+        tags=[TagResponse.model_validate(tag) for tag in item.tags],
+    )
+
+
+class CategoryService:
+    def __init__(self, db: Session) -> None:
+        self.repo = CategoryRepository(db)
+
+    def list(self, search: str | None = None) -> list[CategoryResponse]:
+        return [CategoryResponse.model_validate(item) for item in self.repo.list(search)]
+
+    def create(self, payload: CategoryCreate) -> CategoryResponse:
+        if self.repo.get_by_slug(payload.slug):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Category slug already exists")
+        item = self.repo.create(**payload.model_dump())
+        return CategoryResponse.model_validate(item)
+
+    def update(self, category_id: str, payload: CategoryUpdate) -> CategoryResponse:
+        item = self.repo.get(category_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        data = payload.model_dump(exclude_unset=True)
+        if "slug" in data and data["slug"] != item.slug and self.repo.get_by_slug(data["slug"]):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Category slug already exists")
+        for key, value in data.items():
+            setattr(item, key, value)
+        return CategoryResponse.model_validate(self.repo.save(item))
+
+    def delete(self, category_id: str) -> None:
+        item = self.repo.get(category_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        self.repo.delete(item)
+
+
+class TagService:
+    def __init__(self, db: Session) -> None:
+        self.repo = TagRepository(db)
+
+    def list(self, search: str | None = None) -> list[TagResponse]:
+        return [TagResponse.model_validate(item) for item in self.repo.list(search)]
+
+    def create(self, payload: TagCreate) -> TagResponse:
+        if self.repo.get_by_slug(payload.slug):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Tag slug already exists")
+        item = self.repo.create(**payload.model_dump())
+        return TagResponse.model_validate(item)
+
+    def update(self, tag_id: str, payload: TagUpdate) -> TagResponse:
+        item = self.repo.get(tag_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
+        data = payload.model_dump(exclude_unset=True)
+        if "slug" in data and data["slug"] != item.slug and self.repo.get_by_slug(data["slug"]):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Tag slug already exists")
+        for key, value in data.items():
+            setattr(item, key, value)
+        return TagResponse.model_validate(self.repo.save(item))
+
+    def delete(self, tag_id: str) -> None:
+        item = self.repo.get(tag_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
+        self.repo.delete(item)
+
+
+class NewsService:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+        self.repo = NewsRepository(db)
+        self.tags = TagRepository(db)
+
+    def list(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        status: ContentStatus | None = None,
+        category_id: str | None = None,
+        news_type: NewsType | None = None,
+        published_only: bool = False,
+        is_breaking: bool | None = None,
+    ) -> PaginatedNews:
+        items, total = self.repo.list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            language=language,
+            status=status,
+            category_id=category_id,
+            news_type=news_type,
+            published_only=published_only,
+            is_breaking=is_breaking,
+        )
+        return PaginatedNews(
+            items=[_news_response(item) for item in items],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+
+    def get(self, news_id: str) -> NewsResponse:
+        item = self.repo.get(news_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        return _news_response(item)
+
+    def create(self, payload: NewsCreate, author_id: str) -> NewsResponse:
+        existing = self.repo.get_by_slug(payload.slug, payload.language)
+        if existing:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+        tags = self.tags.get_many(payload.tag_ids)
+        news_type = payload.news_type
+        is_featured = payload.is_featured or news_type == NewsType.featured
+        news = News(
+            title=payload.title,
+            slug=payload.slug,
+            language=payload.language,
+            short_description=payload.short_description,
+            content=payload.content,
+            category_id=payload.category_id,
+            author_id=author_id,
+            status=payload.status,
+            news_type=news_type,
+            is_featured=is_featured,
+            is_breaking=payload.is_breaking,
+            image_url=payload.image_url,
+            seo_title=payload.seo_title,
+            seo_description=payload.seo_description,
+            seo_keywords=payload.seo_keywords,
+            published_at=payload.published_at
+            or (datetime.now(timezone.utc) if payload.status == ContentStatus.published else None),
+            tags=tags,
+        )
+        return _news_response(self.repo.create(news))
+
+    def update(self, news_id: str, payload: NewsUpdate) -> NewsResponse:
+        item = self.repo.get(news_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        data = payload.model_dump(exclude_unset=True)
+        tag_ids = data.pop("tag_ids", None)
+        next_slug = data.get("slug", item.slug)
+        next_language = data.get("language", item.language)
+        if next_slug != item.slug or next_language != item.language:
+            clash = self.repo.get_by_slug(next_slug, next_language)
+            if clash and clash.id != item.id:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+        for key, value in data.items():
+            setattr(item, key, value)
+        if "news_type" in data:
+            item.is_featured = item.news_type == NewsType.featured or bool(item.is_featured)
+            if item.news_type == NewsType.featured:
+                item.is_featured = True
+        if tag_ids is not None:
+            item.tags = self.tags.get_many(tag_ids)
+        if item.status == ContentStatus.published and item.published_at is None:
+            item.published_at = datetime.now(timezone.utc)
+        return _news_response(self.repo.save(item))
+
+    def delete(self, news_id: str) -> None:
+        item = self.repo.get(news_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        item.deleted_at = datetime.now(timezone.utc)
+        self.repo.save(item)

@@ -1,0 +1,10 @@
+.latest-news {
+  &__grid {
+    display: grid;
+    gap: 1.5rem 1.25rem;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}

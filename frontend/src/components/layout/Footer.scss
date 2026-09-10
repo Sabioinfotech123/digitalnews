@@ -1,0 +1,56 @@
+@use '../../styles/variables.scss';
+
+.site-footer {
+  margin-top: auto;
+  background: var(--color-black);
+  color: rgba(255, 255, 255, 0.85);
+  border-top: 3px solid var(--color-primary);
+
+  &__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  &__name {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem;
+    color: var(--color-white);
+    border-bottom: 3px solid var(--color-primary);
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+
+  &__tagline {
+    margin: 0.5rem 0 0;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: var(--font-size-sm);
+  }
+
+  &__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      font-family: var(--font-ui);
+      font-size: var(--font-size-sm);
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  &__copy {
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.5);
+  }
+}

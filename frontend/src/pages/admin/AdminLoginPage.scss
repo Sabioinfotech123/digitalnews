@@ -1,0 +1,52 @@
+.admin-login {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    linear-gradient(135deg, rgba(215, 25, 32, 0.08), transparent 40%),
+    #f7f7f7;
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.08);
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  &__logo {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #111;
+    border-bottom: 3px solid #d71920;
+    line-height: 1.1;
+  }
+
+  &__title {
+    margin-bottom: 0.25rem !important;
+    font-family: var(--font-heading) !important;
+  }
+
+  &__footer {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+
+    a {
+      color: #d71920;
+      font-weight: 600;
+    }
+  }
+}

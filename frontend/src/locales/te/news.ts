@@ -1,0 +1,15 @@
+export const news = {
+  latestNews: 'తాజా వార్తలు',
+  topStories: 'ముఖ్య వార్తలు',
+  featuredNews: 'ఫీచర్డ్',
+  trendingNews: 'ట్రెండింగ్',
+  moreNews: 'మరిన్ని వార్తలు',
+  breakingNews: 'బ్రేకింగ్ న్యూస్',
+  trending: 'ట్రెండింగ్',
+  readMore: 'మరింత చదవండి',
+  viewAllNews: 'అన్ని వార్తలు',
+  loadingArticle: 'వార్త లోడ్ అవుతోంది…',
+  articleNotFound: 'వార్త కనబడలేదు',
+  backHome: 'హోమ్‌కు తిరిగి వెళ్లండి',
+  byAuthor: 'రచయిత',
+} as const

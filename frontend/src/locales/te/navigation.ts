@@ -1,0 +1,15 @@
+export const navigation = {
+  home: 'హోమ్',
+  todayNews: 'ఈరోజు',
+  news: 'వార్తలు',
+  blogs: 'బ్లాగులు',
+  videos: 'వీడియోలు',
+  live: 'లైవ్ టీవీ',
+  shorts: 'షార్ట్స్',
+  search: 'వెతకండి',
+  login: 'లాగిన్',
+  register: 'రిజిస్టర్',
+  profile: 'ప్రొఫైల్',
+  bookmarks: 'బుక్‌మార్కులు',
+  admin: 'అడ్మిన్',
+} as const

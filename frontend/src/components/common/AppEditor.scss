@@ -1,0 +1,105 @@
+.app-editor {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+
+  &--disabled {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f7f7f7;
+  }
+
+  &__btn {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.45rem;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #171717;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    &:hover {
+      background: #fde8e9;
+      color: #d71920;
+    }
+
+    &--active {
+      background: #d71920;
+      color: #fff;
+
+      &:hover {
+        background: #b5141a;
+        color: #fff;
+      }
+    }
+  }
+
+  &__sep {
+    width: 1px;
+    align-self: stretch;
+    margin: 0 0.2rem;
+    background: #e5e7eb;
+  }
+
+  .ProseMirror {
+    outline: none;
+    padding: 0.9rem 1rem;
+    font-family: var(--font-body);
+    color: #171717;
+    line-height: 1.65;
+
+    p {
+      margin: 0 0 0.75rem;
+    }
+
+    h2,
+    h3 {
+      font-family: var(--font-heading);
+      margin: 0.75rem 0 0.5rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.25rem;
+      margin: 0 0 0.75rem;
+    }
+
+    blockquote {
+      margin: 0 0 0.75rem;
+      padding-left: 0.85rem;
+      border-left: 3px solid #d71920;
+      color: #6b7280;
+    }
+
+    a {
+      color: #d71920;
+      text-decoration: underline;
+    }
+
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    p.is-editor-empty:first-child::before {
+      color: #9ca3af;
+      content: attr(data-placeholder);
+      float: left;
+      height: 0;
+      pointer-events: none;
+    }
+  }
+}

@@ -1,0 +1,39 @@
+.news-form-page {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.06);
+  padding: 1.25rem 1.35rem 1.75rem;
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__title {
+    margin: 0 !important;
+    font-family: var(--font-heading) !important;
+    border-left: 4px solid #d71920;
+    padding-left: 0.75rem;
+  }
+
+  &__side {
+    position: sticky;
+    top: 1rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f7f7f7;
+  }
+
+  &__meta {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-family: var(--font-ui);
+  }
+}

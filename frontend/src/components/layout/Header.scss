@@ -1,0 +1,122 @@
+@use '../../styles/variables.scss';
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-black);
+  color: var(--color-white);
+  box-shadow: var(--shadow-md);
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.75rem 1.25rem;
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--color-white);
+    text-decoration: none;
+    flex-shrink: 0;
+
+    &:hover {
+      color: var(--color-white);
+    }
+  }
+
+  &__logo {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    margin-left: var(--space-lg);
+  }
+
+  &__link {
+    font-family: var(--font-ui);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast), color var(--transition-fast);
+
+    &:hover {
+      color: var(--color-white);
+      background: rgba(215, 25, 32, 0.25);
+    }
+
+    &--active {
+      color: var(--color-white);
+      background: var(--color-primary);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  &__icon-btn {
+    color: var(--color-white) !important;
+
+    &:hover {
+      color: var(--color-primary) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+  }
+
+  &__lang {
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    color: var(--color-white) !important;
+    background: transparent !important;
+
+    &:hover {
+      border-color: var(--color-primary) !important;
+      color: var(--color-white) !important;
+      background: rgba(215, 25, 32, 0.35) !important;
+    }
+  }
+
+  &__live-btn {
+    font-weight: var(--font-weight-semibold) !important;
+  }
+
+  &__mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__mobile-link {
+    font-family: var(--font-ui);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 0.75rem 0.85rem;
+    border-radius: var(--radius-md);
+    border-left: 3px solid transparent;
+
+    &:hover,
+    &.active {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-left-color: var(--color-primary);
+    }
+  }
+}

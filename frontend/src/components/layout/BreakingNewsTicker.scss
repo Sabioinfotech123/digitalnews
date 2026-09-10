@@ -1,0 +1,68 @@
+@use '../../styles/variables.scss';
+
+.breaking-ticker {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-primary);
+  color: var(--color-white);
+  min-height: 40px;
+  overflow: hidden;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 1rem;
+    background: var(--color-black);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  &__track {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  &__marquee {
+    display: flex;
+    gap: 2.5rem;
+    white-space: nowrap;
+    animation: ticker-scroll 28s linear infinite;
+    padding-left: 1rem;
+  }
+
+  &__item {
+    font-family: var(--font-body);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+
+    &::before {
+      content: '●';
+      margin-right: 0.65rem;
+      opacity: 0.7;
+    }
+  }
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breaking-ticker__marquee {
+    animation: none;
+  }
+}

@@ -1,0 +1,35 @@
+@use './variables.scss';
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+button,
+input,
+select,
+textarea,
+label,
+.ant-btn,
+.ant-input,
+.ant-menu {
+  font-family: var(--font-ui);
+}
+
+[lang='te'],
+.lang-te {
+  font-family: var(--font-telugu);
+}

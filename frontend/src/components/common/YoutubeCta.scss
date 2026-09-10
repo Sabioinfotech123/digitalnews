@@ -1,0 +1,50 @@
+@use '../../styles/variables.scss';
+
+.yt-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-black);
+  color: var(--color-white);
+  border: 1px solid rgba(215, 25, 32, 0.45);
+  box-shadow: var(--shadow-md);
+
+  &__icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  &__copy {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--font-size-lg);
+    color: var(--color-white);
+  }
+
+  &__text {
+    margin: 0.35rem 0 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: var(--font-size-sm);
+  }
+
+  &__btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.45rem;
+  }
+}

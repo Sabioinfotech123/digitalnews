@@ -1,0 +1,15 @@
+export const news = {
+  latestNews: 'Latest News',
+  topStories: 'Top Stories',
+  featuredNews: 'Featured',
+  trendingNews: 'Trending',
+  moreNews: 'More News',
+  breakingNews: 'Breaking News',
+  trending: 'Trending',
+  readMore: 'Read more',
+  viewAllNews: 'View all news',
+  loadingArticle: 'Loading article…',
+  articleNotFound: 'Article not found',
+  backHome: 'Back to home',
+  byAuthor: 'By',
+} as const

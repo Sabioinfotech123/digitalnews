@@ -1,0 +1,40 @@
+/*
+  Tailwind v4 — utilities + theme only.
+  Preflight is skipped so Ant Design styles are not reset.
+*/
+
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+  /* Brand: Red + White + Black */
+  --color-primary: #d71920;
+  --color-primary-hover: #b5141a;
+  --color-primary-light: #fde8e9;
+  --color-ink: #111111;
+  --color-paper: #ffffff;
+  --color-canvas: #f7f7f7;
+  --color-surface: #ffffff;
+  --color-ink-muted: #6b7280;
+  --color-line: #e5e7eb;
+
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-ui: 'Public Sans', sans-serif;
+  --font-telugu: 'Noto Sans Telugu', sans-serif;
+
+  --shadow-soft: 0 1px 2px rgba(17, 17, 17, 0.06);
+  --shadow-card: 0 4px 12px rgba(17, 17, 17, 0.08);
+  --shadow-lift: 0 12px 24px rgba(17, 17, 17, 0.1);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}

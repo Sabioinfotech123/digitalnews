@@ -1,0 +1,15 @@
+export const navigation = {
+  home: 'Home',
+  todayNews: 'Today',
+  news: 'News',
+  blogs: 'Blogs',
+  videos: 'Videos',
+  live: 'Live TV',
+  shorts: 'Shorts',
+  search: 'Search',
+  login: 'Login',
+  register: 'Register',
+  profile: 'Profile',
+  bookmarks: 'Bookmarks',
+  admin: 'Admin',
+} as const
