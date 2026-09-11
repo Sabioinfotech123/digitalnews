@@ -10,7 +10,7 @@
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | PostgreSQL / SQLite SQLAlchemy URL |
+| `DATABASE_URL` | PostgreSQL SQLAlchemy URL (Docker default in `.env.example`) |
 | `JWT_SECRET_KEY` | Signing secret |
 | `JWT_ALGORITHM` | e.g. `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access TTL |
@@ -21,8 +21,8 @@
 | `AWS_ACCESS_KEY_ID` | IAM access key |
 | `AWS_SECRET_ACCESS_KEY` | IAM secret |
 | `AWS_REGION` | e.g. `us-east-1` |
-| `AWS_S3_BUCKET` | e.g. `digitalnews-media` |
+| `AWS_S3_BUCKET` | e.g. `digitalnews-media-prod` |
 | `AWS_S3_PUBLIC_BASE_URL` | Public object URL base |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional bootstrap (dev only) |
 
-Never commit `.env`.
+Never commit `.env`. See [21-database.md](./21-database.md) for Postgres + Docker.

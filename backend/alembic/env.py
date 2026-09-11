@@ -5,9 +5,13 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
 from app.core.database import Base
-
-# Import models here as they are added so metadata is complete.
-# from app.models import user, news, blog, video, category, tag, media, bookmark
+from app.models import (  # noqa: F401 — register metadata
+    Category,
+    News,
+    NewsTag,
+    Tag,
+    User,
+)
 
 config = context.config
 settings = get_settings()

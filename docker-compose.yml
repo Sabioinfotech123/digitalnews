@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: digitalnews-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: digitalnews
+      POSTGRES_PASSWORD: digitalnews
+      POSTGRES_DB: digitalnews
+    ports:
+      - "5432:5432"
+    volumes:
+      - digitalnews_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U digitalnews -d digitalnews"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  digitalnews_pgdata:

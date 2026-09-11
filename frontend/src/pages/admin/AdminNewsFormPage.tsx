@@ -15,6 +15,7 @@ import { useDocumentTitle } from '@/components/common/DocumentTitle'
 import type { Category, NewsItem, NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import { slugify } from '@/utils/slugify'
+import { stripHtml } from '@/utils/publicNews'
 import { BRAND } from '@/config/brand'
 import './AdminNewsFormPage.scss'
 
@@ -77,6 +78,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
           form.setFieldsValue({
             ...item,
             tag_ids: item.tags.map((tag) => tag.id),
+            short_description: stripHtml(item.short_description),
           })
         } else {
           form.setFieldsValue({
@@ -177,7 +179,12 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               label="Short description"
               rules={[{ required: true, message: 'Description is required' }]}
             >
-              <AppEditor placeholder="Write a short summary…" minHeight={140} />
+              <Input.TextArea
+                rows={4}
+                placeholder="Write a short summary…"
+                showCount
+                maxLength={500}
+              />
             </Form.Item>
 
             <Form.Item

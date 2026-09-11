@@ -14,7 +14,8 @@ dist/
 build/
 frontend/dist/
 
-# Environment / secrets
+# Environment
+
 .env
 .env.*
 !.env.example
@@ -26,11 +27,12 @@ backend/.env
 *.key
 credentials.json
 
-# Local databases
+# Local databases (legacy SQLite / dumps)
 *.db
 *.sqlite
 *.sqlite3
 backend/digitalnews.db
+
 
 # Uploads / media
 backend/uploads/

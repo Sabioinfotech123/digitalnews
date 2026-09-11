@@ -14,6 +14,26 @@ const STATUS_COLOR: Record<string, string> = {
   breaking: 'magenta',
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft',
+  published: 'Published',
+  unpublished: 'Unpublished',
+  scheduled: 'Scheduled',
+  active: 'Active',
+  inactive: 'Inactive',
+  featured: 'Featured',
+  latest: 'Latest',
+  trending: 'Trending',
+  more: 'More',
+  breaking: 'Breaking',
+}
+
+function formatStatusLabel(status: string): string {
+  if (STATUS_LABEL[status]) return STATUS_LABEL[status]
+  if (!status) return ''
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
 export function StatusBadge({ status }: { status: string }) {
-  return <Tag color={STATUS_COLOR[status] ?? 'default'}>{status}</Tag>
+  return <Tag color={STATUS_COLOR[status] ?? 'default'}>{formatStatusLabel(status)}</Tag>
 }
