@@ -55,7 +55,7 @@ copy .env.example .env
 Default DB URL in `.env`:
 
 ```env
-DATABASE_URL=postgresql+psycopg2://digitalnews:digitalnews@localhost:5432/digitalnews
+DATABASE_URL=postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews
 ```
 
 Run migrations, then API:

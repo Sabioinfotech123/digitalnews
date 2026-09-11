@@ -13,7 +13,7 @@ docker compose up -d
 # backend
 cd backend
 # ensure .env has:
-# DATABASE_URL=postgresql+psycopg2://digitalnews:digitalnews@localhost:5432/digitalnews
+# DATABASE_URL=postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
@@ -25,7 +25,7 @@ uvicorn app.main:app --reload --port 8000
 | User | `digitalnews` |
 | Password | `digitalnews` |
 | DB name | `digitalnews` |
-| Port | `5432` |
+| Port | `5433` (mapped from container 5432) |
 
 Change password for shared QA hosts.
 

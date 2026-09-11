@@ -19,11 +19,11 @@ Defaults:
 | Setting | Value |
 |---------|--------|
 | Host | `localhost` |
-| Port | `5432` |
+| Port | `5433` (host) → `5432` (container) |
 | User | `digitalnews` |
 | Password | `digitalnews` |
 | Database | `digitalnews` |
-| URL | `postgresql+psycopg2://digitalnews:digitalnews@localhost:5432/digitalnews` |
+| URL | `postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews` |
 
 Data is stored in Docker volume `digitalnews_pgdata`.
 
