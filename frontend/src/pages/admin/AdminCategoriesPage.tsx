@@ -1,4 +1,4 @@
-import { App, Form, Input, Modal, Popconfirm, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
+import { App, Form, Input, Modal, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createCategory, deleteCategory, fetchCategories, updateCategory } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
@@ -8,6 +8,7 @@ import { AppTable } from '@/components/common/AppTable'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import type { Category } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
+import { confirmDelete } from '@/utils/confirmDelete'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 
@@ -17,7 +18,7 @@ function compareText(a: string | null | undefined, b: string | null | undefined)
 
 export function AdminCategoriesPage() {
   const { t } = useLanguage()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const [items, setItems] = useState<Category[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -61,11 +62,20 @@ export function AdminCategoriesPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteCategory(id)
-      message.success('Deleted')
+      message.success('Category deleted successfully')
       void load()
     } catch (err) {
       message.error(getApiErrorMessage(err, 'Delete failed'))
     }
+  }
+
+  const askDelete = (row: Category) => {
+    confirmDelete({
+      modal,
+      title: 'Delete category?',
+      content: `Delete “${row.name}”? This cannot be undone.`,
+      onConfirm: () => handleDelete(row.id),
+    })
   }
 
   const handleValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
@@ -88,10 +98,10 @@ export function AdminCategoriesPage() {
     try {
       if (editing) {
         await updateCategory(editing.id, values)
-        message.success('Updated')
+        message.success('Category updated successfully')
       } else {
         await createCategory(values)
-        message.success('Created')
+        message.success('Category created successfully')
       }
       setOpen(false)
       void load()
@@ -138,21 +148,15 @@ export function AdminCategoriesPage() {
                 onClick={() => openEditModal(row)}
               />
             </Tooltip>
-            <Popconfirm
-              title="Delete category?"
-              okText="Delete"
-              okButtonProps={{ danger: true }}
-              onConfirm={() => handleDelete(row.id)}
-            >
-              <Tooltip title="Delete">
-                <AppButton
-                  type="text"
-                  aria-label="Delete"
-                  className="app-table__icon-btn app-table__icon-btn--delete"
-                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Delete">
+              <AppButton
+                type="text"
+                aria-label="Delete"
+                className="app-table__icon-btn app-table__icon-btn--delete"
+                icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                onClick={() => askDelete(row)}
+              />
+            </Tooltip>
           </Space>
         ),
       },

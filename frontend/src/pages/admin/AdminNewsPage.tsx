@@ -1,4 +1,4 @@
-import { App, Popconfirm, Select, Space, Tooltip, type TableColumnsType } from 'antd'
+import { App, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteAdminNews, fetchAdminNews } from '@/api/content'
@@ -11,6 +11,7 @@ import { adminNewsEditPath } from '@/config/adminPages'
 import type { ContentLanguage, ContentStatus, NewsItem, NewsType } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import { getApiErrorMessage } from '@/utils/apiError'
+import { confirmDelete } from '@/utils/confirmDelete'
 
 const TYPE_LABELS: Record<NewsType, string> = {
   featured: 'Featured news',
@@ -39,7 +40,7 @@ interface AdminNewsPageProps {
 
 export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
   const { t } = useLanguage()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const navigate = useNavigate()
 
   const [items, setItems] = useState<NewsItem[]>([])
@@ -120,11 +121,20 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
   const handleDelete = async (id: string) => {
     try {
       await deleteAdminNews(id)
-      message.success('Deleted')
+      message.success('News deleted successfully')
       void load()
     } catch (err) {
       message.error(getApiErrorMessage(err, 'Delete failed'))
     }
+  }
+
+  const askDelete = (row: NewsItem) => {
+    confirmDelete({
+      modal,
+      title: 'Delete this news?',
+      content: `Delete “${row.title}”? This cannot be undone.`,
+      onConfirm: () => handleDelete(row.id),
+    })
   }
 
   const columns: TableColumnsType<NewsItem> = useMemo(
@@ -208,21 +218,15 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
                 onClick={() => goToEdit(row)}
               />
             </Tooltip>
-            <Popconfirm
-              title="Delete this news?"
-              okText="Delete"
-              okButtonProps={{ danger: true }}
-              onConfirm={() => handleDelete(row.id)}
-            >
-              <Tooltip title="Delete">
-                <AppButton
-                  type="text"
-                  aria-label="Delete"
-                  className="app-table__icon-btn app-table__icon-btn--delete"
-                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Delete">
+              <AppButton
+                type="text"
+                aria-label="Delete"
+                className="app-table__icon-btn app-table__icon-btn--delete"
+                icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                onClick={() => askDelete(row)}
+              />
+            </Tooltip>
           </Space>
         ),
       },

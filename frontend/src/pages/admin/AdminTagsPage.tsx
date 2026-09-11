@@ -1,4 +1,4 @@
-import { App, Form, Input, Modal, Popconfirm, Space, Tooltip, type TableColumnsType } from 'antd'
+import { App, Form, Input, Modal, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createTag, deleteTag, fetchTags, updateTag } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
@@ -7,6 +7,7 @@ import { AppLoader } from '@/components/common/AppLoader'
 import { AppTable } from '@/components/common/AppTable'
 import type { TagItem } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
+import { confirmDelete } from '@/utils/confirmDelete'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 
@@ -16,7 +17,7 @@ function compareText(a: string | null | undefined, b: string | null | undefined)
 
 export function AdminTagsPage() {
   const { t } = useLanguage()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const [items, setItems] = useState<TagItem[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -59,11 +60,20 @@ export function AdminTagsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteTag(id)
-      message.success('Deleted')
+      message.success('Tag deleted successfully')
       void load()
     } catch (err) {
       message.error(getApiErrorMessage(err, 'Delete failed'))
     }
+  }
+
+  const askDelete = (row: TagItem) => {
+    confirmDelete({
+      modal,
+      title: 'Delete tag?',
+      content: `Delete “${row.name}”? This cannot be undone.`,
+      onConfirm: () => handleDelete(row.id),
+    })
   }
 
   const handleValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
@@ -81,10 +91,10 @@ export function AdminTagsPage() {
     try {
       if (editing) {
         await updateTag(editing.id, values)
-        message.success('Updated')
+        message.success('Tag updated successfully')
       } else {
         await createTag(values)
-        message.success('Created')
+        message.success('Tag created successfully')
       }
       setOpen(false)
       void load()
@@ -124,21 +134,15 @@ export function AdminTagsPage() {
                 onClick={() => openEditModal(row)}
               />
             </Tooltip>
-            <Popconfirm
-              title="Delete tag?"
-              okText="Delete"
-              okButtonProps={{ danger: true }}
-              onConfirm={() => handleDelete(row.id)}
-            >
-              <Tooltip title="Delete">
-                <AppButton
-                  type="text"
-                  aria-label="Delete"
-                  className="app-table__icon-btn app-table__icon-btn--delete"
-                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
-                />
-              </Tooltip>
-            </Popconfirm>
+            <Tooltip title="Delete">
+              <AppButton
+                type="text"
+                aria-label="Delete"
+                className="app-table__icon-btn app-table__icon-btn--delete"
+                icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                onClick={() => askDelete(row)}
+              />
+            </Tooltip>
           </Space>
         ),
       },

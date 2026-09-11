@@ -13,7 +13,7 @@ import { AppEditor } from '@/components/common/AppEditor'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
-import type { Category, NewsItem, NewsType, TagItem } from '@/types/content'
+import type { Category, NewsItem, NewsPayload, NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
@@ -45,7 +45,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
   const lockedType = isNewsType(routeType) ? routeType : defaultNewsType
   const navigate = useNavigate()
   const { message } = App.useApp()
-  const [form] = Form.useForm()
+  const [form] = Form.useForm<NewsPayload>()
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -74,6 +74,15 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
         if (!active) return
         setCategories(cats)
         setTags(tagList)
+
+        if (mode === 'create') {
+          if (!cats.length) {
+            message.warning('Please create a category before adding news')
+          }
+          if (!tagList.length) {
+            message.warning('Please create a tag before adding news')
+          }
+        }
 
         if (mode === 'edit' && id) {
           const item = await fetchAdminNewsById(id)
@@ -121,7 +130,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
     }
   }
 
-  const handleValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
+  const handleValuesChange = (changed: Partial<NewsPayload>, all: NewsPayload) => {
     if (mode === 'create' && 'title' in changed && !form.isFieldTouched('slug')) {
       form.setFieldValue('slug', slugify(String(all.title || '')))
     }
@@ -134,24 +143,24 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
     message.error(getFormValidationMessage(info))
   }
 
-  const handleFinish = async (values: Record<string, unknown>) => {
+  const handleFinish = async (values: NewsPayload) => {
     setSaving(true)
     try {
-      const payload = {
+      const payload: NewsPayload = {
         ...values,
         news_type: values.news_type || lockedType,
-        is_featured: values.news_type === 'featured' || values.is_featured,
+        is_featured: values.news_type === 'featured' || Boolean(values.is_featured),
         category_id: values.category_id || null,
         tag_ids: values.tag_ids || [],
       }
       if (mode === 'create') {
         const created = await createAdminNews(payload)
-        message.success('News created')
+        message.success('News created successfully')
         navigate(`/admin/news/edit/${created.id}`)
       } else if (id) {
         const updated = await updateAdminNews(id, payload)
         setNews(updated)
-        message.success('Saved')
+        message.success('News updated successfully')
       }
     } catch (err) {
       applyApiFieldErrors(form, err)
