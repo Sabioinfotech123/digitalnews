@@ -2,11 +2,12 @@
   &--fullscreen {
     position: fixed;
     inset: 0;
-    z-index: 2000;
+    z-index: 3000;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   &--inline {

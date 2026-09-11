@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import { adminNewsEditPath } from '@/config/adminPages'
 import type { ContentLanguage, ContentStatus, NewsItem, NewsType } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
+import { getApiErrorMessage } from '@/utils/apiError'
 
 const TYPE_LABELS: Record<NewsType, string> = {
   featured: 'Featured news',
@@ -20,6 +21,16 @@ const TYPE_LABELS: Record<NewsType, string> = {
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
   return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+}
+
+function formatUpdatedAt(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 interface AdminNewsPageProps {
@@ -72,6 +83,49 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
 
   const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create/latest'
   const title = newsType ? TYPE_LABELS[newsType] : t('admin.news')
+
+  const handleSearchChange = (value: string) => {
+    setPage(1)
+    setSearch(value)
+  }
+
+  const handleTypeFilterChange = (value: NewsType | 'all') => {
+    setPage(1)
+    setTypeFilter(value)
+  }
+
+  const handleLanguageChange = (value: ContentLanguage | 'all') => {
+    setPage(1)
+    setLanguage(value)
+  }
+
+  const handleStatusChange = (value: ContentStatus | 'all') => {
+    setPage(1)
+    setStatus(value)
+  }
+
+  const handlePageChange = (nextPage: number, nextSize: number) => {
+    setPage(nextPage)
+    setPageSize(nextSize)
+  }
+
+  const goToCreate = () => {
+    navigate(createPath)
+  }
+
+  const goToEdit = (row: NewsItem) => {
+    navigate(adminNewsEditPath(row.news_type, row.id))
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAdminNews(id)
+      message.success('Deleted')
+      void load()
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Delete failed'))
+    }
+  }
 
   const columns: TableColumnsType<NewsItem> = useMemo(
     () => [
@@ -135,15 +189,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         width: 130,
         sorter: (a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
         defaultSortOrder: 'descend',
-        render: (value: string) => {
-          const date = new Date(value)
-          if (Number.isNaN(date.getTime())) return '—'
-          return date.toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })
-        },
+        render: (value: string) => formatUpdatedAt(value),
       },
       {
         title: 'Actions',
@@ -159,18 +205,14 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
                 aria-label="Edit"
                 className="app-table__icon-btn app-table__icon-btn--edit"
                 icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
-                onClick={() => navigate(adminNewsEditPath(row.news_type, row.id))}
+                onClick={() => goToEdit(row)}
               />
             </Tooltip>
             <Popconfirm
               title="Delete this news?"
               okText="Delete"
               okButtonProps={{ danger: true }}
-              onConfirm={async () => {
-                await deleteAdminNews(row.id)
-                message.success('Deleted')
-                void load()
-              }}
+              onConfirm={() => handleDelete(row.id)}
             >
               <Tooltip title="Delete">
                 <AppButton
@@ -185,6 +227,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [load, message, navigate],
   )
 
@@ -197,30 +240,21 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
       rowKey="id"
       searchValue={search}
       searchPlaceholder="Search title or slug…"
-      onSearchChange={(value) => {
-        setPage(1)
-        setSearch(value)
-      }}
+      onSearchChange={handleSearchChange}
       searchExtra={
         <Space wrap>
           {!newsType ? (
             <Select
               value={typeFilter}
               style={{ width: 150 }}
-              onChange={(value: NewsType | 'all') => {
-                setPage(1)
-                setTypeFilter(value)
-              }}
+              onChange={handleTypeFilterChange}
               options={[{ value: 'all', label: 'All types' }, ...NEWS_TYPES]}
             />
           ) : null}
           <Select
             value={language}
             style={{ width: 140 }}
-            onChange={(value: ContentLanguage | 'all') => {
-              setPage(1)
-              setLanguage(value)
-            }}
+            onChange={handleLanguageChange}
             options={[
               { value: 'all', label: 'All languages' },
               { value: 'en', label: 'English' },
@@ -230,10 +264,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           <Select
             value={status}
             style={{ width: 150 }}
-            onChange={(value: ContentStatus | 'all') => {
-              setPage(1)
-              setStatus(value)
-            }}
+            onChange={handleStatusChange}
             options={[
               { value: 'all', label: 'All statuses' },
               { value: 'draft', label: 'Draft' },
@@ -248,7 +279,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         <AppButton
           type="primary"
           icon={<i className="fa-solid fa-plus" aria-hidden />}
-          onClick={() => navigate(createPath)}
+          onClick={goToCreate}
         >
           Create {newsType ? TYPE_LABELS[newsType].toLowerCase() : 'news'}
         </AppButton>
@@ -257,10 +288,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         current: page,
         pageSize,
         total,
-        onChange: (nextPage, nextSize) => {
-          setPage(nextPage)
-          setPageSize(nextSize)
-        },
+        onChange: handlePageChange,
       }}
     />
   )

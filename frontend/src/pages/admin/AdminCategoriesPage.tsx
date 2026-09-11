@@ -3,9 +3,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createCategory, deleteCategory, fetchCategories, updateCategory } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
+import { AppLoader } from '@/components/common/AppLoader'
 import { AppTable } from '@/components/common/AppTable'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import type { Category } from '@/types/content'
+import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
+import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
@@ -19,6 +22,7 @@ export function AdminCategoriesPage() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
   const [form] = Form.useForm()
 
@@ -36,6 +40,68 @@ export function AdminCategoriesPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const openCreateModal = () => {
+    setEditing(null)
+    form.resetFields()
+    form.setFieldsValue({ is_active: true })
+    setOpen(true)
+  }
+
+  const openEditModal = (row: Category) => {
+    setEditing(row)
+    form.setFieldsValue(row)
+    setOpen(true)
+  }
+
+  const closeModal = () => {
+    if (!saving) setOpen(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCategory(id)
+      message.success('Deleted')
+      void load()
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Delete failed'))
+    }
+  }
+
+  const handleValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
+    if ('name' in changed && !editing) {
+      form.setFieldValue('slug', slugify(String(all.name || '')))
+    }
+  }
+
+  const handleFinishFailed = (info: FormValidationInfo) => {
+    message.error(getFormValidationMessage(info))
+  }
+
+  const handleFinish = async (values: {
+    name: string
+    slug: string
+    description?: string
+    is_active?: boolean
+  }) => {
+    setSaving(true)
+    try {
+      if (editing) {
+        await updateCategory(editing.id, values)
+        message.success('Updated')
+      } else {
+        await createCategory(values)
+        message.success('Created')
+      }
+      setOpen(false)
+      void load()
+    } catch (err) {
+      applyApiFieldErrors(form, err)
+      message.error(getApiErrorMessage(err, 'Save failed'))
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const columns: TableColumnsType<Category> = useMemo(
     () => [
@@ -69,22 +135,14 @@ export function AdminCategoriesPage() {
                 aria-label="Edit"
                 className="app-table__icon-btn app-table__icon-btn--edit"
                 icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
-                onClick={() => {
-                  setEditing(row)
-                  form.setFieldsValue(row)
-                  setOpen(true)
-                }}
+                onClick={() => openEditModal(row)}
               />
             </Tooltip>
             <Popconfirm
               title="Delete category?"
               okText="Delete"
               okButtonProps={{ danger: true }}
-              onConfirm={async () => {
-                await deleteCategory(row.id)
-                message.success('Deleted')
-                void load()
-              }}
+              onConfirm={() => handleDelete(row.id)}
             >
               <Tooltip title="Delete">
                 <AppButton
@@ -99,11 +157,13 @@ export function AdminCategoriesPage() {
         ),
       },
     ],
-    [form, load, message],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [load, message],
   )
 
   return (
     <>
+      <AppLoader fullscreen spinning={saving} tip="Saving…" />
       <AppTable<Category>
         title={t('admin.categories')}
         loading={loading}
@@ -116,12 +176,7 @@ export function AdminCategoriesPage() {
           <AppButton
             type="primary"
             icon={<i className="fa-solid fa-plus" aria-hidden />}
-            onClick={() => {
-              setEditing(null)
-              form.resetFields()
-              form.setFieldsValue({ is_active: true })
-              setOpen(true)
-            }}
+            onClick={openCreateModal}
           >
             Add category
           </AppButton>
@@ -132,33 +187,18 @@ export function AdminCategoriesPage() {
       <Modal
         title={editing ? 'Edit category' : 'Add category'}
         open={open}
-        onCancel={() => setOpen(false)}
-        onOk={() => form.submit()}
+        onCancel={closeModal}
+        onOk={form.submit}
+        confirmLoading={saving}
         destroyOnHidden
       >
         <Form
           form={form}
           layout="vertical"
-          onValuesChange={(changed, all) => {
-            if ('name' in changed && !editing) {
-              form.setFieldValue('slug', slugify(String(all.name || '')))
-            }
-          }}
-          onFinish={async (values) => {
-            try {
-              if (editing) {
-                await updateCategory(editing.id, values)
-                message.success('Updated')
-              } else {
-                await createCategory(values)
-                message.success('Created')
-              }
-              setOpen(false)
-              void load()
-            } catch {
-              message.error('Save failed')
-            }
-          }}
+          disabled={saving}
+          onValuesChange={handleValuesChange}
+          onFinishFailed={handleFinishFailed}
+          onFinish={handleFinish}
         >
           <Form.Item name="name" label="Name" rules={[{ required: true, min: 2 }]}>
             <Input />
