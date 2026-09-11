@@ -3,7 +3,7 @@ export const BRAND = {
   shortName: 'AK News',
   tagline: 'Digital News Platform',
   logo: '/assets/logo-placeholder.svg',
-  favicon: '/assets/favicon-placeholder.svg',
+  favicon: '/assets/favicon.png',
   /** Replace with real YouTube channel when finalized */
   youtubeChannelUrl: 'https://www.youtube.com/',
   /** Replace with embeddable live stream URL (YouTube Live / CDN) */
