@@ -39,18 +39,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null)
       return
     }
-    const me = await fetchMe()
-    setUser(me)
+    try {
+      const me = await fetchMe()
+      setUser(me)
+    } catch {
+      clearTokens()
+      setUser(null)
+    }
   }, [])
 
   useEffect(() => {
     let active = true
     ;(async () => {
       try {
-        if (getStoredAccessToken()) {
-          const me = await fetchMe()
-          if (active) setUser(me)
+        if (!getStoredAccessToken()) {
+          if (active) setUser(null)
+          return
         }
+        const me = await fetchMe()
+        if (active) setUser(me)
       } catch {
         clearTokens()
         if (active) setUser(null)

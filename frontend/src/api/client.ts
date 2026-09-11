@@ -23,6 +23,11 @@ apiClient.interceptors.request.use((config) => {
 
 let refreshPromise: Promise<string | null> | null = null
 
+function isAuthEndpoint(url?: string): boolean {
+  if (!url) return false
+  return /\/auth\/(login|register|refresh)(?:\?|$)/.test(url)
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = getStoredRefreshToken()
   if (!refreshToken) {
@@ -43,7 +48,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config
-    if (error.response?.status !== 401 || !original || original._retry) {
+    if (
+      error.response?.status !== 401 ||
+      !original ||
+      original._retry ||
+      isAuthEndpoint(original.url)
+    ) {
       return Promise.reject(error)
     }
     original._retry = true

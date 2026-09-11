@@ -32,9 +32,10 @@ export function AppLoader({
     if (!spinning) return null
     return (
       <div className={cn('app-loader app-loader--fullscreen', className)} role="status" aria-live="polite">
-        <Spin size={size} tip={tip}>
-          <div className="app-loader__spacer" />
-        </Spin>
+        <div className="app-loader__panel">
+          <Spin size={size} />
+          {tip ? <p className="app-loader__tip">{tip}</p> : null}
+        </div>
       </div>
     )
   }
@@ -50,9 +51,10 @@ export function AppLoader({
   if (!spinning) return null
   return (
     <div className={cn('app-loader app-loader--inline', className)} role="status">
-      <Spin size={size} tip={tip}>
-        <div className="app-loader__spacer app-loader__spacer--sm" />
-      </Spin>
+      <div className="app-loader__panel">
+        <Spin size={size} />
+        {tip ? <p className="app-loader__tip">{tip}</p> : null}
+      </div>
     </div>
   )
 }
