@@ -10,13 +10,17 @@ import {
 } from '@/api/content'
 import { AppButton } from '@/components/common/AppButton'
 import { AppEditor } from '@/components/common/AppEditor'
+import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
-import type { Category, NewsItem, NewsType, TagItem } from '@/types/content'
+import type { Category, NewsItem, NewsPayload, NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
+import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
+import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
 import { BRAND } from '@/config/brand'
+import { adminNewsEditPath } from '@/config/adminPages'
 import './AdminNewsFormPage.scss'
 
 const { Title } = Typography
@@ -42,7 +46,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
   const lockedType = isNewsType(routeType) ? routeType : defaultNewsType
   const navigate = useNavigate()
   const { message } = App.useApp()
-  const [form] = Form.useForm()
+  const [form] = Form.useForm<NewsPayload>()
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -64,12 +68,22 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
 
   useEffect(() => {
     let active = true
-    ;(async () => {
+
+    async function loadFormData() {
       try {
         const [cats, tagList] = await Promise.all([fetchCategories(), fetchTags()])
         if (!active) return
         setCategories(cats)
         setTags(tagList)
+
+        if (mode === 'create') {
+          if (!cats.length) {
+            message.warning('Please create a category before adding news')
+          }
+          if (!tagList.length) {
+            message.warning('Please create a tag before adding news')
+          }
+        }
 
         if (mode === 'edit' && id) {
           const item = await fetchAdminNewsById(id)
@@ -93,16 +107,72 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
           })
         }
       } catch {
+        if (!active) return
         message.error(mode === 'edit' ? 'News not found' : 'Failed to load form data')
         if (mode === 'edit') navigate('/admin/news')
       } finally {
         if (active) setLoading(false)
       }
-    })()
+    }
+
+    void loadFormData()
     return () => {
       active = false
     }
   }, [mode, id, form, message, navigate, lockedType])
+
+  const goBackToList = () => {
+    navigate(listPath)
+  }
+
+  const handleTitleBlur = (value: string) => {
+    if (!form.getFieldValue('slug')) {
+      form.setFieldValue('slug', slugify(value))
+    }
+  }
+
+  const handleValuesChange = (changed: Partial<NewsPayload>, all: NewsPayload) => {
+    if (mode === 'create' && 'title' in changed && !form.isFieldTouched('slug')) {
+      form.setFieldValue('slug', slugify(String(all.title || '')))
+    }
+    if ('news_type' in changed) {
+      form.setFieldValue('is_featured', all.news_type === 'featured')
+    }
+  }
+
+  const handleFinishFailed = (info: FormValidationInfo) => {
+    message.error(getFormValidationMessage(info))
+  }
+
+  const handleFinish = async (values: NewsPayload) => {
+    setSaving(true)
+    try {
+      const payload: NewsPayload = {
+        ...values,
+        news_type: values.news_type || lockedType,
+        is_featured: values.news_type === 'featured' || Boolean(values.is_featured),
+        category_id: values.category_id || null,
+        tag_ids: values.tag_ids || [],
+      }
+      if (mode === 'create') {
+        const created = await createAdminNews(payload)
+        message.success('News created successfully')
+        const newsType = created.news_type || lockedType
+        navigate(adminNewsEditPath(newsType, created.id))
+      } else if (id) {
+        const updated = await updateAdminNews(id, payload)
+        setNews(updated)
+        message.success('News updated successfully')
+      }
+    } catch (err) {
+      applyApiFieldErrors(form, err)
+      message.error(
+        getApiErrorMessage(err, mode === 'create' ? 'Could not create news' : 'Save failed'),
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const pageTitle =
     mode === 'create'
@@ -111,62 +181,29 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
 
   return (
     <div className="news-form-page">
+      <AppLoader fullscreen spinning={saving} tip={mode === 'create' ? 'Creating…' : 'Saving…'} />
       <div className="news-form-page__header">
         <Title level={3} className="news-form-page__title">
           {pageTitle}
         </Title>
-        <AppButton onClick={() => navigate(listPath)}>Back to list</AppButton>
+        <AppButton onClick={goBackToList}>Back to list</AppButton>
       </div>
 
       <Form
         form={form}
         layout="vertical"
-        disabled={loading}
+        disabled={loading || saving}
         className="news-form-page__form"
-        onValuesChange={(changed, all) => {
-          if (mode === 'create' && 'title' in changed && !form.isFieldTouched('slug')) {
-            form.setFieldValue('slug', slugify(String(all.title || '')))
-          }
-          if ('news_type' in changed) {
-            form.setFieldValue('is_featured', all.news_type === 'featured')
-          }
-        }}
-        onFinish={async (values) => {
-          setSaving(true)
-          try {
-            const payload = {
-              ...values,
-              news_type: values.news_type || lockedType,
-              is_featured: values.news_type === 'featured' || values.is_featured,
-              category_id: values.category_id || null,
-              tag_ids: values.tag_ids || [],
-            }
-            if (mode === 'create') {
-              const created = await createAdminNews(payload)
-              message.success('News created')
-              navigate(`/admin/news/edit/${created.id}`)
-            } else if (id) {
-              const updated = await updateAdminNews(id, payload)
-              setNews(updated)
-              message.success('Saved')
-            }
-          } catch {
-            message.error(mode === 'create' ? 'Could not create news' : 'Save failed')
-          } finally {
-            setSaving(false)
-          }
-        }}
+        onValuesChange={handleValuesChange}
+        onFinishFailed={handleFinishFailed}
+        onFinish={handleFinish}
       >
         <Row gutter={[20, 0]}>
           <Col xs={24} lg={16}>
             <Form.Item name="title" label="Title" rules={[{ required: true, min: 3 }]}>
               <Input
                 size="large"
-                onBlur={(e) => {
-                  if (!form.getFieldValue('slug')) {
-                    form.setFieldValue('slug', slugify(e.target.value))
-                  }
-                }}
+                onBlur={(e) => handleTitleBlur(e.target.value)}
               />
             </Form.Item>
 

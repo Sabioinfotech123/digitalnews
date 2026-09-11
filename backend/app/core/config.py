@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = True
 
-    database_url: str = "postgresql+psycopg2://digitalnews:digitalnews@localhost:5432/digitalnews"
+    database_url: str = "postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews"
 
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

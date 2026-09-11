@@ -1,6 +1,6 @@
 export const BRAND = {
-  name: 'NEWS',
-  shortName: 'NEWS',
+  name: 'AK News',
+  shortName: 'AK News',
   tagline: 'Digital News Platform',
   logo: '/assets/logo-placeholder.svg',
   favicon: '/assets/favicon-placeholder.svg',

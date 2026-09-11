@@ -59,7 +59,6 @@ export function AppTable<T extends object>({
     }
     if (draftSearch === searchValue) return
 
-    // Clear applies immediately; typing waits for debounce
     if (draftSearch === '') {
       onSearchChange('')
       return
@@ -81,30 +80,32 @@ export function AppTable<T extends object>({
         </div>
       ) : null}
 
-      {showFilters ? (
-        <div className="app-table__filters">
-          {showSearch ? (
-            <Space wrap size="middle" className="app-table__search-row">
-              <Input
-                allowClear
-                value={draftSearch}
-                placeholder={searchPlaceholder}
-                onChange={(e) => setDraftSearch(e.target.value)}
-                prefix={<i className="fa-solid fa-magnifying-glass text-ink-muted" aria-hidden />}
-                className="app-table__search"
-              />
-              {searchExtra}
-            </Space>
-          ) : null}
-          {filters}
-        </div>
-      ) : null}
-
       <div className={cn('app-table__card', cardClassName)}>
+        {showFilters ? (
+          <div className="app-table__filters">
+            {showSearch ? (
+              <Space wrap size="middle" className="app-table__search-row">
+                <Input
+                  allowClear
+                  size="large"
+                  value={draftSearch}
+                  placeholder={searchPlaceholder}
+                  onChange={(e) => setDraftSearch(e.target.value)}
+                  prefix={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
+                  className="app-table__search"
+                />
+                {searchExtra}
+              </Space>
+            ) : null}
+            {filters}
+          </div>
+        ) : null}
+
         <Table<T>
           rowKey={tableProps.rowKey ?? 'id'}
           size="middle"
           {...tableProps}
+          className={cn('app-table__grid', tableProps.className)}
           pagination={
             pagination === false
               ? false

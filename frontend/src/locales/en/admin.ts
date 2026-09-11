@@ -9,7 +9,7 @@ export const admin = {
   allNews: 'All news',
   blogs: 'Blogs',
   videos: 'Videos',
-  taxonomy: 'Taxonomy',
+  taxonomy: 'Categories & Tags',
   categories: 'Categories',
   tags: 'Tags',
   media: 'Media',

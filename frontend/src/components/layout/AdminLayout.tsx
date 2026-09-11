@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
-import { BRAND } from '@/config/brand'
+import logoImg from '@/assets/logo/logo.png'
 import { resolveAdminPageMeta } from '@/config/adminPages'
 import './AdminLayout.scss'
 
@@ -60,6 +60,21 @@ export function AdminLayout() {
       label: <Link to="/admin">{t('admin.dashboard')}</Link>,
     },
     {
+      key: 'taxonomy',
+      icon: <i className="fa-solid fa-tags" aria-hidden />,
+      label: t('admin.taxonomy'),
+      children: [
+        {
+          key: '/admin/categories',
+          label: <Link to="/admin/categories">{t('admin.categories')}</Link>,
+        },
+        {
+          key: '/admin/tags',
+          label: <Link to="/admin/tags">{t('admin.tags')}</Link>,
+        },
+      ],
+    },
+    {
       key: 'news',
       icon: <i className="fa-solid fa-newspaper" aria-hidden />,
       label: t('admin.news'),
@@ -97,21 +112,6 @@ export function AdminLayout() {
       label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
     },
     {
-      key: 'taxonomy',
-      icon: <i className="fa-solid fa-tags" aria-hidden />,
-      label: t('admin.taxonomy'),
-      children: [
-        {
-          key: '/admin/categories',
-          label: <Link to="/admin/categories">{t('admin.categories')}</Link>,
-        },
-        {
-          key: '/admin/tags',
-          label: <Link to="/admin/tags">{t('admin.tags')}</Link>,
-        },
-      ],
-    },
-    {
       key: '/admin/media',
       icon: <i className="fa-solid fa-photo-film" aria-hidden />,
       label: <Link to="/admin/media">{t('admin.media')}</Link>,
@@ -144,15 +144,7 @@ export function AdminLayout() {
         width={240}
       >
         <div className="admin-layout__brand">
-          <span className="admin-layout__brand-mark" aria-hidden>
-            {BRAND.shortName.slice(0, 1)}
-          </span>
-          {!collapsed && (
-            <div className="admin-layout__brand-copy">
-              <span className="admin-layout__brand-name">{BRAND.shortName}</span>
-              <span className="admin-layout__brand-text">CMS</span>
-            </div>
-          )}
+          <img src={logoImg} alt="AK News" className="admin-layout__brand-name" />
         </div>
         <Menu
           theme="light"

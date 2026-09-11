@@ -33,9 +33,9 @@ export function MediaUploader({
     try {
       const result = await uploadMediaFile(file as File, { kind, folder })
       onChange?.(result.url)
-      message.success('Uploaded')
+      message.success(kind === 'image' ? 'Image uploaded successfully' : 'File uploaded successfully')
     } catch {
-      message.error('Upload failed')
+      message.error(kind === 'image' ? 'Image upload failed' : 'File upload failed')
     } finally {
       setUploading(false)
     }

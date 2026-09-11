@@ -1,0 +1,240 @@
+================================================================================
+DIGITAL NEWS — FULL SETUP & RUN GUIDE (Windows PowerShell)
+================================================================================
+Prerequisites:
+  - Node.js 20+
+  - Python 3.10+
+  - Docker Desktop (must be RUNNING)
+
+Repo root:
+  d:\SabioInfotech\digitalnews
+
+
+================================================================================
+PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
+================================================================================
+
+----- PostgreSQL (Docker) -----
+  Host     : localhost
+  Port     : 5433          << IMPORTANT (not 5432)
+  User     : digitalnews
+  Password : digitalnews
+  Database : digitalnews
+
+  Full URL (put this in backend\.env as DATABASE_URL):
+  postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews
+
+  Why port 5433?
+  - Host 5432 is often already used by a local Postgres install.
+  - Docker maps 5433 (your PC) → 5432 (inside container).
+  - If you use port 5432 in DATABASE_URL you may get:
+    "password authentication failed for user digitalnews"
+
+----- Admin CMS login (created on first API start from .env) -----
+  URL      : http://localhost:5173/admin/login
+  Email    : admin@example.com
+  Password : Admin@12345
+
+  Change in backend\.env:
+    ADMIN_EMAIL=admin@example.com
+    ADMIN_PASSWORD=Admin@12345
+    ADMIN_FULL_NAME=Site Admin
+
+----- Frontend API URL -----
+  frontend\.env:
+    VITE_API_URL=http://localhost:8000/api/v1
+
+----- JWT / security (backend\.env) -----
+  JWT_SECRET_KEY=change-me-in-production
+  (change this for QA/shared environments)
+
+----- AWS S3 (optional for image upload) -----
+  Fill in backend\.env:
+    AWS_ACCESS_KEY_ID=...
+    AWS_SECRET_ACCESS_KEY=...
+    AWS_REGION=us-east-1
+    AWS_S3_BUCKET=digitalnews-media-prod
+    AWS_S3_PUBLIC_BASE_URL=https://digitalnews-media-prod.s3.us-east-1.amazonaws.com
+
+  Without these, API runs but image upload to S3 will fail.
+
+
+================================================================================
+0) START DATABASE (Docker) — every day / first time
+================================================================================
+cd d:\SabioInfotech\digitalnews
+
+docker compose up -d
+docker compose ps
+# Expect: digitalnews-db  ...  0.0.0.0:5433->5432/tcp  (healthy)
+
+docker compose logs -f db          # watch logs (Ctrl+C to exit logs)
+
+Stop DB (keep data):
+  docker compose down
+
+Reset DB completely (delete all data + recreate):
+  docker compose down -v
+  docker compose up -d
+  cd backend
+  .\.venv\Scripts\activate
+  alembic upgrade head
+
+
+================================================================================
+1) BACKEND — FIRST TIME SETUP
+================================================================================
+cd d:\SabioInfotech\digitalnews\backend
+
+python -m venv .venv
+.\.venv\Scripts\activate
+
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+copy .env.example .env
+
+# VERIFY backend\.env has this exact line (port 5433):
+# DATABASE_URL=postgresql+psycopg2://digitalnews:digitalnews@localhost:5433/digitalnews
+
+# Create tables
+alembic upgrade head
+
+
+================================================================================
+2) BACKEND — RUN API (every time)
+================================================================================
+cd d:\SabioInfotech\digitalnews\backend
+.\.venv\Scripts\activate
+
+# Optional if schema changed:
+alembic upgrade head
+
+uvicorn app.main:app --reload --port 8000
+
+URLs:
+  API docs : http://localhost:8000/docs
+  Health   : http://localhost:8000/api/v1/health
+  ReDoc    : http://localhost:8000/redoc
+
+If venv already exists: only activate + uvicorn.
+
+
+================================================================================
+3) FRONTEND — FIRST TIME SETUP
+================================================================================
+cd d:\SabioInfotech\digitalnews\frontend
+
+npm install
+
+copy .env.example .env
+# Ensure frontend\.env:
+# VITE_API_URL=http://localhost:8000/api/v1
+
+
+================================================================================
+4) FRONTEND — RUN DEV SERVER (every time)
+================================================================================
+cd d:\SabioInfotech\digitalnews\frontend
+npm run dev
+
+App:
+  http://localhost:5173
+
+Admin:
+  http://localhost:5173/admin/login
+  admin@example.com / Admin@12345
+
+
+================================================================================
+5) FULL START ORDER (3 terminals)
+================================================================================
+
+# Terminal A — Database
+cd d:\SabioInfotech\digitalnews
+docker compose up -d
+
+# Terminal B — Backend
+cd d:\SabioInfotech\digitalnews\backend
+.\.venv\Scripts\activate
+alembic upgrade head
+uvicorn app.main:app --reload --port 8000
+
+# Terminal C — Frontend
+cd d:\SabioInfotech\digitalnews\frontend
+npm run dev
+
+
+================================================================================
+6) USEFUL COMMANDS
+================================================================================
+
+# Frontend
+npm install
+npm run dev
+npm run build
+npm run preview
+
+# Backend (venv activated)
+pip install -r requirements.txt
+alembic upgrade head
+alembic revision --autogenerate -m "your message"
+uvicorn app.main:app --reload --port 8000
+deactivate
+
+# Docker
+docker compose up -d
+docker compose ps
+docker compose down
+docker compose down -v
+docker compose logs -f db
+
+# Quick DB password test (inside container — should work):
+docker exec -it digitalnews-db psql -U digitalnews -d digitalnews -c "SELECT 1;"
+
+
+================================================================================
+7) COMMON ERRORS
+================================================================================
+
+ERROR: password authentication failed for user "digitalnews"
+  → You are hitting wrong Postgres (usually local on 5432).
+  → Fix DATABASE_URL port to 5433.
+  → Or stop local Postgres service, then use Docker on 5432 if you prefer.
+  → Confirm: docker compose ps shows 0.0.0.0:5433->5432/tcp
+
+ERROR: connection refused / could not connect to server
+  → Start Docker Desktop, then: docker compose up -d
+
+ERROR: relation "users" does not exist / table missing
+  → Run: alembic upgrade head
+
+ERROR: ModuleNotFoundError / no module named app
+  → cd backend && .\.venv\Scripts\activate
+
+S3 AccessDenied on image URL
+  → See docs\aws-s3-setup.md (bucket public read policy)
+
+
+================================================================================
+8) NEVER COMMIT THESE
+================================================================================
+  backend\.env
+  frontend\.env
+  AWS secret keys
+  *.db (old SQLite files)
+
+Safe to commit:
+  .env.example
+  docker-compose.yml
+  code + docs
+
+
+================================================================================
+9) MORE DOCS
+================================================================================
+  README.md
+  docs\13-development-setup.md
+  docs\21-database.md
+  docs\aws-s3-setup.md
+================================================================================

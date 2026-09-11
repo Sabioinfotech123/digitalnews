@@ -70,6 +70,10 @@
       .admin-layout__brand {
         justify-content: center;
         padding-inline: 0;
+
+        .admin-layout__brand-name {
+          height: 32px;
+        }
       }
 
       .admin-layout__menu {
@@ -107,52 +111,32 @@
   &__brand {
     display: flex;
     align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    gap: 12px;
-    height: 72px;
+    height: 80px;
     margin: 0 var(--sb-pad-x);
-    padding: 4px 2px 0;
+    padding: 8px 2px 0;
     border-bottom: 1px solid var(--sb-border);
   }
 
   &__brand-mark {
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--color-primary);
-    box-shadow: 0 6px 14px rgba(215, 25, 32, 0.22);
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #fff;
+    display: none;
   }
 
   &__brand-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
+    display: none;
   }
 
   &__brand-name {
-    font-family: var(--font-heading);
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--sb-text-strong);
-    letter-spacing: 0.03em;
-    line-height: 1.1;
+    display: block;
+    height: 44px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
   }
 
   &__brand-text {
-    font-family: var(--font-ui);
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--sb-muted);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    display: none;
   }
 
   &__menu {

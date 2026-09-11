@@ -9,7 +9,7 @@ export const admin = {
   allNews: 'అన్ని వార్తలు',
   blogs: 'బ్లాగులు',
   videos: 'వీడియోలు',
-  taxonomy: 'వర్గీకరణ',
+  taxonomy: 'కేటగిరీలు & ట్యాగులు',
   categories: 'కేటగిరీలు',
   tags: 'ట్యాగులు',
   media: 'మీడియా',

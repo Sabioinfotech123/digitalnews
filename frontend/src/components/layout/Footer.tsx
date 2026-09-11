@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import logoImg from '@/assets/logo/logo.png'
 import { BRAND } from '@/config/brand'
 import './Footer.scss'
 
@@ -11,9 +12,7 @@ export function Footer() {
     <footer className="site-footer mt-auto border-t-[3px] border-primary bg-ink text-white/85">
       <div className="mx-auto grid max-w-[1200px] gap-5 px-5 pt-8 pb-6">
         <div>
-          <span className="site-footer__name inline-block border-b-[3px] border-primary pb-0.5 font-heading text-xl font-bold text-paper">
-            {BRAND.name}
-          </span>
+          <img src={logoImg} alt={BRAND.name} className="site-footer__name" />
           <p className="mt-2 mb-0 text-sm text-white/65">{BRAND.tagline}</p>
         </div>
         <nav className="flex flex-wrap gap-4" aria-label="Footer">
