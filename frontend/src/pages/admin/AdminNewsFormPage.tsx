@@ -20,6 +20,7 @@ import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formF
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
 import { BRAND } from '@/config/brand'
+import { adminNewsEditPath } from '@/config/adminPages'
 import './AdminNewsFormPage.scss'
 
 const { Title } = Typography
@@ -156,7 +157,8 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
       if (mode === 'create') {
         const created = await createAdminNews(payload)
         message.success('News created successfully')
-        navigate(`/admin/news/edit/${created.id}`)
+        const newsType = created.news_type || lockedType
+        navigate(adminNewsEditPath(newsType, created.id))
       } else if (id) {
         const updated = await updateAdminNews(id, payload)
         setNews(updated)

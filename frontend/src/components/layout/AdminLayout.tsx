@@ -60,6 +60,21 @@ export function AdminLayout() {
       label: <Link to="/admin">{t('admin.dashboard')}</Link>,
     },
     {
+      key: 'taxonomy',
+      icon: <i className="fa-solid fa-tags" aria-hidden />,
+      label: t('admin.taxonomy'),
+      children: [
+        {
+          key: '/admin/categories',
+          label: <Link to="/admin/categories">{t('admin.categories')}</Link>,
+        },
+        {
+          key: '/admin/tags',
+          label: <Link to="/admin/tags">{t('admin.tags')}</Link>,
+        },
+      ],
+    },
+    {
       key: 'news',
       icon: <i className="fa-solid fa-newspaper" aria-hidden />,
       label: t('admin.news'),
@@ -95,21 +110,6 @@ export function AdminLayout() {
       key: '/admin/videos',
       icon: <i className="fa-solid fa-video" aria-hidden />,
       label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
-    },
-    {
-      key: 'taxonomy',
-      icon: <i className="fa-solid fa-tags" aria-hidden />,
-      label: t('admin.taxonomy'),
-      children: [
-        {
-          key: '/admin/categories',
-          label: <Link to="/admin/categories">{t('admin.categories')}</Link>,
-        },
-        {
-          key: '/admin/tags',
-          label: <Link to="/admin/tags">{t('admin.tags')}</Link>,
-        },
-      ],
     },
     {
       key: '/admin/media',
