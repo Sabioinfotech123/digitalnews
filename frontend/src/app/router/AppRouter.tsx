@@ -70,6 +70,7 @@ export function AppRouter() {
           <Route path="news/more" element={<AdminMoreNewsPage />} />
           <Route path="news/create" element={<AdminNewsCreatePage />} />
           <Route path="news/create/:newsType" element={<AdminNewsCreatePage />} />
+          <Route path="news/:newsType/edit/:id" element={<AdminNewsEditPage />} />
           <Route path="news/edit/:id" element={<AdminNewsEditPage />} />
           <Route path="blogs" element={<AdminModule titleKey="admin.blogs" />} />
           <Route path="videos" element={<AdminModule titleKey="admin.videos" />} />

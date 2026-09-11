@@ -1,5 +1,5 @@
 import { Input, Space, Table, type TableProps } from 'antd'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 import './AppTable.scss'
 
@@ -14,6 +14,8 @@ export type AppTableProps<T extends object> = Omit<TableProps<T>, 'title'> & {
   searchValue?: string
   searchPlaceholder?: string
   onSearchChange?: (value: string) => void
+  /** Delay before notifying parent of search changes (ms). Default 400. */
+  searchDebounceMs?: number
   /** Extra node next to search (chips, toggles, etc.) */
   searchExtra?: ReactNode
   className?: string
@@ -28,9 +30,10 @@ export function AppTable<T extends object>({
   title,
   toolbar,
   filters,
-  searchValue,
+  searchValue = '',
   searchPlaceholder = 'Search…',
   onSearchChange,
+  searchDebounceMs = 400,
   searchExtra,
   className,
   cardClassName,
@@ -40,6 +43,34 @@ export function AppTable<T extends object>({
   const showHeader = Boolean(title || toolbar)
   const showSearch = typeof onSearchChange === 'function'
   const showFilters = Boolean(filters) || showSearch
+
+  const [draftSearch, setDraftSearch] = useState(searchValue)
+  const skipDebounceRef = useRef(true)
+
+  useEffect(() => {
+    setDraftSearch(searchValue)
+  }, [searchValue])
+
+  useEffect(() => {
+    if (!onSearchChange) return
+    if (skipDebounceRef.current) {
+      skipDebounceRef.current = false
+      return
+    }
+    if (draftSearch === searchValue) return
+
+    // Clear applies immediately; typing waits for debounce
+    if (draftSearch === '') {
+      onSearchChange('')
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      onSearchChange(draftSearch)
+    }, searchDebounceMs)
+
+    return () => window.clearTimeout(timer)
+  }, [draftSearch, onSearchChange, searchDebounceMs, searchValue])
 
   return (
     <div className={cn('app-table', className)}>
@@ -56,9 +87,9 @@ export function AppTable<T extends object>({
             <Space wrap size="middle" className="app-table__search-row">
               <Input
                 allowClear
-                value={searchValue}
+                value={draftSearch}
                 placeholder={searchPlaceholder}
-                onChange={(e) => onSearchChange?.(e.target.value)}
+                onChange={(e) => setDraftSearch(e.target.value)}
                 prefix={<i className="fa-solid fa-magnifying-glass text-ink-muted" aria-hidden />}
                 className="app-table__search"
               />

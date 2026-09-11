@@ -1,4 +1,4 @@
-import { App, Popconfirm, Select, Space, type TableColumnsType } from 'antd'
+import { App, Popconfirm, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteAdminNews, fetchAdminNews } from '@/api/content'
@@ -7,6 +7,7 @@ import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
 import { LanguageBadge } from '@/components/common/LanguageBadge'
 import { StatusBadge } from '@/components/common/StatusBadge'
+import { adminNewsEditPath } from '@/config/adminPages'
 import type { ContentLanguage, ContentStatus, NewsItem, NewsType } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 
@@ -15,6 +16,10 @@ const TYPE_LABELS: Record<NewsType, string> = {
   latest: 'Latest news',
   trending: 'Trending news',
   more: 'More news',
+}
+
+function compareText(a: string | null | undefined, b: string | null | undefined) {
+  return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
 }
 
 interface AdminNewsPageProps {
@@ -75,6 +80,8 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         dataIndex: 'title',
         key: 'title',
         ellipsis: true,
+        sorter: (a, b) => compareText(a.title, b.title),
+        sortDirections: ['ascend', 'descend'],
         render: (value: string, row) => (
           <div>
             <div className="font-ui font-semibold text-ink">{value}</div>
@@ -86,30 +93,35 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         title: 'Type',
         dataIndex: 'news_type',
         width: 110,
+        sorter: (a, b) => compareText(a.news_type, b.news_type),
         render: (value: string) => <StatusBadge status={value} />,
       },
       {
         title: 'Language',
         dataIndex: 'language',
         width: 110,
+        sorter: (a, b) => compareText(a.language, b.language),
         render: (value: string) => <LanguageBadge language={value} />,
       },
       {
         title: 'Category',
         dataIndex: 'category_name',
         width: 140,
+        sorter: (a, b) => compareText(a.category_name, b.category_name),
         render: (value: string | null) => value || '—',
       },
       {
         title: 'Status',
         dataIndex: 'status',
         width: 120,
+        sorter: (a, b) => compareText(a.status, b.status),
         render: (value: string) => <StatusBadge status={value} />,
       },
       {
         title: 'Flags',
         key: 'flags',
         width: 120,
+        sorter: (a, b) => Number(b.is_breaking) - Number(a.is_breaking),
         render: (_, row) => (
           <Space size={4} wrap>
             {row.is_breaking ? <StatusBadge status="breaking" /> : null}
@@ -117,25 +129,57 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       },
       {
+        title: 'Updated',
+        dataIndex: 'updated_at',
+        key: 'updated_at',
+        width: 130,
+        sorter: (a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
+        defaultSortOrder: 'descend',
+        render: (value: string) => {
+          const date = new Date(value)
+          if (Number.isNaN(date.getTime())) return '—'
+          return date.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })
+        },
+      },
+      {
         title: 'Actions',
         key: 'actions',
-        width: 160,
+        width: 100,
+        align: 'center',
+        fixed: 'right',
         render: (_, row) => (
-          <Space>
-            <AppButton type="link" onClick={() => navigate(`/admin/news/edit/${row.id}`)}>
-              Edit
-            </AppButton>
+          <Space size={4}>
+            <Tooltip title="Edit">
+              <AppButton
+                type="text"
+                aria-label="Edit"
+                className="app-table__icon-btn app-table__icon-btn--edit"
+                icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+                onClick={() => navigate(adminNewsEditPath(row.news_type, row.id))}
+              />
+            </Tooltip>
             <Popconfirm
               title="Delete this news?"
+              okText="Delete"
+              okButtonProps={{ danger: true }}
               onConfirm={async () => {
                 await deleteAdminNews(row.id)
                 message.success('Deleted')
                 void load()
               }}
             >
-              <AppButton type="link" danger>
-                Delete
-              </AppButton>
+              <Tooltip title="Delete">
+                <AppButton
+                  type="text"
+                  aria-label="Delete"
+                  className="app-table__icon-btn app-table__icon-btn--delete"
+                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
         ),

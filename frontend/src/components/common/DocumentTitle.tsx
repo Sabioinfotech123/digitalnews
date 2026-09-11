@@ -48,6 +48,8 @@ export function DocumentTitle() {
   const { pathname } = useLocation()
 
   useEffect(() => {
+    // AdminLayout owns titles via config/adminPages.ts
+    if (pathname.startsWith('/admin') && pathname !== '/admin/login') return
     document.title = resolveTitle(pathname)
   }, [pathname])
 

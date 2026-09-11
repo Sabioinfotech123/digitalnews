@@ -9,13 +9,13 @@
         "s3:GetObject",
         "s3:DeleteObject"
       ],
-      "Resource": "arn:aws:s3:::digitalnews-media/*"
+      "Resource": "arn:aws:s3:::digitalnews-media-prod/*"
     },
     {
       "Sid": "DigitalNewsMediaBucket",
       "Effect": "Allow",
       "Action": ["s3:ListBucket"],
-      "Resource": "arn:aws:s3:::digitalnews-media"
+      "Resource": "arn:aws:s3:::digitalnews-media-prod"
     }
   ]
 }

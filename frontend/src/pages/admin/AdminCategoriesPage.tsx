@@ -1,4 +1,4 @@
-import { App, Form, Input, Modal, Popconfirm, Space, Switch, type TableColumnsType } from 'antd'
+import { App, Form, Input, Modal, Popconfirm, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createCategory, deleteCategory, fetchCategories, updateCategory } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
@@ -7,6 +7,10 @@ import { AppTable } from '@/components/common/AppTable'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import type { Category } from '@/types/content'
 import { slugify } from '@/utils/slugify'
+
+function compareText(a: string | null | undefined, b: string | null | undefined) {
+  return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+}
 
 export function AdminCategoriesPage() {
   const { t } = useLanguage()
@@ -35,41 +39,61 @@ export function AdminCategoriesPage() {
 
   const columns: TableColumnsType<Category> = useMemo(
     () => [
-      { title: 'Name', dataIndex: 'name' },
-      { title: 'Slug', dataIndex: 'slug' },
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        sorter: (a, b) => compareText(a.name, b.name),
+      },
+      {
+        title: 'Slug',
+        dataIndex: 'slug',
+        sorter: (a, b) => compareText(a.slug, b.slug),
+      },
       {
         title: 'Status',
         dataIndex: 'is_active',
         width: 120,
+        sorter: (a, b) => Number(b.is_active) - Number(a.is_active),
         render: (active: boolean) => <StatusBadge status={active ? 'active' : 'inactive'} />,
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: 160,
+        width: 100,
+        align: 'center',
         render: (_, row) => (
-          <Space>
-            <AppButton
-              type="link"
-              onClick={() => {
-                setEditing(row)
-                form.setFieldsValue(row)
-                setOpen(true)
-              }}
-            >
-              Edit
-            </AppButton>
+          <Space size={4}>
+            <Tooltip title="Edit">
+              <AppButton
+                type="text"
+                aria-label="Edit"
+                className="app-table__icon-btn app-table__icon-btn--edit"
+                icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+                onClick={() => {
+                  setEditing(row)
+                  form.setFieldsValue(row)
+                  setOpen(true)
+                }}
+              />
+            </Tooltip>
             <Popconfirm
               title="Delete category?"
+              okText="Delete"
+              okButtonProps={{ danger: true }}
               onConfirm={async () => {
                 await deleteCategory(row.id)
                 message.success('Deleted')
                 void load()
               }}
             >
-              <AppButton type="link" danger>
-                Delete
-              </AppButton>
+              <Tooltip title="Delete">
+                <AppButton
+                  type="text"
+                  aria-label="Delete"
+                  className="app-table__icon-btn app-table__icon-btn--delete"
+                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
         ),

@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = True
 
-    database_url: str = "sqlite:///./digitalnews.db"
+    database_url: str = "postgresql+psycopg2://digitalnews:digitalnews@localhost:5432/digitalnews"
 
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
     aws_region: str = "us-east-1"
-    aws_s3_bucket: str = "digitalnews-media"
-    aws_s3_public_base_url: str = "https://digitalnews-media.s3.us-east-1.amazonaws.com"
+    aws_s3_bucket: str = "digitalnews-media-prod"
+    aws_s3_public_base_url: str = "https://digitalnews-media-prod.s3.us-east-1.amazonaws.com"
 
     admin_email: str = "admin@example.com"
     admin_password: str = "Admin@12345"

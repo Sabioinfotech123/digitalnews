@@ -1,4 +1,4 @@
-import { App, Form, Input, Modal, Popconfirm, Space, type TableColumnsType } from 'antd'
+import { App, Form, Input, Modal, Popconfirm, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createTag, deleteTag, fetchTags, updateTag } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
@@ -6,6 +6,10 @@ import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
 import type { TagItem } from '@/types/content'
 import { slugify } from '@/utils/slugify'
+
+function compareText(a: string | null | undefined, b: string | null | undefined) {
+  return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+}
 
 export function AdminTagsPage() {
   const { t } = useLanguage()
@@ -34,35 +38,54 @@ export function AdminTagsPage() {
 
   const columns: TableColumnsType<TagItem> = useMemo(
     () => [
-      { title: 'Name', dataIndex: 'name' },
-      { title: 'Slug', dataIndex: 'slug' },
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        sorter: (a, b) => compareText(a.name, b.name),
+      },
+      {
+        title: 'Slug',
+        dataIndex: 'slug',
+        sorter: (a, b) => compareText(a.slug, b.slug),
+      },
       {
         title: 'Actions',
         key: 'actions',
-        width: 160,
+        width: 100,
+        align: 'center',
         render: (_, row) => (
-          <Space>
-            <AppButton
-              type="link"
-              onClick={() => {
-                setEditing(row)
-                form.setFieldsValue(row)
-                setOpen(true)
-              }}
-            >
-              Edit
-            </AppButton>
+          <Space size={4}>
+            <Tooltip title="Edit">
+              <AppButton
+                type="text"
+                aria-label="Edit"
+                className="app-table__icon-btn app-table__icon-btn--edit"
+                icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+                onClick={() => {
+                  setEditing(row)
+                  form.setFieldsValue(row)
+                  setOpen(true)
+                }}
+              />
+            </Tooltip>
             <Popconfirm
               title="Delete tag?"
+              okText="Delete"
+              okButtonProps={{ danger: true }}
               onConfirm={async () => {
                 await deleteTag(row.id)
                 message.success('Deleted')
                 void load()
               }}
             >
-              <AppButton type="link" danger>
-                Delete
-              </AppButton>
+              <Tooltip title="Delete">
+                <AppButton
+                  type="text"
+                  aria-label="Delete"
+                  className="app-table__icon-btn app-table__icon-btn--delete"
+                  icon={<i className="fa-solid fa-trash-can" aria-hidden />}
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
         ),
