@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
+import logoImg from '@/assets/logo/logo.png'
 import { BRAND } from '@/config/brand'
 import { cn } from '@/utils/cn'
 import './Header.scss'
@@ -26,7 +27,7 @@ export function Header() {
     <header className="site-header">
       <div className="site-header__top mx-auto flex max-w-[1200px] items-center gap-4 px-5 py-3">
         <Link to="/" className="site-header__brand" aria-label={BRAND.name}>
-          <img src={BRAND.logo} alt={BRAND.name} className="site-header__logo h-8 w-auto" width={132} height={36} />
+          <img src={logoImg} alt={BRAND.name} className="site-header__logo" />
         </Link>
 
         <nav className="site-header__nav hide-on-mobile ml-6 flex flex-1 items-center gap-1" aria-label="Main">

@@ -5,12 +5,12 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
-import { BRAND } from '@/config/brand'
+import logoImg from '@/assets/logo/logo.png'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import './AdminLoginPage.scss'
 
-const { Title, Paragraph, Text } = Typography
+const { Title, Paragraph } = Typography
 
 type LoginValues = { email: string; password: string }
 
@@ -59,8 +59,7 @@ export function AdminLoginPage() {
       <AppLoader fullscreen spinning={submitting} tip={t('auth.signingIn')} />
       <div className="admin-login__card">
         <div className="admin-login__brand">
-          <span className="admin-login__logo">{BRAND.name}</span>
-          <Text type="secondary">CMS</Text>
+          <img src={logoImg} alt="AK News" className="admin-login__logo" />
         </div>
         <Title level={3} className="admin-login__title">
           {t('admin.loginTitle')}
