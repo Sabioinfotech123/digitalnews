@@ -1,6 +1,8 @@
-import { Drawer } from 'antd'
-import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Dropdown, Drawer } from 'antd'
+import type { MenuProps } from 'antd'
+import { useMemo, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import logoImg from '@/assets/logo/logo.png'
@@ -10,7 +12,6 @@ import './Header.scss'
 
 const navItems = [
   { to: '/', key: 'navigation.home' as const },
-  { to: '/live', key: 'navigation.live' as const },
   { to: '/videos', key: 'navigation.videos' as const },
   { to: '/shorts', key: 'navigation.shorts' as const },
   { to: '/news', key: 'navigation.news' as const },
@@ -19,9 +20,53 @@ const navItems = [
 
 export function Header() {
   const { t, uiLanguage, setUiLanguage } = useLanguage()
+  const { isAuthenticated, isAdmin, logout } = useAuth()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
 
   const toggleLanguage = () => setUiLanguage(uiLanguage === 'en' ? 'te' : 'en')
+
+  const handleLogout = () => {
+    logout()
+    setOpen(false)
+  }
+
+  const accountMenuItems: MenuProps['items'] = useMemo(
+    () => [
+      {
+        key: 'login',
+        icon: <i className="fa-solid fa-right-to-bracket" aria-hidden />,
+        label: t('navigation.login'),
+        onClick: () => navigate('/login'),
+      },
+      {
+        key: 'register',
+        icon: <i className="fa-solid fa-user-plus" aria-hidden />,
+        label: t('navigation.register'),
+        onClick: () => navigate('/register'),
+      },
+    ],
+    [navigate, t],
+  )
+
+  const signedInMenuItems: MenuProps['items'] = useMemo(() => {
+    const items: MenuProps['items'] = []
+    if (isAdmin) {
+      items.push({
+        key: 'admin',
+        icon: <i className="fa-solid fa-gauge-high" aria-hidden />,
+        label: t('admin.dashboard'),
+        onClick: () => navigate('/admin'),
+      })
+    }
+    items.push({
+      key: 'logout',
+      icon: <i className="fa-solid fa-right-from-bracket" aria-hidden />,
+      label: t('auth.logout'),
+      onClick: handleLogout,
+    })
+    return items
+  }, [isAdmin, navigate, t])
 
   return (
     <header className="site-header">
@@ -69,6 +114,17 @@ export function Header() {
           >
             {uiLanguage === 'en' ? 'తెలుగు' : 'English'}
           </AppButton>
+          <Dropdown
+            menu={{ items: isAuthenticated ? signedInMenuItems : accountMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <button type="button" className="site-header__account hide-on-mobile">
+              <i className="fa-solid fa-user" aria-hidden />
+              <span>{t('auth.account')}</span>
+              <i className="fa-solid fa-chevron-down site-header__account-caret" aria-hidden />
+            </button>
+          </Dropdown>
           <AppButton
             type="text"
             className="site-header__icon-btn show-on-mobile-only"
@@ -98,9 +154,30 @@ export function Header() {
               {t(item.key)}
             </NavLink>
           ))}
-          <Link to="/login" className="site-header__mobile-link" onClick={() => setOpen(false)}>
-            {t('navigation.login')}
+          <Link to="/live" className="site-header__mobile-link" onClick={() => setOpen(false)}>
+            {t('videos.watchLive')}
           </Link>
+          {isAuthenticated ? (
+            <>
+              {isAdmin ? (
+                <Link to="/admin" className="site-header__mobile-link" onClick={() => setOpen(false)}>
+                  {t('admin.dashboard')}
+                </Link>
+              ) : null}
+              <button type="button" className="site-header__mobile-link" onClick={handleLogout}>
+                {t('auth.logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="site-header__mobile-link" onClick={() => setOpen(false)}>
+                {t('navigation.login')}
+              </Link>
+              <Link to="/register" className="site-header__mobile-link" onClick={() => setOpen(false)}>
+                {t('navigation.register')}
+              </Link>
+            </>
+          )}
         </nav>
       </Drawer>
     </header>

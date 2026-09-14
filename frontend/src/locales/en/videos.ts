@@ -1,6 +1,6 @@
 export const videos = {
   liveTv: 'Live TV',
-  watchLive: 'Watch Live',
+  watchLive: 'Live TV',
   liveNow: 'Live Now',
   latestVideos: 'Latest Videos',
   videosOfTheDay: 'Videos of the Day',

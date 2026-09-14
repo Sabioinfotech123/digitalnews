@@ -17,9 +17,12 @@ import {
 } from '@/pages/admin/AdminNewsPage'
 import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { LivePage } from '@/pages/public/LivePage'
+import { LoginPage } from '@/pages/public/LoginPage'
 import { NewsDetailPage } from '@/pages/public/NewsDetailPage'
+import { RegisterPage } from '@/pages/public/RegisterPage'
 import { ShortsPage } from '@/pages/public/ShortsPage'
 import { VideoDetailPage } from '@/pages/public/VideoDetailPage'
 import { VideosPage } from '@/pages/public/VideosPage'
@@ -39,7 +42,7 @@ function Placeholder({ title }: { title: string }) {
 function AdminModule({
   titleKey,
 }: {
-  titleKey: 'admin.blogs' | 'admin.videos' | 'admin.media' | 'admin.users' | 'admin.settings' | 'admin.profile'
+  titleKey: 'admin.blogs' | 'admin.videos' | 'admin.media' | 'admin.settings' | 'admin.profile'
 }) {
   const { t } = useLanguage()
   return <AdminSectionPage title={t(titleKey)} />
@@ -57,7 +60,8 @@ export function AppRouter() {
       <Route path="/news" element={<PublicPage><Placeholder title="News" /></PublicPage>} />
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />
       <Route path="/blogs" element={<PublicPage><Placeholder title="Blogs" /></PublicPage>} />
-      <Route path="/login" element={<PublicPage><Placeholder title="Login" /></PublicPage>} />
+      <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
+      <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
 
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route element={<RequireAdmin />}>
@@ -77,7 +81,7 @@ export function AppRouter() {
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />
-          <Route path="users" element={<AdminModule titleKey="admin.users" />} />
+          <Route path="users" element={<AdminUsersPage />} />
           <Route path="settings" element={<AdminModule titleKey="admin.settings" />} />
           <Route path="profile" element={<AdminModule titleKey="admin.profile" />} />
         </Route>

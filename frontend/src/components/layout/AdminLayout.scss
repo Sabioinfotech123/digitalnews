@@ -187,6 +187,14 @@
         transition: color var(--transition-fast);
       }
 
+      .ant-menu-title-content {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
       a {
         color: inherit !important;
       }
@@ -203,10 +211,23 @@
       }
     }
 
+    .ant-menu-submenu-title {
+      padding-inline-end: 36px !important;
+    }
+
     .ant-menu-submenu-arrow {
+      inset-inline-end: 12px !important;
+      width: 12px;
       color: var(--sb-muted) !important;
-      inset-inline-end: 14px !important;
-      opacity: 0.8;
+      opacity: 1 !important;
+      pointer-events: none;
+
+      &::before,
+      &::after {
+        background: currentColor !important;
+        width: 7px !important;
+        height: 1.5px !important;
+      }
     }
 
     .ant-menu-submenu-open > .ant-menu-submenu-title {

@@ -37,6 +37,22 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class AdminUserCreate(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str = Field(min_length=2, max_length=255)
+    role: UserRole = UserRole.USER
+    is_active: bool = True
+
+
+class AdminUserUpdate(BaseModel):
+    email: str | None = Field(default=None, min_length=5, max_length=255)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+    full_name: str | None = Field(default=None, min_length=2, max_length=255)
+    role: UserRole | None = None
+    is_active: bool | None = None
+
+
 class AuthResponse(BaseModel):
     user: UserResponse
     tokens: TokenResponse
