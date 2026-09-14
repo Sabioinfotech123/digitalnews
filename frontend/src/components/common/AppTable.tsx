@@ -105,7 +105,7 @@ export function AppTable<T extends object>({
           rowKey={tableProps.rowKey ?? 'id'}
           size="middle"
           {...tableProps}
-          className={cn('app-table__grid', tableProps.className)}
+          rootClassName={cn('app-table__grid', tableProps.rootClassName)}
           pagination={
             pagination === false
               ? false
