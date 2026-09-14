@@ -75,7 +75,7 @@ services:
     container_name: aknews-web
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8088:80"
+      - "0.0.0.0:8088:80"
     networks:
       - aknews_qa_net
     depends_on:
