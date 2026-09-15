@@ -1,0 +1,46 @@
+.public-auth {
+  display: grid;
+  place-items: center;
+  padding: 2.5rem 1.25rem 3rem;
+  min-height: calc(100vh - 180px);
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(17, 17, 17, 0.08);
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  &__logo {
+    display: block;
+    height: 48px;
+    width: auto;
+  }
+
+  &__title {
+    margin-bottom: 0.25rem !important;
+    font-family: var(--font-heading) !important;
+  }
+
+  &__footer {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    color: #6b7280;
+
+    a {
+      color: #d71920;
+      font-weight: 600;
+    }
+  }
+}

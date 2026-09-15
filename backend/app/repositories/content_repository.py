@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.content import Category, ContentLanguage, ContentStatus, News, NewsType, Tag
+from app.models.content import Blog, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
 
 
 class CategoryRepository:
@@ -156,3 +156,77 @@ class NewsRepository:
         self.db.commit()
         self.db.refresh(news)
         return self.get(news.id) or news
+
+
+class BlogRepository:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def _base(self):
+        return select(Blog).where(Blog.deleted_at.is_(None)).options(
+            selectinload(Blog.tags),
+            selectinload(Blog.category),
+            selectinload(Blog.author),
+        )
+
+    def list(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        status: ContentStatus | None = None,
+        category_id: str | None = None,
+        published_only: bool = False,
+    ) -> tuple[list[Blog], int]:
+        stmt = self._base()
+        count_stmt = select(func.count()).select_from(Blog).where(Blog.deleted_at.is_(None))
+
+        if published_only:
+            stmt = stmt.where(Blog.status == ContentStatus.published)
+            count_stmt = count_stmt.where(Blog.status == ContentStatus.published)
+        if language:
+            stmt = stmt.where(Blog.language == language)
+            count_stmt = count_stmt.where(Blog.language == language)
+        if status:
+            stmt = stmt.where(Blog.status == status)
+            count_stmt = count_stmt.where(Blog.status == status)
+        if category_id:
+            stmt = stmt.where(Blog.category_id == category_id)
+            count_stmt = count_stmt.where(Blog.category_id == category_id)
+        if search:
+            like = f"%{search}%"
+            filter_expr = or_(Blog.title.ilike(like), Blog.slug.ilike(like), Blog.short_description.ilike(like))
+            stmt = stmt.where(filter_expr)
+            count_stmt = count_stmt.where(filter_expr)
+
+        total = int(self.db.scalar(count_stmt) or 0)
+        stmt = stmt.order_by(Blog.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        return list(self.db.scalars(stmt).all()), total
+
+    def get(self, blog_id: str) -> Blog | None:
+        return self.db.scalar(self._base().where(Blog.id == blog_id))
+
+    def get_by_slug(self, slug: str, language: ContentLanguage | None = None) -> Blog | None:
+        stmt = self._base().where(Blog.slug == slug)
+        if language:
+            stmt = stmt.where(Blog.language == language)
+        return self.db.scalar(stmt)
+
+    def create(self, blog: Blog) -> Blog:
+        self.db.add(blog)
+        self.db.commit()
+        self.db.refresh(blog)
+        return self.get(blog.id) or blog
+
+    def save(self, blog: Blog) -> Blog:
+        self.db.add(blog)
+        self.db.commit()
+        self.db.refresh(blog)
+        return self.get(blog.id) or blog
+
+    def count_all(self) -> int:
+        return int(
+            self.db.scalar(select(func.count()).select_from(Blog).where(Blog.deleted_at.is_(None))) or 0
+        )

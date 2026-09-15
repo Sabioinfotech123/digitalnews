@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client'
-import type { AuthResponse, AuthUser, DashboardStats, TokenPair } from '@/types/auth'
+import type { AuthResponse, AuthUser, DashboardStats, TokenPair, UserRole } from '@/types/auth'
 
 const ACCESS_KEY = 'news.accessToken'
 const REFRESH_KEY = 'news.refreshToken'
@@ -55,4 +55,33 @@ export async function fetchMe(): Promise<AuthUser> {
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const { data } = await apiClient.get<DashboardStats>('/admin/dashboard')
   return data
+}
+
+export interface AdminUserPayload {
+  email: string
+  password?: string
+  full_name: string
+  role: UserRole
+  is_active: boolean
+}
+
+export async function fetchAdminUsers(search?: string): Promise<AuthUser[]> {
+  const { data } = await apiClient.get<AuthUser[]>('/admin/users', {
+    params: search ? { search } : undefined,
+  })
+  return data
+}
+
+export async function createAdminUser(payload: AdminUserPayload): Promise<AuthUser> {
+  const { data } = await apiClient.post<AuthUser>('/admin/users', payload)
+  return data
+}
+
+export async function updateAdminUser(id: string, payload: Partial<AdminUserPayload>): Promise<AuthUser> {
+  const { data } = await apiClient.patch<AuthUser>(`/admin/users/${id}`, payload)
+  return data
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+  await apiClient.delete(`/admin/users/${id}`)
 }

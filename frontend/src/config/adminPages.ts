@@ -139,6 +139,30 @@ export function resolveAdminPageMeta(
     }
   }
 
+  const createBlog = pathname.match(/^\/admin\/blogs\/create$/)
+  if (createBlog) {
+    return {
+      documentTitle: brandTitle(`Create - Blog`),
+      breadcrumbs: [
+        { title: t('admin.blogs'), path: '/admin/blogs' },
+        { title: t('admin.createNews') },
+      ],
+      menuKey: '/admin/blogs',
+    }
+  }
+
+  const editBlog = pathname.match(/^\/admin\/blogs\/edit\/[^/]+$/)
+  if (editBlog) {
+    return {
+      documentTitle: brandTitle(`Edit - Blog`),
+      breadcrumbs: [
+        { title: t('admin.blogs'), path: '/admin/blogs' },
+        { title: t('admin.editNews') },
+      ],
+      menuKey: '/admin/blogs',
+    }
+  }
+
   const simple: Array<{ prefix: string; titleKey: TranslationKey; crumbs: AdminCrumb[]; menuKey: string }> = [
     {
       prefix: '/admin/blogs',

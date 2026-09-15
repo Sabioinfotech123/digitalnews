@@ -12,6 +12,8 @@ const STATUS_COLOR: Record<string, string> = {
   trending: 'orange',
   more: 'default',
   breaking: 'magenta',
+  USER: 'blue',
+  ADMIN: 'red',
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -26,6 +28,8 @@ const STATUS_LABEL: Record<string, string> = {
   trending: 'Trending',
   more: 'More',
   breaking: 'Breaking',
+  USER: 'User',
+  ADMIN: 'Admin',
 }
 
 function formatStatusLabel(status: string): string {
