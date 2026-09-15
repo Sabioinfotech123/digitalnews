@@ -3,6 +3,7 @@ from sqlalchemy import func, select
 
 from app.core.dependencies import AdminUser, DbSession
 from app.models.content import ContentStatus, News
+from app.repositories.content_repository import BlogRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import AdminUserCreate, AdminUserUpdate, DashboardStats, UserResponse
 from app.services.admin_user_service import AdminUserService
@@ -39,7 +40,7 @@ def dashboard(_admin: AdminUser, db: DbSession) -> DashboardStats:
         total_news=total_news,
         published_news=published_news,
         draft_news=draft_news,
-        total_blogs=0,
+        total_blogs=BlogRepository(db).count_all(),
         total_videos=0,
         total_users=users,
         total_views=total_views,

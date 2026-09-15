@@ -120,3 +120,67 @@ class PaginatedNews(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class BlogCreate(BaseModel):
+    title: str = Field(min_length=3, max_length=300)
+    slug: str = Field(min_length=3, max_length=320)
+    language: ContentLanguage
+    short_description: str | None = None
+    content: str = ""
+    category_id: str | None = None
+    tag_ids: list[str] = Field(default_factory=list)
+    status: ContentStatus = ContentStatus.draft
+    image_url: str | None = None
+    seo_title: str | None = None
+    seo_description: str | None = None
+    seo_keywords: str | None = None
+    published_at: datetime | None = None
+
+
+class BlogUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=3, max_length=300)
+    slug: str | None = Field(default=None, min_length=3, max_length=320)
+    language: ContentLanguage | None = None
+    short_description: str | None = None
+    content: str | None = None
+    category_id: str | None = None
+    tag_ids: list[str] | None = None
+    status: ContentStatus | None = None
+    image_url: str | None = None
+    seo_title: str | None = None
+    seo_description: str | None = None
+    seo_keywords: str | None = None
+    published_at: datetime | None = None
+
+
+class BlogResponse(BaseModel):
+    id: str
+    title: str
+    slug: str
+    language: ContentLanguage
+    short_description: str | None
+    content: str
+    category_id: str | None
+    category_name: str | None = None
+    author_id: str | None
+    author_name: str | None = None
+    status: ContentStatus
+    image_url: str | None = None
+    seo_title: str | None
+    seo_description: str | None
+    seo_keywords: str | None
+    published_at: datetime | None
+    view_count: int
+    created_at: datetime
+    updated_at: datetime
+    tags: list[TagResponse] = Field(default_factory=list)
+
+    model_config = {"from_attributes": True}
+
+
+class PaginatedBlogs(BaseModel):
+    items: list[BlogResponse]
+    total: int
+    page: int
+    page_size: int
