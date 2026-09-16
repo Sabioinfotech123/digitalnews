@@ -1,4 +1,4 @@
-import { App, Breadcrumb, Layout, Menu, type MenuProps } from 'antd'
+import { App, Breadcrumb, Dropdown, Layout, Menu, type MenuProps } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
@@ -6,6 +6,7 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import logoImg from '@/assets/logo/logo.png'
 import { resolveAdminPageMeta } from '@/config/adminPages'
+import { cn } from '@/utils/cn'
 import { confirmAction } from '@/utils/confirmAction'
 import './AdminLayout.scss'
 
@@ -32,6 +33,62 @@ export function AdminLayout() {
       },
     })
   }
+
+  const quickAddItems: MenuProps['items'] = useMemo(
+    () => [
+      {
+        key: 'category',
+        icon: <i className="fa-solid fa-folder" aria-hidden />,
+        label: t('admin.addCategory'),
+        onClick: () => navigate('/admin/categories?create=1'),
+      },
+      {
+        key: 'tag',
+        icon: <i className="fa-solid fa-tags" aria-hidden />,
+        label: t('admin.addTag'),
+        onClick: () => navigate('/admin/tags?create=1'),
+      },
+      { type: 'divider' },
+      {
+        key: 'featured',
+        icon: <i className="fa-solid fa-star" aria-hidden />,
+        label: t('admin.addFeaturedNews'),
+        onClick: () => navigate('/admin/news/create/featured'),
+      },
+      {
+        key: 'latest',
+        icon: <i className="fa-solid fa-clock" aria-hidden />,
+        label: t('admin.addLatestNews'),
+        onClick: () => navigate('/admin/news/create/latest'),
+      },
+      {
+        key: 'trending',
+        icon: <i className="fa-solid fa-fire" aria-hidden />,
+        label: t('admin.addTrendingNews'),
+        onClick: () => navigate('/admin/news/create/trending'),
+      },
+      {
+        key: 'more',
+        icon: <i className="fa-solid fa-ellipsis" aria-hidden />,
+        label: t('admin.addMoreNews'),
+        onClick: () => navigate('/admin/news/create/more'),
+      },
+      { type: 'divider' },
+      {
+        key: 'blog',
+        icon: <i className="fa-solid fa-pen-nib" aria-hidden />,
+        label: t('admin.addBlog'),
+        onClick: () => navigate('/admin/blogs/create'),
+      },
+      {
+        key: 'user',
+        icon: <i className="fa-solid fa-user-plus" aria-hidden />,
+        label: t('admin.addUser'),
+        onClick: () => navigate('/admin/users?create=1'),
+      },
+    ],
+    [navigate, t],
+  )
 
   const pageMeta = useMemo(
     () => resolveAdminPageMeta(location.pathname, t),
@@ -155,12 +212,29 @@ export function AdminLayout() {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
+        trigger={null}
         breakpoint="lg"
         className="admin-layout__sider"
         width={240}
       >
         <div className="admin-layout__brand">
-          <img src={logoImg} alt="AK News" className="admin-layout__brand-name" />
+          {!collapsed ? (
+            <img src={logoImg} alt="AK News" className="admin-layout__brand-name" />
+          ) : null}
+          <button
+            type="button"
+            className="admin-layout__sider-toggle"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            <i
+              className={cn(
+                'fa-solid',
+                collapsed ? 'fa-angles-right' : 'fa-angles-left',
+              )}
+              aria-hidden
+            />
+          </button>
         </div>
         <Menu
           theme="light"
@@ -193,6 +267,11 @@ export function AdminLayout() {
             />
           </div>
           <div className="admin-layout__header-actions">
+            <Dropdown menu={{ items: quickAddItems }} placement="bottomRight" trigger={['click']}>
+              <AppButton type="default" className="admin-layout__add-btn">
+                <i className="fa-solid fa-plus" aria-hidden /> {t('admin.quickAdd')}
+              </AppButton>
+            </Dropdown>
             <AppButton type="default" onClick={() => navigate('/')}>
               <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden /> {t('admin.backToSite')}
             </AppButton>

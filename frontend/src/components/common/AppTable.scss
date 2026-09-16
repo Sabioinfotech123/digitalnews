@@ -180,6 +180,27 @@
       white-space: nowrap;
     }
 
+    /* Empty state: no divider under header */
+    .ant-table-empty {
+      .ant-table-thead > tr > th {
+        border-bottom: none !important;
+      }
+
+      .ant-table-header {
+        border-bottom: none !important;
+        box-shadow: none !important;
+      }
+
+      .ant-table-container::before,
+      .ant-table-container::after {
+        display: none !important;
+      }
+
+      .ant-table-tbody > tr.ant-table-placeholder > td {
+        border-bottom: none !important;
+      }
+    }
+
     .ant-table-tbody > tr > td {
       font-family: var(--font-body);
       font-size: 0.95rem;
@@ -187,6 +208,25 @@
       border-bottom: 1px solid #f0f2f5 !important;
       padding: 1rem 1.1rem !important;
       transition: background var(--transition-fast);
+    }
+
+    /* Ant Design measure row — keep collapsed (our td padding was forcing a line) */
+    .ant-table-tbody > tr.ant-table-measure-row,
+    .ant-table-tbody > tr.ant-table-measure-row > td {
+      height: 0 !important;
+      max-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-bottom: 0 !important;
+      line-height: 0 !important;
+      overflow: hidden !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .ant-table-tbody > tr.ant-table-measure-row > td > div {
+      height: 0 !important;
+      overflow: hidden !important;
     }
 
     .ant-table-tbody > tr:last-child > td {
@@ -302,12 +342,18 @@
     }
 
     &--refresh {
-      color: #6b7280;
-      background: rgba(107, 114, 128, 0.08);
+      color: #ea580c !important;
+      background: rgba(234, 88, 12, 0.12) !important;
 
-      &:hover {
-        color: var(--color-primary) !important;
-        background: rgba(215, 25, 32, 0.1) !important;
+      &:hover:not(:disabled) {
+        color: #c2410c !important;
+        background: rgba(234, 88, 12, 0.2) !important;
+      }
+
+      &:disabled {
+        color: #9ca3af !important;
+        background: rgba(107, 114, 128, 0.08) !important;
+        opacity: 1;
       }
 
       &.is-spinning i {

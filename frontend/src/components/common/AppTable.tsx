@@ -167,7 +167,7 @@ export function AppTable<T extends object>({
             size="middle"
             loading={loading}
             {...tableProps}
-            className={cn('app-table__grid', tableProps.className)}
+            rootClassName={cn('app-table__grid', tableProps.rootClassName)}
             scroll={mergedScroll}
             pagination={
               pagination === false
