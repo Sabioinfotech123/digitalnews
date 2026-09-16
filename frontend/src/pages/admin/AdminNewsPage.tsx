@@ -193,6 +193,15 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       },
       {
+        title: 'Views',
+        dataIndex: 'view_count',
+        key: 'view_count',
+        width: 90,
+        align: 'right',
+        sorter: (a, b) => a.view_count - b.view_count,
+        render: (value: number) => value.toLocaleString('en-IN'),
+      },
+      {
         title: 'Updated',
         dataIndex: 'updated_at',
         key: 'updated_at',

@@ -150,10 +150,13 @@ class NewsService:
             page_size=page_size,
         )
 
-    def get(self, news_id: str) -> NewsResponse:
+    def get(self, news_id: str, *, increment_view: bool = False) -> NewsResponse:
         item = self.repo.get(news_id)
         if not item:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        if increment_view:
+            self.repo.increment_view(news_id)
+            item = self.repo.get(news_id) or item
         return _news_response(item)
 
     def create(self, payload: NewsCreate, author_id: str) -> NewsResponse:

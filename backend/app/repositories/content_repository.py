@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.content import Blog, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
@@ -144,6 +144,14 @@ class NewsRepository:
         if language:
             stmt = stmt.where(News.language == language)
         return self.db.scalar(stmt)
+
+    def increment_view(self, news_id: str) -> None:
+        self.db.execute(
+            update(News)
+            .where(News.id == news_id, News.deleted_at.is_(None))
+            .values(view_count=News.view_count + 1)
+        )
+        self.db.commit()
 
     def create(self, news: News) -> News:
         self.db.add(news)
