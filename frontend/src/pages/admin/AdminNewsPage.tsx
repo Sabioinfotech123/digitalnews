@@ -161,7 +161,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         render: (value: string) => <StatusBadge status={value} />,
       },
       {
-        title: 'Language',
+        title: 'Lun',
         dataIndex: 'language',
         width: 110,
         sorter: (a, b) => compareText(a.language, b.language),

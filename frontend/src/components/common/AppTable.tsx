@@ -38,6 +38,7 @@ export function AppTable<T extends object>({
   className,
   cardClassName,
   pagination,
+  scroll,
   ...tableProps
 }: AppTableProps<T>) {
   const showHeader = Boolean(title || toolbar)
@@ -46,6 +47,8 @@ export function AppTable<T extends object>({
 
   const [draftSearch, setDraftSearch] = useState(searchValue)
   const skipDebounceRef = useRef(true)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [scrollY, setScrollY] = useState(360)
 
   useEffect(() => {
     setDraftSearch(searchValue)
@@ -70,6 +73,38 @@ export function AppTable<T extends object>({
 
     return () => window.clearTimeout(timer)
   }, [draftSearch, onSearchChange, searchDebounceMs, searchValue])
+
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el) return
+
+    const update = () => {
+      const paginationEl = el.querySelector('.ant-table-pagination') as HTMLElement | null
+      const headerEl = el.querySelector('.ant-table-header') as HTMLElement | null
+      const theadEl = el.querySelector('.ant-table-thead') as HTMLElement | null
+      const paginationH = paginationEl?.offsetHeight ?? 64
+      const headerH = headerEl?.offsetHeight || theadEl?.offsetHeight || 48
+      // scroll.y = body only — leave room for sticky thead + pagination
+      const next = Math.max(180, el.clientHeight - paginationH - headerH - 8)
+      setScrollY((prev) => (prev === next ? prev : next))
+    }
+
+    update()
+    const frame = window.requestAnimationFrame(update)
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener('resize', update)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [showFilters, pagination, tableProps.dataSource])
+
+  const mergedScroll: TableProps<T>['scroll'] = {
+    x: scroll?.x ?? 'max-content',
+    y: scroll?.y ?? scrollY,
+  }
 
   return (
     <div className={cn('app-table', className)}>
@@ -101,21 +136,24 @@ export function AppTable<T extends object>({
           </div>
         ) : null}
 
-        <Table<T>
-          rowKey={tableProps.rowKey ?? 'id'}
-          size="middle"
-          {...tableProps}
-          className={cn('app-table__grid', tableProps.className)}
-          pagination={
-            pagination === false
-              ? false
-              : {
-                  showSizeChanger: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
-                  ...pagination,
-                }
-          }
-        />
+        <div className="app-table__body" ref={bodyRef}>
+          <Table<T>
+            rowKey={tableProps.rowKey ?? 'id'}
+            size="middle"
+            {...tableProps}
+            className={cn('app-table__grid', tableProps.className)}
+            scroll={mergedScroll}
+            pagination={
+              pagination === false
+                ? false
+                : {
+                    showSizeChanger: true,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+                    ...pagination,
+                  }
+            }
+          />
+        </div>
       </div>
     </div>
   )

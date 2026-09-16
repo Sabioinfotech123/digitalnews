@@ -107,6 +107,12 @@ export function Header() {
         </nav>
 
         <div className="site-header__actions ml-auto flex items-center gap-2">
+          <AppButton
+            type="text"
+            className="site-header__icon-btn hide-on-mobile"
+            aria-label={t('navigation.search')}
+            icon={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
+          />
           <Link to="/live" className="hide-on-mobile">
             <AppButton
               type="primary"
@@ -116,12 +122,6 @@ export function Header() {
               {t('videos.watchLive')}
             </AppButton>
           </Link>
-          <AppButton
-            type="text"
-            className="site-header__icon-btn hide-on-mobile"
-            aria-label={t('navigation.search')}
-            icon={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
-          />
           <AppButton
             type="default"
             className="site-header__lang"
