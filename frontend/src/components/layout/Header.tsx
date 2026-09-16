@@ -1,4 +1,4 @@
-import { Dropdown, Drawer } from 'antd'
+import { App, Dropdown, Drawer } from 'antd'
 import type { MenuProps } from 'antd'
 import { useMemo, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { AppButton } from '@/components/common/AppButton'
 import logoImg from '@/assets/logo/logo.png'
 import { BRAND } from '@/config/brand'
 import { cn } from '@/utils/cn'
+import { confirmAction } from '@/utils/confirmAction'
 import './Header.scss'
 
 const navItems = [
@@ -21,14 +22,29 @@ const navItems = [
 export function Header() {
   const { t, uiLanguage, setUiLanguage } = useLanguage()
   const { isAuthenticated, isAdmin, logout } = useAuth()
+  const { modal } = App.useApp()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
 
   const toggleLanguage = () => setUiLanguage(uiLanguage === 'en' ? 'te' : 'en')
 
-  const handleLogout = () => {
-    logout()
+  const openDashboard = () => {
+    window.open('/admin', '_blank', 'noopener,noreferrer')
     setOpen(false)
+  }
+
+  const handleLogout = () => {
+    confirmAction({
+      modal,
+      title: t('auth.logoutConfirmTitle'),
+      content: t('auth.logoutConfirmContent'),
+      okText: t('auth.logoutConfirmOk'),
+      okType: 'danger',
+      onConfirm: () => {
+        logout()
+        setOpen(false)
+      },
+    })
   }
 
   const accountMenuItems: MenuProps['items'] = useMemo(
@@ -56,7 +72,7 @@ export function Header() {
         key: 'admin',
         icon: <i className="fa-solid fa-gauge-high" aria-hidden />,
         label: t('admin.dashboard'),
-        onClick: () => navigate('/admin'),
+        onClick: openDashboard,
       })
     }
     items.push({
@@ -66,7 +82,7 @@ export function Header() {
       onClick: handleLogout,
     })
     return items
-  }, [isAdmin, navigate, t])
+  }, [isAdmin, t, modal, logout])
 
   return (
     <header className="site-header">
@@ -160,9 +176,9 @@ export function Header() {
           {isAuthenticated ? (
             <>
               {isAdmin ? (
-                <Link to="/admin" className="site-header__mobile-link" onClick={() => setOpen(false)}>
+                <button type="button" className="site-header__mobile-link" onClick={openDashboard}>
                   {t('admin.dashboard')}
-                </Link>
+                </button>
               ) : null}
               <button type="button" className="site-header__mobile-link" onClick={handleLogout}>
                 {t('auth.logout')}

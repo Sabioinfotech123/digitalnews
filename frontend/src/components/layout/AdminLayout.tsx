@@ -1,4 +1,4 @@
-import { Breadcrumb, Layout, Menu, type MenuProps } from 'antd'
+import { App, Breadcrumb, Layout, Menu, type MenuProps } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
@@ -6,6 +6,7 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import logoImg from '@/assets/logo/logo.png'
 import { resolveAdminPageMeta } from '@/config/adminPages'
+import { confirmAction } from '@/utils/confirmAction'
 import './AdminLayout.scss'
 
 const { Header, Sider, Content } = Layout
@@ -13,9 +14,24 @@ const { Header, Sider, Content } = Layout
 export function AdminLayout() {
   const { t } = useLanguage()
   const { logout } = useAuth()
+  const { modal } = App.useApp()
   const location = useLocation()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
+
+  const handleLogout = () => {
+    confirmAction({
+      modal,
+      title: t('auth.logoutConfirmTitle'),
+      content: t('auth.logoutConfirmContent'),
+      okText: t('auth.logoutConfirmOk'),
+      okType: 'danger',
+      onConfirm: () => {
+        logout()
+        navigate('/admin/login')
+      },
+    })
+  }
 
   const pageMeta = useMemo(
     () => resolveAdminPageMeta(location.pathname, t),
@@ -180,13 +196,7 @@ export function AdminLayout() {
             <AppButton type="default" onClick={() => navigate('/')}>
               <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden /> {t('admin.backToSite')}
             </AppButton>
-            <AppButton
-              type="primary"
-              onClick={() => {
-                logout()
-                navigate('/admin/login')
-              }}
-            >
+            <AppButton type="primary" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" aria-hidden /> {t('admin.logout')}
             </AppButton>
           </div>

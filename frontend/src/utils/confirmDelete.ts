@@ -1,18 +1,7 @@
-import type { ReactNode } from 'react'
+import { confirmAction, type ConfirmModalApi } from '@/utils/confirmAction'
 
 type ConfirmDeleteOptions = {
-  modal: {
-    confirm: (config: {
-      title: ReactNode
-      content?: ReactNode
-      okText?: string
-      okType?: 'danger' | 'primary' | 'dashed' | 'link' | 'text' | 'default'
-      cancelText?: string
-      centered?: boolean
-      autoFocusButton?: 'ok' | 'cancel' | null
-      onOk?: () => void | Promise<void>
-    }) => void
-  }
+  modal: ConfirmModalApi
   title: string
   content?: string
   onConfirm: () => void | Promise<void>
@@ -20,14 +9,13 @@ type ConfirmDeleteOptions = {
 
 /** Centered page modal for destructive delete confirmation. */
 export function confirmDelete({ modal, title, content, onConfirm }: ConfirmDeleteOptions) {
-  modal.confirm({
+  confirmAction({
+    modal,
     title,
     content,
     okText: 'Delete',
     okType: 'danger',
     cancelText: 'Cancel',
-    centered: true,
-    autoFocusButton: 'cancel',
-    onOk: onConfirm,
+    onConfirm,
   })
 }
