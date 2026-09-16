@@ -116,6 +116,20 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
+
+    &--with-refresh {
+      .ant-table-pagination {
+        padding-left: 3.25rem !important;
+      }
+    }
+  }
+
+  &__refresh {
+    position: absolute;
+    left: 1.1rem;
+    bottom: 0.85rem;
+    z-index: 3;
   }
 
   &__grid {
@@ -286,6 +300,26 @@
         background: rgba(220, 38, 38, 0.12) !important;
       }
     }
+
+    &--refresh {
+      color: #6b7280;
+      background: rgba(107, 114, 128, 0.08);
+
+      &:hover {
+        color: var(--color-primary) !important;
+        background: rgba(215, 25, 32, 0.1) !important;
+      }
+
+      &.is-spinning i {
+        animation: app-table-spin 0.8s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes app-table-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

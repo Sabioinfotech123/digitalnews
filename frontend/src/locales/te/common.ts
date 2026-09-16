@@ -6,4 +6,12 @@ export const common = {
   save: 'సేవ్',
   cancel: 'రద్దు',
   search: 'వెతకండి',
+  searchPlaceholder: 'వార్తలు మరియు బ్లాగులు వెతకండి…',
+  searchTitle: 'వెతకండి',
+  searchResultsFor: 'ఫలితాలు',
+  searchEmpty: 'ఫలితాలు దొరకలేదు',
+  searchHint: 'వార్తలు మరియు బ్లాగుల కోసం కీవర్డ్ టైప్ చేయండి',
+  searchNews: 'వార్తలు',
+  searchBlogs: 'బ్లాగులు',
+  backHome: 'హోమ్‌కు తిరిగి వెళ్లండి',
 } as const

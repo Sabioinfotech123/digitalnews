@@ -173,6 +173,7 @@ export function AdminCategoriesPage() {
         loading={loading}
         dataSource={items}
         columns={columns}
+        onRefresh={() => void load()}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search categories…"

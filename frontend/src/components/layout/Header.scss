@@ -86,6 +86,50 @@
     }
   }
 
+  &__search {
+    display: inline-flex;
+    align-items: center;
+    min-width: 32px;
+  }
+
+  &__search-input {
+    width: min(280px, 36vw);
+
+    &.ant-input-affix-wrapper {
+      height: 32px;
+      border-radius: 6px !important;
+      border-color: rgba(255, 255, 255, 0.35) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #fff !important;
+      box-shadow: none !important;
+
+      input {
+        color: #fff !important;
+        background: transparent !important;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.55);
+        }
+      }
+
+      .ant-input-prefix,
+      .ant-input-clear-icon {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+
+      &:hover,
+      &:focus,
+      &.ant-input-affix-wrapper-focused {
+        border-color: var(--color-primary) !important;
+        background: rgba(215, 25, 32, 0.2) !important;
+      }
+    }
+  }
+
+  &__mobile-search {
+    margin-bottom: 0.75rem;
+  }
+
   &__lang {
     border-color: rgba(255, 255, 255, 0.35) !important;
     color: var(--color-white) !important;

@@ -1,6 +1,6 @@
-import { App, Dropdown, Drawer } from 'antd'
-import type { MenuProps } from 'antd'
-import { useMemo, useState } from 'react'
+import { App, Dropdown, Drawer, Input } from 'antd'
+import type { InputRef, MenuProps } from 'antd'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
@@ -25,6 +25,9 @@ export function Header() {
   const { modal } = App.useApp()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const searchInputRef = useRef<InputRef>(null)
 
   const toggleLanguage = () => setUiLanguage(uiLanguage === 'en' ? 'te' : 'en')
 
@@ -46,6 +49,23 @@ export function Header() {
       },
     })
   }
+
+  const goSearch = (value?: string) => {
+    const q = (value ?? searchValue).trim()
+    setSearchOpen(false)
+    setOpen(false)
+    if (!q) {
+      navigate('/search')
+      return
+    }
+    navigate(`/search?q=${encodeURIComponent(q)}`)
+  }
+
+  useEffect(() => {
+    if (!searchOpen) return
+    const timer = window.setTimeout(() => searchInputRef.current?.focus(), 30)
+    return () => window.clearTimeout(timer)
+  }, [searchOpen])
 
   const accountMenuItems: MenuProps['items'] = useMemo(
     () => [
@@ -107,12 +127,32 @@ export function Header() {
         </nav>
 
         <div className="site-header__actions ml-auto flex items-center gap-2">
-          <AppButton
-            type="text"
-            className="site-header__icon-btn hide-on-mobile"
-            aria-label={t('navigation.search')}
-            icon={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
-          />
+          <div className={cn('site-header__search hide-on-mobile', searchOpen && 'is-open')}>
+            {searchOpen ? (
+              <Input
+                ref={searchInputRef}
+                allowClear
+                value={searchValue}
+                placeholder={t('common.searchPlaceholder')}
+                prefix={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onPressEnter={() => goSearch()}
+                onBlur={() => {
+                  if (!searchValue.trim()) setSearchOpen(false)
+                }}
+                className="site-header__search-input"
+                aria-label={t('navigation.search')}
+              />
+            ) : (
+              <AppButton
+                type="text"
+                className="site-header__icon-btn"
+                aria-label={t('navigation.search')}
+                icon={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
+                onClick={() => setSearchOpen(true)}
+              />
+            )}
+          </div>
           <Link to="/live" className="hide-on-mobile">
             <AppButton
               type="primary"
@@ -159,6 +199,21 @@ export function Header() {
         className="site-header__drawer"
       >
         <nav className="site-header__mobile-nav flex flex-col gap-1">
+          <form
+            className="site-header__mobile-search"
+            onSubmit={(e) => {
+              e.preventDefault()
+              goSearch()
+            }}
+          >
+            <Input
+              allowClear
+              value={searchValue}
+              placeholder={t('common.searchPlaceholder')}
+              prefix={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </form>
           {navItems.map((item) => (
             <NavLink
               key={item.to}

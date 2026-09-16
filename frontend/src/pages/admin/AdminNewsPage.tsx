@@ -251,6 +251,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
       dataSource={items}
       columns={columns}
       rowKey="id"
+      onRefresh={() => void load()}
       searchValue={search}
       searchPlaceholder="Search title or slug…"
       onSearchChange={handleSearchChange}

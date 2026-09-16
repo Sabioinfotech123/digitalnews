@@ -27,6 +27,7 @@ import { LivePage } from '@/pages/public/LivePage'
 import { LoginPage } from '@/pages/public/LoginPage'
 import { NewsDetailPage } from '@/pages/public/NewsDetailPage'
 import { RegisterPage } from '@/pages/public/RegisterPage'
+import { SearchPage } from '@/pages/public/SearchPage'
 import { ShortsPage } from '@/pages/public/ShortsPage'
 import { VideoDetailPage } from '@/pages/public/VideoDetailPage'
 import { VideosPage } from '@/pages/public/VideosPage'
@@ -65,6 +66,7 @@ export function AppRouter() {
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />
       <Route path="/blogs" element={<PublicPage><BlogsPage /></PublicPage>} />
       <Route path="/blogs/:slug" element={<PublicPage><BlogDetailPage /></PublicPage>} />
+      <Route path="/search" element={<PublicPage><SearchPage /></PublicPage>} />
       <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
       <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
 

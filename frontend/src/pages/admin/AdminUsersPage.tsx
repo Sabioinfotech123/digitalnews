@@ -207,6 +207,7 @@ export function AdminUsersPage() {
         loading={loading}
         dataSource={items}
         columns={columns}
+        onRefresh={() => void load()}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search name or email…"
