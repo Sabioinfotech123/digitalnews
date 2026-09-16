@@ -2,6 +2,8 @@ import { App, ConfigProvider } from 'antd'
 import type { ReactNode } from 'react'
 import { AuthProvider } from '@/app/providers/AuthProvider'
 import { LanguageProvider } from '@/app/providers/LanguageProvider'
+import { ZoomProvider } from '@/app/providers/ZoomProvider'
+import { ZoomControls } from '@/components/common/ZoomControls'
 
 const antdTheme = {
   token: {
@@ -26,6 +28,10 @@ const antdTheme = {
       itemSelectedColor: '#D71920',
       itemSelectedBg: '#FDE8E9',
     },
+    Form: {
+      verticalLabelPadding: '0 0 2px',
+      itemMarginBottom: 16,
+    },
   },
 }
 
@@ -33,9 +39,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ConfigProvider theme={antdTheme}>
       <App>
-        <LanguageProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </LanguageProvider>
+        <ZoomProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              {children}
+              <ZoomControls />
+            </AuthProvider>
+          </LanguageProvider>
+        </ZoomProvider>
       </App>
     </ConfigProvider>
   )

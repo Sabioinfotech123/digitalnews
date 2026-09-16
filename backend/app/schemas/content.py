@@ -61,7 +61,7 @@ class NewsCreate(BaseModel):
     news_type: NewsType = NewsType.latest
     is_featured: bool = False
     is_breaking: bool = False
-    image_url: str | None = None
+    image_url: str = Field(min_length=1, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None
@@ -80,7 +80,7 @@ class NewsUpdate(BaseModel):
     news_type: NewsType | None = None
     is_featured: bool | None = None
     is_breaking: bool | None = None
-    image_url: str | None = None
+    image_url: str | None = Field(default=None, min_length=1, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None

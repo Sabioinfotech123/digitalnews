@@ -26,3 +26,19 @@
   background: var(--color-primary-hover) !important;
   border-color: var(--color-primary-hover) !important;
 }
+
+/* Tighter label → control spacing (vertical forms) */
+.ant-form-vertical {
+  .ant-form-item-label {
+    padding-bottom: 2px !important;
+
+    > label {
+      height: auto;
+      line-height: 1.35;
+    }
+  }
+
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+}
