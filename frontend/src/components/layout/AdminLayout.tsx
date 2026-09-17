@@ -37,6 +37,12 @@ export function AdminLayout() {
   const quickAddItems: MenuProps['items'] = useMemo(
     () => [
       {
+        key: 'breaking',
+        icon: <i className="fa-solid fa-bolt" aria-hidden />,
+        label: t('admin.addBreakingNews'),
+        onClick: () => navigate('/admin/breaking-news?create=1'),
+      },
+      {
         key: 'category',
         icon: <i className="fa-solid fa-folder" aria-hidden />,
         label: t('admin.addCategory'),
@@ -131,6 +137,11 @@ export function AdminLayout() {
       key: '/admin',
       icon: <i className="fa-solid fa-gauge-high" aria-hidden />,
       label: <Link to="/admin">{t('admin.dashboard')}</Link>,
+    },
+    {
+      key: '/admin/breaking-news',
+      icon: <i className="fa-solid fa-bolt" aria-hidden />,
+      label: <Link to="/admin/breaking-news">{t('admin.breakingNews')}</Link>,
     },
     {
       key: 'taxonomy',

@@ -152,3 +152,26 @@ class BlogTag(Base):
 
     blog_id: Mapped[str] = mapped_column(String(36), ForeignKey("blogs.id"), primary_key=True)
     tag_id: Mapped[str] = mapped_column(String(36), ForeignKey("tags.id"), primary_key=True)
+
+
+class BreakingNews(Base):
+    """Ticker headlines shown in the public Breaking News bar."""
+
+    __tablename__ = "breaking_news"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title: Mapped[str] = mapped_column(String(300), nullable=False)
+    language: Mapped[ContentLanguage] = mapped_column(
+        Enum(ContentLanguage, native_enum=False), index=True, nullable=False
+    )
+    link_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )

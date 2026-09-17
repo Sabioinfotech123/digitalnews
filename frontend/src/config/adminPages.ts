@@ -177,6 +177,12 @@ export function resolveAdminPageMeta(
       menuKey: '/admin/videos',
     },
     {
+      prefix: '/admin/breaking-news',
+      titleKey: 'admin.breakingNews',
+      crumbs: [{ title: t('admin.breakingNews') }],
+      menuKey: '/admin/breaking-news',
+    },
+    {
       prefix: '/admin/categories',
       titleKey: 'admin.categories',
       crumbs: [{ title: t('admin.taxonomy') }, { title: t('admin.categories') }],

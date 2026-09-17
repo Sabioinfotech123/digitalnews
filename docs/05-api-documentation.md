@@ -176,7 +176,44 @@ Blogs have no `news_type` / breaking flags.
 
 ---
 
-## 7) Categories & tags
+## 7) Breaking news ticker
+
+Header ticker headlines (separate from `news.is_breaking`).
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/breaking-news` | Anyone | List **active** ticker items |
+| GET | `/admin/breaking-news` | Admin | List all (active + inactive) |
+| POST | `/admin/breaking-news` | Admin | Create |
+| PATCH | `/admin/breaking-news/{id}` | Admin | Update |
+| DELETE | `/admin/breaking-news/{id}` | Admin | Hard delete |
+
+### Query params
+
+| Param | Example | Meaning |
+|-------|---------|---------|
+| `language` | `en` or `te` | Filter language |
+| `search` | `india` | Admin list only — search title |
+
+### Create / update fields
+
+| Field | Required? | Notes |
+|-------|-----------|-------|
+| `title` | Yes | 3–300 chars |
+| `language` | Yes | `en` / `te` |
+| `link_url` | Optional | Path or URL |
+| `is_active` | Optional | default `true` |
+| `sort_order` | Optional | default `0` |
+
+Example:
+
+```text
+GET /api/v1/breaking-news?language=en
+```
+
+---
+
+## 8) Categories & tags
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
@@ -193,7 +230,7 @@ Optional query: `?search=sports`
 
 ---
 
-## 8) Media upload (admin)
+## 9) Media upload (admin)
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
@@ -211,7 +248,7 @@ Response includes `url` — use that as `image_url` when creating news.
 
 ---
 
-## 9) Admin dashboard & users
+## 10) Admin dashboard & users
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
@@ -245,6 +282,12 @@ GET /blogs?search=keyword&language=en
 
 Opening public detail (`/news/{slug}` or `/news/by-id/{id}`) increases `view_count`.  
 Admin list shows that number in the Views column.
+
+### D) Update the breaking news ticker
+
+1. Login as admin  
+2. `POST /admin/breaking-news` with `title`, `language`, `is_active: true`  
+3. Public site calls `GET /breaking-news?language=en` (or `te`) and shows the ticker
 
 ---
 

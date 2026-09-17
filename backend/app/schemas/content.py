@@ -184,3 +184,32 @@ class PaginatedBlogs(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class BreakingNewsCreate(BaseModel):
+    title: str = Field(min_length=3, max_length=300)
+    language: ContentLanguage
+    link_url: str | None = Field(default=None, max_length=500)
+    is_active: bool = True
+    sort_order: int = 0
+
+
+class BreakingNewsUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=3, max_length=300)
+    language: ContentLanguage | None = None
+    link_url: str | None = Field(default=None, max_length=500)
+    is_active: bool | None = None
+    sort_order: int | None = None
+
+
+class BreakingNewsResponse(BaseModel):
+    id: str
+    title: str
+    language: ContentLanguage
+    link_url: str | None
+    is_active: bool
+    sort_order: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}

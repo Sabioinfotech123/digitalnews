@@ -24,6 +24,10 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 ┌──────────┐       ┌────────────┐            │
 │  users   │───────│   blogs    │────────────┘
 └──────────┘       └────────────┘
+
+┌────────────────┐
+│ breaking_news  │  (standalone ticker headlines)
+└────────────────┘
 ```
 
 **In plain words:**
@@ -31,6 +35,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Categories** group content (Sports, Tech…).
 - **Tags** can be attached to many news/blogs.
 - **News** and **Blogs** are the main articles.
+- **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
 
 ---
 
@@ -103,7 +108,7 @@ These are fixed options used in several tables:
 | `status` | draft / published / … |
 | `news_type` | featured / latest / trending / more |
 | `is_featured` | Featured flag |
-| `is_breaking` | Breaking news flag |
+| `is_breaking` | Breaking badge on the article (not the header ticker) |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -149,6 +154,26 @@ Almost like news, **without** `news_type`, `is_featured`, `is_breaking`.
 |--------|----------------|
 | `blog_id` | Blog ID |
 | `tag_id` | Tag ID |
+
+---
+
+### 8) `breaking_news` — header ticker headlines
+
+Standalone ticker items (not full articles). Managed in Admin → **Breaking news**.
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | UUID |
+| `title` | Headline text shown in the red ticker |
+| `language` | `en` / `te` |
+| `link_url` | Optional link (internal path or full URL) |
+| `is_active` | Only active items appear on the public site |
+| `sort_order` | Lower numbers first |
+| `created_at` / `updated_at` | Timestamps |
+
+**Note:** `news.is_breaking` is a badge on an article. The header bar uses this table.
+
+Migration: `0003_breaking_news.py`
 
 ---
 

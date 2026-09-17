@@ -6,6 +6,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AdminBlogCreatePage, AdminBlogEditPage } from '@/pages/admin/AdminBlogFormPage'
 import { AdminBlogsPage } from '@/pages/admin/AdminBlogsPage'
+import { AdminBreakingNewsPage } from '@/pages/admin/AdminBreakingNewsPage'
 import { AdminCategoriesPage } from '@/pages/admin/AdminCategoriesPage'
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
@@ -87,6 +88,7 @@ export function AppRouter() {
           <Route path="blogs/create" element={<AdminBlogCreatePage />} />
           <Route path="blogs/edit/:id" element={<AdminBlogEditPage />} />
           <Route path="videos" element={<AdminModule titleKey="admin.videos" />} />
+          <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />

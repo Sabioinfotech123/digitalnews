@@ -22,7 +22,8 @@ Password: Admin@12345
 ```text
 1) Catalog → Categories
 2) Catalog → Tags
-3) News (by type)  OR  Blogs
+3) Breaking news (ticker)  — optional, anytime
+4) News (by type)  OR  Blogs
 ```
 
 **Why?**  
@@ -36,6 +37,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | Menu | What you do there |
 |------|-------------------|
 | **Dashboard** | Counts / overview |
+| **Breaking news** | Header ticker headlines (CRUD) |
 | **Catalog → Categories** | Add/edit/delete categories |
 | **Catalog → Tags** | Add/edit/delete tags |
 | **News → All news** | See every news item |
@@ -75,6 +77,26 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 **Edit / Delete** same as categories.
 
 > Tip: Tags are smaller labels (Cricket, Election, AI…). One news can have many tags.
+
+---
+
+## Step 2.5 — Breaking news ticker
+
+Controls the red **BREAKING NEWS** bar under the public header.
+
+1. Sidebar → **Breaking news**
+2. Click **Add breaking news** (or header **Add** → Breaking news)
+3. Fill:
+   - **Title** — text that scrolls in the ticker
+   - **Language** — English or తెలుగు (matches public language switcher)
+   - **Link URL** (optional) — e.g. `/news/my-slug` or full URL
+   - **Sort order** — lower numbers first
+   - **Active** ON to show on the site
+4. Save
+
+**Public site:** only **active** items for the current language appear. If none are active, the ticker hides.
+
+> Tip: This is **not** the same as the “Breaking” switch on a news article. That badge is for the article card/detail; this page feeds the header ticker.
 
 ---
 
