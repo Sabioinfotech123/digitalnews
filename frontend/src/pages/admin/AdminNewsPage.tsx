@@ -82,7 +82,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     void load()
   }, [load])
 
-  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create/latest'
+  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create'
   const title = newsType ? TYPE_LABELS[newsType] : t('admin.news')
 
   const handleSearchChange = (value: string) => {

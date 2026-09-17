@@ -135,7 +135,8 @@ You can create from:
 | Short description | Summary |
 | Content | Full article |
 | **News image** | **Required** — upload first |
-| News type | Usually locked by the page you came from |
+| News type | Locked if you came from Featured/Latest/…; from **All news** you can pick any type |
+
 | Language | English / Telugu |
 | Status | draft / published / … |
 | Category | Pick from Catalog |
