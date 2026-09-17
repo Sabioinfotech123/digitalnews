@@ -1,41 +1,93 @@
-import { App, Form, Input, Modal, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
+import { App, Dropdown, Form, Input, InputNumber, Modal, Select, Space, Switch, Tooltip, type MenuProps, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { createCategory, deleteCategory, fetchCategories, updateCategory } from '@/api/content'
+import {
+  createBreakingNews,
+  deleteBreakingNews,
+  fetchAdminBreakingNews,
+  updateBreakingNews,
+} from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
 import { AppTable } from '@/components/common/AppTable'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import type { Category } from '@/types/content'
+import type { BreakingNewsItem, ContentLanguage } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { confirmDelete } from '@/utils/confirmDelete'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
-import { slugify } from '@/utils/slugify'
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
   return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
 }
 
-export function AdminCategoriesPage() {
+function resolveOpenUrl(link: string): string {
+  const trimmed = link.trim()
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/')) return `${window.location.origin}${trimmed}`
+  return trimmed
+}
+
+function LinkActions({ url }: { url: string }) {
+  const { message } = App.useApp()
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'copy',
+      icon: <i className="fa-regular fa-copy" aria-hidden />,
+      label: 'Copy',
+      onClick: async () => {
+        try {
+          await navigator.clipboard.writeText(url)
+          message.success('Link copied')
+        } catch {
+          message.error('Could not copy link')
+        }
+      },
+    },
+    {
+      key: 'open',
+      icon: <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden />,
+      label: 'Open',
+      onClick: () => {
+        window.open(resolveOpenUrl(url), '_blank', 'noopener,noreferrer')
+      },
+    },
+  ]
+
+  return (
+    <Dropdown menu={{ items }} trigger={['click']} placement="bottom">
+      <AppButton
+        type="text"
+        size="small"
+        aria-label="Link actions"
+        className="app-table__icon-btn text-primary"
+        icon={<i className="fa-solid fa-link" aria-hidden />}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </Dropdown>
+  )
+}
+
+export function AdminBreakingNewsPage() {
   const { t } = useLanguage()
   const { message, modal } = App.useApp()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [items, setItems] = useState<Category[]>([])
+  const [items, setItems] = useState<BreakingNewsItem[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [editing, setEditing] = useState<Category | null>(null)
+  const [editing, setEditing] = useState<BreakingNewsItem | null>(null)
   const [form] = Form.useForm()
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      setItems(await fetchCategories(search || undefined))
+      setItems(await fetchAdminBreakingNews({ search: search || undefined }))
     } catch {
-      message.error('Failed to load categories')
+      message.error('Failed to load breaking news')
     } finally {
       setLoading(false)
     }
@@ -48,17 +100,17 @@ export function AdminCategoriesPage() {
   const openCreateModal = useCallback(() => {
     setEditing(null)
     form.resetFields()
-    form.setFieldsValue({ is_active: true })
+    form.setFieldsValue({ is_active: true, language: 'en', sort_order: 0 })
     setOpen(true)
   }, [form])
 
   useEffect(() => {
     if (searchParams.get('create') !== '1') return
     openCreateModal()
-    navigate('/admin/categories', { replace: true })
+    navigate('/admin/breaking-news', { replace: true })
   }, [searchParams, openCreateModal, navigate])
 
-  const openEditModal = (row: Category) => {
+  const openEditModal = (row: BreakingNewsItem) => {
     setEditing(row)
     form.setFieldsValue(row)
     setOpen(true)
@@ -70,27 +122,21 @@ export function AdminCategoriesPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteCategory(id)
-      message.success('Category deleted successfully')
+      await deleteBreakingNews(id)
+      message.success('Breaking news deleted successfully')
       void load()
     } catch (err) {
       message.error(getApiErrorMessage(err, 'Delete failed'))
     }
   }
 
-  const askDelete = (row: Category) => {
+  const askDelete = (row: BreakingNewsItem) => {
     confirmDelete({
       modal,
-      title: 'Delete category?',
-      content: `Delete “${row.name}”? This cannot be undone.`,
+      title: 'Delete breaking news?',
+      content: `Delete “${row.title}”? This cannot be undone.`,
       onConfirm: () => handleDelete(row.id),
     })
-  }
-
-  const handleValuesChange = (changed: Record<string, unknown>, all: Record<string, unknown>) => {
-    if ('name' in changed && !editing) {
-      form.setFieldValue('slug', slugify(String(all.name || '')))
-    }
   }
 
   const handleFinishFailed = (info: FormValidationInfo) => {
@@ -98,19 +144,24 @@ export function AdminCategoriesPage() {
   }
 
   const handleFinish = async (values: {
-    name: string
-    slug: string
-    description?: string
+    title: string
+    language: ContentLanguage
+    link_url?: string
     is_active?: boolean
+    sort_order?: number
   }) => {
     setSaving(true)
     try {
+      const payload = {
+        ...values,
+        link_url: values.link_url?.trim() || null,
+      }
       if (editing) {
-        await updateCategory(editing.id, values)
-        message.success('Category updated successfully')
+        await updateBreakingNews(editing.id, payload)
+        message.success('Breaking news updated successfully')
       } else {
-        await createCategory(values)
-        message.success('Category created successfully')
+        await createBreakingNews(payload)
+        message.success('Breaking news created successfully')
       }
       setOpen(false)
       void load()
@@ -122,17 +173,34 @@ export function AdminCategoriesPage() {
     }
   }
 
-  const columns: TableColumnsType<Category> = useMemo(
+  const columns: TableColumnsType<BreakingNewsItem> = useMemo(
     () => [
       {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter: (a, b) => compareText(a.name, b.name),
+        title: 'Title',
+        dataIndex: 'title',
+        sorter: (a, b) => compareText(a.title, b.title),
       },
       {
-        title: 'Slug',
-        dataIndex: 'slug',
-        sorter: (a, b) => compareText(a.slug, b.slug),
+        title: 'Link',
+        dataIndex: 'link_url',
+        width: 90,
+        align: 'center',
+        sorter: (a, b) => Number(Boolean(b.link_url)) - Number(Boolean(a.link_url)),
+        render: (link: string | null) =>
+          link?.trim() ? <LinkActions url={link.trim()} /> : <span className="text-ink-muted">—</span>,
+      },
+      {
+        title: 'Language',
+        dataIndex: 'language',
+        width: 110,
+        sorter: (a, b) => compareText(a.language, b.language),
+        render: (lang: ContentLanguage) => (lang === 'te' ? 'తెలుగు' : 'English'),
+      },
+      {
+        title: 'Order',
+        dataIndex: 'sort_order',
+        width: 90,
+        sorter: (a, b) => a.sort_order - b.sort_order,
       },
       {
         title: 'Status',
@@ -177,29 +245,29 @@ export function AdminCategoriesPage() {
   return (
     <>
       <AppLoader fullscreen spinning={saving} tip="Saving…" />
-      <AppTable<Category>
-        title={t('admin.categories')}
+      <AppTable<BreakingNewsItem>
+        title={t('admin.breakingNews')}
         loading={loading}
         dataSource={items}
         columns={columns}
         onRefresh={() => void load()}
         searchValue={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search categories…"
+        searchPlaceholder="Search breaking news…"
         toolbar={
           <AppButton
             type="primary"
             icon={<i className="fa-solid fa-plus" aria-hidden />}
             onClick={openCreateModal}
           >
-            Add category
+            Add breaking news
           </AppButton>
         }
         pagination={{ pageSize: 10 }}
       />
 
       <Modal
-        title={editing ? 'Edit category' : 'Add category'}
+        title={editing ? 'Edit breaking news' : 'Add breaking news'}
         open={open}
         onCancel={closeModal}
         onOk={form.submit}
@@ -210,18 +278,25 @@ export function AdminCategoriesPage() {
           form={form}
           layout="vertical"
           disabled={saving}
-          onValuesChange={handleValuesChange}
           onFinishFailed={handleFinishFailed}
           onFinish={handleFinish}
         >
-          <Form.Item name="name" label="Name" rules={[{ required: true, min: 2 }]}>
-            <Input />
+          <Form.Item name="title" label="Title" rules={[{ required: true, min: 3, max: 300 }]}>
+            <Input.TextArea rows={2} maxLength={300} showCount />
           </Form.Item>
-          <Form.Item name="slug" label="Slug" rules={[{ required: true, min: 2 }]}>
-            <Input />
+          <Form.Item name="language" label="Language" rules={[{ required: true }]}>
+            <Select
+              options={[
+                { value: 'en', label: 'English' },
+                { value: 'te', label: 'తెలుగు' },
+              ]}
+            />
           </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} />
+          <Form.Item name="link_url" label="Link URL (optional)">
+            <Input placeholder="https://… or /news/slug" />
+          </Form.Item>
+          <Form.Item name="sort_order" label="Sort order">
+            <InputNumber className="w-full" min={0} precision={0} />
           </Form.Item>
           <Form.Item name="is_active" label="Active" valuePropName="checked">
             <Switch />

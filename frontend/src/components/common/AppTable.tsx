@@ -1,5 +1,6 @@
-import { Input, Space, Table, type TableProps } from 'antd'
+import { Input, Space, Table, Tooltip, type TableProps } from 'antd'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { AppButton } from '@/components/common/AppButton'
 import { cn } from '@/utils/cn'
 import './AppTable.scss'
 
@@ -18,6 +19,8 @@ export type AppTableProps<T extends object> = Omit<TableProps<T>, 'title'> & {
   searchDebounceMs?: number
   /** Extra node next to search (chips, toggles, etc.) */
   searchExtra?: ReactNode
+  /** Bottom-left reload control */
+  onRefresh?: () => void
   className?: string
   cardClassName?: string
 }
@@ -35,9 +38,12 @@ export function AppTable<T extends object>({
   onSearchChange,
   searchDebounceMs = 400,
   searchExtra,
+  onRefresh,
   className,
   cardClassName,
   pagination,
+  scroll,
+  loading,
   ...tableProps
 }: AppTableProps<T>) {
   const showHeader = Boolean(title || toolbar)
@@ -46,6 +52,8 @@ export function AppTable<T extends object>({
 
   const [draftSearch, setDraftSearch] = useState(searchValue)
   const skipDebounceRef = useRef(true)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [scrollY, setScrollY] = useState(360)
 
   useEffect(() => {
     setDraftSearch(searchValue)
@@ -70,6 +78,37 @@ export function AppTable<T extends object>({
 
     return () => window.clearTimeout(timer)
   }, [draftSearch, onSearchChange, searchDebounceMs, searchValue])
+
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el) return
+
+    const update = () => {
+      const paginationEl = el.querySelector('.ant-table-pagination') as HTMLElement | null
+      const headerEl = el.querySelector('.ant-table-header') as HTMLElement | null
+      const theadEl = el.querySelector('.ant-table-thead') as HTMLElement | null
+      const paginationH = paginationEl?.offsetHeight ?? 64
+      const headerH = headerEl?.offsetHeight || theadEl?.offsetHeight || 48
+      const next = Math.max(180, el.clientHeight - paginationH - headerH - 8)
+      setScrollY((prev) => (prev === next ? prev : next))
+    }
+
+    update()
+    const frame = window.requestAnimationFrame(update)
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener('resize', update)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [showFilters, pagination, tableProps.dataSource])
+
+  const mergedScroll: TableProps<T>['scroll'] = {
+    x: scroll?.x ?? 'max-content',
+    y: scroll?.y ?? scrollY,
+  }
 
   return (
     <div className={cn('app-table', className)}>
@@ -101,21 +140,46 @@ export function AppTable<T extends object>({
           </div>
         ) : null}
 
-        <Table<T>
-          rowKey={tableProps.rowKey ?? 'id'}
-          size="middle"
-          {...tableProps}
-          className={cn('app-table__grid', tableProps.className)}
-          pagination={
-            pagination === false
-              ? false
-              : {
-                  showSizeChanger: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
-                  ...pagination,
-                }
-          }
-        />
+        <div
+          className={cn('app-table__body', onRefresh && 'app-table__body--with-refresh')}
+          ref={bodyRef}
+        >
+          {onRefresh ? (
+            <div className="app-table__refresh">
+              <Tooltip title="Refresh">
+                <AppButton
+                  type="text"
+                  aria-label="Refresh"
+                  className={cn(
+                    'app-table__icon-btn',
+                    'app-table__icon-btn--refresh',
+                    loading && 'is-spinning',
+                  )}
+                  icon={<i className="fa-solid fa-arrows-rotate" aria-hidden />}
+                  disabled={Boolean(loading)}
+                  onClick={onRefresh}
+                />
+              </Tooltip>
+            </div>
+          ) : null}
+          <Table<T>
+            rowKey={tableProps.rowKey ?? 'id'}
+            size="middle"
+            loading={loading}
+            {...tableProps}
+            rootClassName={cn('app-table__grid', tableProps.rootClassName)}
+            scroll={mergedScroll}
+            pagination={
+              pagination === false
+                ? false
+                : {
+                    showSizeChanger: true,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+                    ...pagination,
+                  }
+            }
+          />
+        </div>
       </div>
     </div>
   )

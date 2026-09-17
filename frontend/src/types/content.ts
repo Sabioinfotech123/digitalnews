@@ -122,3 +122,22 @@ export interface BlogPayload {
   seo_keywords?: string | null
   published_at?: string | null
 }
+
+export interface BreakingNewsItem {
+  id: string
+  title: string
+  language: ContentLanguage
+  link_url: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BreakingNewsPayload {
+  title: string
+  language: ContentLanguage
+  link_url?: string | null
+  is_active?: boolean
+  sort_order?: number
+}

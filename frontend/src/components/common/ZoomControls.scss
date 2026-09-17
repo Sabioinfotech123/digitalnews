@@ -1,0 +1,142 @@
+.zoom-fab {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 1100;
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    box-shadow:
+      0 4px 14px rgba(17, 17, 17, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      box-shadow 150ms ease;
+
+    i {
+      font-size: 0.9rem;
+    }
+
+    .zoom-fab__look-icon {
+      display: block;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: var(--color-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(215, 25, 32, 0.35);
+    }
+
+    &.is-open {
+      background: var(--color-primary);
+    }
+  }
+
+  &__panel {
+    min-width: 148px;
+    padding: 0.15rem 0.1rem;
+  }
+
+  &__label {
+    margin: 0 0 0.55rem;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+
+    i {
+      font-size: 0.7rem;
+    }
+
+    &:hover:not(:disabled) {
+      color: var(--color-primary);
+      border-color: rgba(215, 25, 32, 0.35);
+      background: #fff7f7;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  &__value {
+    min-width: 3.2rem;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111;
+  }
+
+  &__reset {
+    display: block;
+    width: 100%;
+    margin-top: 0.65rem;
+    padding: 0.35rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #f3f4f6;
+    color: #4b5563;
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 120ms ease,
+      color 120ms ease;
+
+    &:hover {
+      background: #eceef2;
+      color: var(--color-primary);
+    }
+  }
+}
+
+.zoom-fab__popover {
+  .ant-popover-inner {
+    border-radius: 12px;
+    padding: 0.75rem 0.85rem;
+    box-shadow:
+      0 8px 28px rgba(17, 17, 17, 0.14),
+      0 0 0 1px rgba(17, 17, 17, 0.04);
+  }
+}

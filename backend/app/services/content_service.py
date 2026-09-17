@@ -4,11 +4,20 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.content import Blog, ContentLanguage, ContentStatus, News, NewsType
-from app.repositories.content_repository import BlogRepository, CategoryRepository, NewsRepository, TagRepository
+from app.repositories.content_repository import (
+    BlogRepository,
+    BreakingNewsRepository,
+    CategoryRepository,
+    NewsRepository,
+    TagRepository,
+)
 from app.schemas.content import (
     BlogCreate,
     BlogResponse,
     BlogUpdate,
+    BreakingNewsCreate,
+    BreakingNewsResponse,
+    BreakingNewsUpdate,
     CategoryCreate,
     CategoryResponse,
     CategoryUpdate,
@@ -150,10 +159,13 @@ class NewsService:
             page_size=page_size,
         )
 
-    def get(self, news_id: str) -> NewsResponse:
+    def get(self, news_id: str, *, increment_view: bool = False) -> NewsResponse:
         item = self.repo.get(news_id)
         if not item:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        if increment_view:
+            self.repo.increment_view(news_id)
+            item = self.repo.get(news_id) or item
         return _news_response(item)
 
     def create(self, payload: NewsCreate, author_id: str) -> NewsResponse:
@@ -331,3 +343,38 @@ class BlogService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
         item.deleted_at = datetime.now(timezone.utc)
         self.repo.save(item)
+
+
+class BreakingNewsService:
+    def __init__(self, db: Session) -> None:
+        self.repo = BreakingNewsRepository(db)
+
+    def list(
+        self,
+        *,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        active_only: bool = False,
+    ) -> list[BreakingNewsResponse]:
+        return [
+            BreakingNewsResponse.model_validate(item)
+            for item in self.repo.list(search=search, language=language, active_only=active_only)
+        ]
+
+    def create(self, payload: BreakingNewsCreate) -> BreakingNewsResponse:
+        item = self.repo.create(**payload.model_dump())
+        return BreakingNewsResponse.model_validate(item)
+
+    def update(self, item_id: str, payload: BreakingNewsUpdate) -> BreakingNewsResponse:
+        item = self.repo.get(item_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Breaking news not found")
+        for key, value in payload.model_dump(exclude_unset=True).items():
+            setattr(item, key, value)
+        return BreakingNewsResponse.model_validate(self.repo.save(item))
+
+    def delete(self, item_id: str) -> None:
+        item = self.repo.get(item_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Breaking news not found")
+        self.repo.delete(item)

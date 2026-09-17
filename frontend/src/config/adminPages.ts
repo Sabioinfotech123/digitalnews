@@ -101,16 +101,27 @@ export function resolveAdminPageMeta(
 
   const createMatch = pathname.match(/^\/admin\/news\/create(?:\/(featured|latest|trending|more))?$/)
   if (createMatch) {
-    const type = (createMatch[1] as NewsType | undefined) ?? 'latest'
-    const meta = NEWS_TYPE_PAGE[type]
+    const type = createMatch[1] as NewsType | undefined
+    if (type) {
+      const meta = NEWS_TYPE_PAGE[type]
+      return {
+        documentTitle: brandTitle(`Create - ${meta.titleLabel}`),
+        breadcrumbs: [
+          { title: t('admin.news'), path: '/admin/news' },
+          { title: meta.crumb, path: meta.listPath },
+          { title: t('admin.createNews') },
+        ],
+        menuKey: meta.listPath,
+      }
+    }
     return {
-      documentTitle: brandTitle(`Create - ${meta.titleLabel}`),
+      documentTitle: brandTitle(`Create - News`),
       breadcrumbs: [
         { title: t('admin.news'), path: '/admin/news' },
-        { title: meta.crumb, path: meta.listPath },
+        { title: t('admin.allNews'), path: '/admin/news' },
         { title: t('admin.createNews') },
       ],
-      menuKey: meta.listPath,
+      menuKey: '/admin/news',
     }
   }
 
@@ -175,6 +186,12 @@ export function resolveAdminPageMeta(
       titleKey: 'admin.videos',
       crumbs: [{ title: t('admin.videos') }],
       menuKey: '/admin/videos',
+    },
+    {
+      prefix: '/admin/breaking-news',
+      titleKey: 'admin.breakingNews',
+      crumbs: [{ title: t('admin.breakingNews') }],
+      menuKey: '/admin/breaking-news',
     },
     {
       prefix: '/admin/categories',
