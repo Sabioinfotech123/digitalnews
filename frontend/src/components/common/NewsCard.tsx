@@ -10,6 +10,8 @@ interface NewsCardProps {
   compact?: boolean
   /** One-per-row layout — used on /news list view only */
   list?: boolean
+  /** Where detail page “Back” should return (e.g. `/news`) */
+  from?: string
   className?: string
 }
 
@@ -18,6 +20,7 @@ export function NewsCard({
   featured = false,
   compact = false,
   list = false,
+  from,
   className = '',
 }: NewsCardProps) {
   const { t } = useLanguage()
@@ -32,8 +35,11 @@ export function NewsCard({
         className,
       )}
     >
-      <Link to={`/news/${article.slug}`} className="news-card__link">
-        <div
+      <Link
+        to={`/news/${article.slug}`}
+        state={from ? { from } : undefined}
+        className="news-card__link"
+      >        <div
           className="news-card__media"
           style={{
             backgroundImage: article.imageUrl

@@ -39,6 +39,10 @@
     padding-left: 1rem;
   }
 
+  &:hover &__marquee {
+    animation-play-state: paused;
+  }
+
   &__item {
     font-family: var(--font-body);
     font-size: var(--font-size-sm);

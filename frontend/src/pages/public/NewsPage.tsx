@@ -116,7 +116,7 @@ export function NewsPage() {
             )}
           >
             {items.map((article) => (
-              <NewsCard key={article.id} article={article} list={view === 'list'} />
+              <NewsCard key={article.id} article={article} list={view === 'list'} from="/news" />
             ))}
           </div>
 
