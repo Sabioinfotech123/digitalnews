@@ -12,11 +12,11 @@ import { confirmAction } from '@/utils/confirmAction'
 import './Header.scss'
 
 const navItems = [
-  { to: '/', key: 'navigation.home' as const },
-  { to: '/videos', key: 'navigation.videos' as const },
-  { to: '/shorts', key: 'navigation.shorts' as const },
-  { to: '/news', key: 'navigation.news' as const },
-  { to: '/blogs', key: 'navigation.blogs' as const },
+  { to: '/', key: 'navigation.home' as const, icon: 'fa-house' },
+  { to: '/videos', key: 'navigation.videos' as const, icon: 'fa-film' },
+  { to: '/shorts', key: 'navigation.shorts' as const, icon: 'fa-play' },
+  { to: '/news', key: 'navigation.news' as const, icon: 'fa-newspaper' },
+  { to: '/blogs', key: 'navigation.blogs' as const, icon: 'fa-pen-nib' },
 ]
 
 export function Header() {
@@ -192,13 +192,18 @@ export function Header() {
       </div>
 
       <Drawer
-        title={BRAND.name}
+        title={
+          <Link to="/" className="site-header__drawer-brand" onClick={() => setOpen(false)}>
+            <img src={logoImg} alt={BRAND.name} className="site-header__drawer-logo" />
+          </Link>
+        }
         placement="right"
         open={open}
         onClose={() => setOpen(false)}
         className="site-header__drawer"
+        width={320}
       >
-        <nav className="site-header__mobile-nav flex flex-col gap-1">
+        <nav className="site-header__mobile-nav" aria-label="Mobile">
           <form
             className="site-header__mobile-search"
             onSubmit={(e) => {
@@ -208,47 +213,104 @@ export function Header() {
           >
             <Input
               allowClear
+              size="large"
               value={searchValue}
               placeholder={t('common.searchPlaceholder')}
               prefix={<i className="fa-solid fa-magnifying-glass" aria-hidden />}
               onChange={(e) => setSearchValue(e.target.value)}
             />
           </form>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className="site-header__mobile-link"
+
+          <div className="site-header__mobile-links">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn('site-header__mobile-link', isActive && 'site-header__mobile-link--active')
+                }
+                onClick={() => setOpen(false)}
+                end={item.to === '/'}
+              >
+                <i className={cn('fa-solid', item.icon)} aria-hidden />
+                <span>{t(item.key)}</span>
+              </NavLink>
+            ))}
+            <Link
+              to="/live"
+              className="site-header__mobile-live"
               onClick={() => setOpen(false)}
-              end={item.to === '/'}
             >
-              {t(item.key)}
-            </NavLink>
-          ))}
-          <Link to="/live" className="site-header__mobile-link" onClick={() => setOpen(false)}>
-            {t('videos.watchLive')}
-          </Link>
-          {isAuthenticated ? (
-            <>
-              {isAdmin ? (
-                <button type="button" className="site-header__mobile-link" onClick={openDashboard}>
-                  {t('admin.dashboard')}
-                </button>
-              ) : null}
-              <button type="button" className="site-header__mobile-link" onClick={handleLogout}>
-                {t('auth.logout')}
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="site-header__mobile-link" onClick={() => setOpen(false)}>
-                {t('navigation.login')}
-              </Link>
-              <Link to="/register" className="site-header__mobile-link" onClick={() => setOpen(false)}>
-                {t('navigation.register')}
-              </Link>
-            </>
-          )}
+              <span className="site-header__mobile-live-icon" aria-hidden>
+                <i className="fa-solid fa-tower-broadcast" />
+              </span>
+              <span className="site-header__mobile-live-copy">
+                <span className="site-header__mobile-live-title">{t('videos.watchLive')}</span>
+                <span className="site-header__mobile-live-sub">On air now</span>
+              </span>
+              <span className="site-header__mobile-live-badge">LIVE</span>
+            </Link>
+          </div>
+
+          <div className="site-header__mobile-actions">
+            <AppButton
+              type="default"
+              block
+              className="site-header__mobile-lang"
+              onClick={toggleLanguage}
+              icon={<i className="fa-solid fa-globe" aria-hidden />}
+            >
+              {uiLanguage === 'en' ? 'తెలుగు' : 'English'}
+            </AppButton>
+
+            {isAuthenticated ? (
+              <>
+                {isAdmin ? (
+                  <AppButton
+                    type="primary"
+                    block
+                    icon={<i className="fa-solid fa-gauge-high" aria-hidden />}
+                    onClick={openDashboard}
+                  >
+                    {t('admin.dashboard')}
+                  </AppButton>
+                ) : null}
+                <AppButton
+                  danger
+                  block
+                  icon={<i className="fa-solid fa-right-from-bracket" aria-hidden />}
+                  onClick={handleLogout}
+                >
+                  {t('auth.logout')}
+                </AppButton>
+              </>
+            ) : (
+              <>
+                <AppButton
+                  type="primary"
+                  block
+                  icon={<i className="fa-solid fa-right-to-bracket" aria-hidden />}
+                  onClick={() => {
+                    setOpen(false)
+                    navigate('/login')
+                  }}
+                >
+                  {t('navigation.login')}
+                </AppButton>
+                <AppButton
+                  type="default"
+                  block
+                  icon={<i className="fa-solid fa-user-plus" aria-hidden />}
+                  onClick={() => {
+                    setOpen(false)
+                    navigate('/register')
+                  }}
+                >
+                  {t('navigation.register')}
+                </AppButton>
+              </>
+            )}
+          </div>
         </nav>
       </Drawer>
     </header>

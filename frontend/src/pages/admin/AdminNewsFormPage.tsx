@@ -235,8 +235,12 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
 
           <Col xs={24} lg={8}>
             <div className="news-form-page__side">
-              <Form.Item name="image_url" label="News image">
-                <MediaUploader kind="image" folder="news" label="" />
+              <Form.Item
+                name="image_url"
+                label="News image"
+                rules={[{ required: true, message: 'News image is required' }]}
+              >
+                <MediaUploader kind="image" folder="news" label="" required />
               </Form.Item>
 
               <Form.Item name="news_type" label="News type" rules={[{ required: true }]}>

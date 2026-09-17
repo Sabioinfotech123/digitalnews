@@ -32,4 +32,13 @@ export const admin = {
   noActivity: 'No recent activity yet. Content modules arrive in later phases.',
   logout: 'Logout',
   backToSite: 'View website',
+  quickAdd: 'Add',
+  addCategory: 'Category',
+  addTag: 'Tag',
+  addFeaturedNews: 'Featured news',
+  addLatestNews: 'Latest news',
+  addTrendingNews: 'Trending news',
+  addMoreNews: 'More news',
+  addBlog: 'Blog',
+  addUser: 'User',
 } as const

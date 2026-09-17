@@ -32,4 +32,13 @@ export const admin = {
   noActivity: 'ఇంకా యాక్టివిటీ లేదు. కంటెంట్ మాడ్యూల్స్ తర్వాతి దశల్లో వస్తాయి.',
   logout: 'లాగౌట్',
   backToSite: 'వెబ్‌సైట్ చూడండి',
+  quickAdd: 'జోడించు',
+  addCategory: 'కేటగిరీ',
+  addTag: 'ట్యాగ్',
+  addFeaturedNews: 'ఫీచర్డ్ వార్త',
+  addLatestNews: 'తాజా వార్త',
+  addTrendingNews: 'ట్రెండింగ్ వార్త',
+  addMoreNews: 'మరిన్ని వార్తలు',
+  addBlog: 'బ్లాగ్',
+  addUser: 'వినియోగదారు',
 } as const

@@ -1,5 +1,6 @@
 import { App, Form, Input, Modal, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { createTag, deleteTag, fetchTags, updateTag } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
@@ -18,6 +19,8 @@ function compareText(a: string | null | undefined, b: string | null | undefined)
 export function AdminTagsPage() {
   const { t } = useLanguage()
   const { message, modal } = App.useApp()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [items, setItems] = useState<TagItem[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -41,11 +44,17 @@ export function AdminTagsPage() {
     void load()
   }, [load])
 
-  const openCreateModal = () => {
+  const openCreateModal = useCallback(() => {
     setEditing(null)
     form.resetFields()
     setOpen(true)
-  }
+  }, [form])
+
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    openCreateModal()
+    navigate('/admin/tags', { replace: true })
+  }, [searchParams, openCreateModal, navigate])
 
   const openEditModal = (row: TagItem) => {
     setEditing(row)
