@@ -224,6 +224,7 @@ Remove old item
 |--------------|---------------|
 | Publish Featured news | Home → Featured section |
 | Publish Latest / Trending / More | Matching home sections |
+| **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
 | Open article on site | Increases **Views** in admin table |
 
@@ -231,6 +232,7 @@ Public URLs (local):
 
 ```text
 http://localhost:5173/          Home
+http://localhost:5173/news      All news (list)
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search

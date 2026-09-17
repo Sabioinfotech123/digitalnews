@@ -27,6 +27,56 @@
   border-color: var(--color-primary-hover) !important;
 }
 
+/* Flat segmented control (news list view toggle) */
+.view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--color-canvas, #f7f7f7);
+}
+
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: none;
+  outline: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    color: var(--color-text, #111);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(215, 25, 32, 0.35);
+    outline-offset: 1px;
+  }
+
+  &--active {
+    background: var(--color-primary);
+    color: #fff;
+
+    &:hover {
+      color: #fff;
+      background: var(--color-primary-hover, #b5141a);
+    }
+  }
+}
+
 /* Tighter label → control spacing (vertical forms) */
 .ant-form-vertical {
   .ant-form-item-label {

@@ -8,10 +8,18 @@ interface NewsCardProps {
   article: PublicNewsCardModel
   featured?: boolean
   compact?: boolean
+  /** One-per-row layout — used on /news list view only */
+  list?: boolean
   className?: string
 }
 
-export function NewsCard({ article, featured = false, compact = false, className = '' }: NewsCardProps) {
+export function NewsCard({
+  article,
+  featured = false,
+  compact = false,
+  list = false,
+  className = '',
+}: NewsCardProps) {
   const { t } = useLanguage()
 
   return (
@@ -20,6 +28,7 @@ export function NewsCard({ article, featured = false, compact = false, className
         'news-card',
         featured && 'news-card--featured',
         compact && 'news-card--compact',
+        list && 'news-card--list',
         className,
       )}
     >
