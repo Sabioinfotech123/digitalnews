@@ -12,15 +12,27 @@ function itemHref(linkUrl: string | null): string | null {
 
 function TickerText({ item }: { item: BreakingNewsItem }) {
   const href = itemHref(item.link_url)
-  if (!href) return <>{item.title}</>
+  if (!href) return <span className="breaking-ticker__text">{item.title}</span>
+
+  const label = (
+    <>
+      {item.title}
+      <i className="fa-solid fa-arrow-up-right-from-square breaking-ticker__link-icon" aria-hidden />
+    </>
+  )
+
   if (href.startsWith('http://') || href.startsWith('https://')) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        {item.title}
+      <a className="breaking-ticker__link" href={href} target="_blank" rel="noopener noreferrer">
+        {label}
       </a>
     )
   }
-  return <Link to={href}>{item.title}</Link>
+  return (
+    <Link className="breaking-ticker__link" to={href}>
+      {label}
+    </Link>
+  )
 }
 
 export function BreakingNewsTicker() {

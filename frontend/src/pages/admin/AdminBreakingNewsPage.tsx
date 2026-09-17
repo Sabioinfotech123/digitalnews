@@ -1,4 +1,4 @@
-import { App, Form, Input, InputNumber, Modal, Select, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
+import { App, Dropdown, Form, Input, InputNumber, Modal, Select, Space, Switch, Tooltip, type MenuProps, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -19,6 +19,54 @@ import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formF
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
   return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
+}
+
+function resolveOpenUrl(link: string): string {
+  const trimmed = link.trim()
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/')) return `${window.location.origin}${trimmed}`
+  return trimmed
+}
+
+function LinkActions({ url }: { url: string }) {
+  const { message } = App.useApp()
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'copy',
+      icon: <i className="fa-regular fa-copy" aria-hidden />,
+      label: 'Copy',
+      onClick: async () => {
+        try {
+          await navigator.clipboard.writeText(url)
+          message.success('Link copied')
+        } catch {
+          message.error('Could not copy link')
+        }
+      },
+    },
+    {
+      key: 'open',
+      icon: <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden />,
+      label: 'Open',
+      onClick: () => {
+        window.open(resolveOpenUrl(url), '_blank', 'noopener,noreferrer')
+      },
+    },
+  ]
+
+  return (
+    <Dropdown menu={{ items }} trigger={['click']} placement="bottom">
+      <AppButton
+        type="text"
+        size="small"
+        aria-label="Link actions"
+        className="app-table__icon-btn text-primary"
+        icon={<i className="fa-solid fa-link" aria-hidden />}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </Dropdown>
+  )
 }
 
 export function AdminBreakingNewsPage() {
@@ -131,6 +179,15 @@ export function AdminBreakingNewsPage() {
         title: 'Title',
         dataIndex: 'title',
         sorter: (a, b) => compareText(a.title, b.title),
+      },
+      {
+        title: 'Link',
+        dataIndex: 'link_url',
+        width: 90,
+        align: 'center',
+        sorter: (a, b) => Number(Boolean(b.link_url)) - Number(Boolean(a.link_url)),
+        render: (link: string | null) =>
+          link?.trim() ? <LinkActions url={link.trim()} /> : <span className="text-ink-muted">—</span>,
       },
       {
         title: 'Language',

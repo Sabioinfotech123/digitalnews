@@ -98,6 +98,10 @@ Controls the red **BREAKING NEWS** bar under the public header.
 
 > Tip: This is **not** the same as the “Breaking” switch on a news article. That badge is for the article card/detail; this page feeds the header ticker.
 
+**How to see if a link was added**
+- Admin list → **Link** column shows a 🔗 icon. Click it → **Copy** or **Open**. Empty = no link.
+- Public ticker → linked headlines are **underlined** and show a small external-link icon.
+
 ---
 
 ## Step 3 — News workflow
