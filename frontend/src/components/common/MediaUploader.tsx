@@ -58,14 +58,28 @@ export function MediaUploader({
         <div className="media-uploader__preview">
           <img src={value} alt="" />
           <div className="media-uploader__actions">
-            <AppButton
-              size="small"
-              danger
-              onClick={() => onChange?.(null)}
-              disabled={uploading}
-            >
-              Remove
-            </AppButton>
+            {required ? (
+              <Upload
+                accept={accept}
+                multiple={false}
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+                disabled={uploading}
+              >
+                <AppButton size="small" disabled={uploading}>
+                  Change
+                </AppButton>
+              </Upload>
+            ) : (
+              <AppButton
+                size="small"
+                danger
+                onClick={() => onChange?.(null)}
+                disabled={uploading}
+              >
+                Remove
+              </AppButton>
+            )}
           </div>
         </div>
       ) : (

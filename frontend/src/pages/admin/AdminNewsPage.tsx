@@ -82,7 +82,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     void load()
   }, [load])
 
-  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create/latest'
+  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create'
   const title = newsType ? TYPE_LABELS[newsType] : t('admin.news')
 
   const handleSearchChange = (value: string) => {
@@ -161,7 +161,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         render: (value: string) => <StatusBadge status={value} />,
       },
       {
-        title: 'Language',
+        title: 'Lun',
         dataIndex: 'language',
         width: 110,
         sorter: (a, b) => compareText(a.language, b.language),
@@ -191,6 +191,15 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
             {row.is_breaking ? <StatusBadge status="breaking" /> : null}
           </Space>
         ),
+      },
+      {
+        title: 'Views',
+        dataIndex: 'view_count',
+        key: 'view_count',
+        width: 90,
+        align: 'right',
+        sorter: (a, b) => a.view_count - b.view_count,
+        render: (value: number) => value.toLocaleString('en-IN'),
       },
       {
         title: 'Updated',
@@ -242,6 +251,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
       dataSource={items}
       columns={columns}
       rowKey="id"
+      onRefresh={() => void load()}
       searchValue={search}
       searchPlaceholder="Search title or slug…"
       onSearchChange={handleSearchChange}

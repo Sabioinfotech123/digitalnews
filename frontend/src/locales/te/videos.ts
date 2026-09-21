@@ -1,6 +1,6 @@
 export const videos = {
   liveTv: 'లైవ్ టీవీ',
-  watchLive: 'లైవ్ చూడండి',
+  watchLive: 'లైవ్ టీవీ',
   liveNow: 'ఇప్పుడు లైవ్',
   latestVideos: 'తాజా వీడియోలు',
   videosOfTheDay: 'ఈరోజు వీడియోలు',

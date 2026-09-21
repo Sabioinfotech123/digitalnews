@@ -76,3 +76,68 @@ export interface NewsPayload {
   seo_keywords?: string | null
   published_at?: string | null
 }
+
+export interface BlogItem {
+  id: string
+  title: string
+  slug: string
+  language: ContentLanguage
+  short_description: string | null
+  content: string
+  category_id: string | null
+  category_name: string | null
+  author_id: string | null
+  author_name: string | null
+  status: ContentStatus
+  image_url: string | null
+  seo_title: string | null
+  seo_description: string | null
+  seo_keywords: string | null
+  published_at: string | null
+  view_count: number
+  created_at: string
+  updated_at: string
+  tags: TagItem[]
+}
+
+export interface PaginatedBlogs {
+  items: BlogItem[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface BlogPayload {
+  title: string
+  slug: string
+  language: ContentLanguage
+  short_description?: string | null
+  content?: string
+  category_id?: string | null
+  tag_ids?: string[]
+  status?: ContentStatus
+  image_url?: string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  seo_keywords?: string | null
+  published_at?: string | null
+}
+
+export interface BreakingNewsItem {
+  id: string
+  title: string
+  language: ContentLanguage
+  link_url: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BreakingNewsPayload {
+  title: string
+  language: ContentLanguage
+  link_url?: string | null
+  is_active?: boolean
+  sort_order?: number
+}

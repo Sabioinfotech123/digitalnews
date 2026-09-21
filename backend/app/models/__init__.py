@@ -1,4 +1,7 @@
 from app.models.content import (
+    Blog,
+    BlogTag,
+    BreakingNews,
     Category,
     ContentLanguage,
     ContentStatus,
@@ -15,6 +18,9 @@ __all__ = [
     "Tag",
     "News",
     "NewsTag",
+    "Blog",
+    "BlogTag",
+    "BreakingNews",
     "ContentLanguage",
     "ContentStatus",
 ]

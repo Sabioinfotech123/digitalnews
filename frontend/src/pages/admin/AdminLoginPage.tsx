@@ -79,7 +79,7 @@ export function AdminLoginPage() {
             label={t('auth.email')}
             name="email"
             rules={[{ required: true }]}
-            initialValue="admin@example.com"
+            initialValue="hr@sabioinfotech.com"
           >
             <Input size="large" prefix={<i className="fa-solid fa-envelope text-ink-muted" aria-hidden />} />
           </Form.Item>
@@ -87,7 +87,7 @@ export function AdminLoginPage() {
             label={t('auth.password')}
             name="password"
             rules={[{ required: true, min: 8 }]}
-            initialValue="Admin@12345"
+            initialValue="Sabio@123"
           >
             <Input.Password size="large" prefix={<i className="fa-solid fa-lock text-ink-muted" aria-hidden />} />
           </Form.Item>

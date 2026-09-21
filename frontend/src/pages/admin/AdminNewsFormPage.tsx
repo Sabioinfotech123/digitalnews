@@ -43,7 +43,9 @@ interface AdminNewsFormPageProps {
 
 export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNewsFormPageProps) {
   const { id, newsType: routeType } = useParams()
-  const lockedType = isNewsType(routeType) ? routeType : defaultNewsType
+  const typeFromRoute = isNewsType(routeType) ? routeType : undefined
+  const lockedType = typeFromRoute ?? defaultNewsType
+  const typeLocked = Boolean(typeFromRoute)
   const navigate = useNavigate()
   const { message } = App.useApp()
   const [form] = Form.useForm<NewsPayload>()
@@ -56,11 +58,15 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
   const listPath =
     mode === 'edit' && news?.news_type
       ? `/admin/news/${news.news_type}`
-      : `/admin/news/${lockedType}`
+      : typeFromRoute
+        ? `/admin/news/${typeFromRoute}`
+        : '/admin/news'
 
   useDocumentTitle(
     mode === 'create'
-      ? `Create ${TYPE_TITLES[lockedType]} | ${BRAND.name} CMS`
+      ? typeFromRoute
+        ? `Create ${TYPE_TITLES[typeFromRoute]} | ${BRAND.name} CMS`
+        : `Create News | ${BRAND.name} CMS`
       : news?.title
         ? `Edit: ${news.title} | ${BRAND.name} CMS`
         : `Edit News | ${BRAND.name} CMS`,
@@ -176,7 +182,9 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
 
   const pageTitle =
     mode === 'create'
-      ? `Create ${TYPE_TITLES[lockedType].toLowerCase()}`
+      ? typeFromRoute
+        ? `Create ${TYPE_TITLES[typeFromRoute].toLowerCase()}`
+        : 'Create news'
       : `Edit ${news ? TYPE_TITLES[news.news_type].toLowerCase() : 'news'}`
 
   return (
@@ -238,13 +246,13 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               <Form.Item
                 name="image_url"
                 label="News image"
-                rules={[{ required: true, message: 'Upload a news image' }]}
+                rules={[{ required: true, message: 'News image is required' }]}
               >
                 <MediaUploader kind="image" folder="news" label="" required />
               </Form.Item>
 
               <Form.Item name="news_type" label="News type" rules={[{ required: true }]}>
-                <Select options={NEWS_TYPES} disabled={mode === 'create' && Boolean(routeType)} />
+                <Select options={NEWS_TYPES} disabled={mode === 'create' && typeLocked} />
               </Form.Item>
 
               <Form.Item name="language" label="Content language" rules={[{ required: true }]}>
@@ -270,6 +278,8 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               <Form.Item name="category_id" label="Category">
                 <Select
                   allowClear
+                  showSearch
+                  optionFilterProp="label"
                   options={categories.map((c) => ({ value: c.id, label: c.name }))}
                   placeholder="Select category"
                 />
@@ -279,6 +289,8 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
                 <Select
                   mode="multiple"
                   allowClear
+                  showSearch
+                  optionFilterProp="label"
                   options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
                   placeholder="Select tags"
                 />
