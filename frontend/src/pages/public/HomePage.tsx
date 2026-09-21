@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchPublicNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { FeaturedNewsSection } from '@/components/news/FeaturedNewsSection'
+import { HomeNewsSkeleton } from '@/components/news/HomeNewsSkeleton'
 import { LatestNewsSection } from '@/components/news/LatestNewsSection'
 import { MoreNewsSection } from '@/components/news/MoreNewsSection'
 import { TrendingNewsSection } from '@/components/news/TrendingNewsSection'
@@ -78,15 +79,19 @@ export function HomePage() {
   return (
     <main className="home">
       <div className="home__container">
-        {loading ? <p className="home__loading">{t('news.latestNews')}…</p> : null}
+        {loading ? (
+          <HomeNewsSkeleton />
+        ) : (
+          <>
+            <FeaturedNewsSection articles={featured} />
+            <LatestNewsSection articles={latest} />
 
-        <FeaturedNewsSection articles={featured} />
-        <LatestNewsSection articles={latest} />
-
-        <div className="home__split">
-          <TrendingNewsSection articles={trending} />
-          <MoreNewsSection articles={more} />
-        </div>
+            <div className="home__split">
+              <TrendingNewsSection articles={trending} />
+              <MoreNewsSection articles={more} />
+            </div>
+          </>
+        )}
 
         <section className="home__section">
           <SectionHeader
