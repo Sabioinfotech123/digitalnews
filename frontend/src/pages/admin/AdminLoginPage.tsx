@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
-import logoImg from '@/assets/logo/logo.png'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import './AdminLoginPage.scss'
@@ -18,6 +18,7 @@ export function AdminLoginPage() {
   const { t } = useLanguage()
   const { message } = App.useApp()
   const { login, isAdmin, loading } = useAuth()
+  const { logoUrl } = useSiteSettings()
   const navigate = useNavigate()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
@@ -59,7 +60,7 @@ export function AdminLoginPage() {
       <AppLoader fullscreen spinning={submitting} tip={t('auth.signingIn')} />
       <div className="admin-login__card">
         <div className="admin-login__brand">
-          <img src={logoImg} alt="AK News" className="admin-login__logo" />
+          <img src={logoUrl} alt="AK News" className="admin-login__logo" />
         </div>
         <Title level={3} className="admin-login__title">
           {t('admin.loginTitle')}

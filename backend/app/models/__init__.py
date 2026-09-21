@@ -9,6 +9,7 @@ from app.models.content import (
     NewsTag,
     Tag,
 )
+from app.models.settings import SiteSettings
 from app.models.user import User, UserRole
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "Blog",
     "BlogTag",
     "BreakingNews",
+    "SiteSettings",
     "ContentLanguage",
     "ContentStatus",
 ]

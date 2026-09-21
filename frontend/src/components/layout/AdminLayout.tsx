@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
-import logoImg from '@/assets/logo/logo.png'
 import { resolveAdminPageMeta } from '@/config/adminPages'
 import { cn } from '@/utils/cn'
 import { confirmAction } from '@/utils/confirmAction'
@@ -15,6 +15,7 @@ const { Header, Sider, Content } = Layout
 export function AdminLayout() {
   const { t } = useLanguage()
   const { logout } = useAuth()
+  const { logoUrl } = useSiteSettings()
   const { modal } = App.useApp()
   const location = useLocation()
   const navigate = useNavigate()
@@ -230,7 +231,7 @@ export function AdminLayout() {
       >
         <div className="admin-layout__brand">
           {!collapsed ? (
-            <img src={logoImg} alt="AK News" className="admin-layout__brand-name" />
+            <img src={logoUrl} alt="AK News" className="admin-layout__brand-name" />
           ) : null}
           <button
             type="button"

@@ -44,6 +44,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **News → Featured / Latest / Trending / More** | Manage that homepage section only |
 | **Blogs** | Blog list + create/edit |
 | **Users** | Admin user accounts |
+| **Settings** | Website logo + primary color |
 | Header **Add** button | Quick shortcuts to create things |
 
 ---
@@ -101,6 +102,17 @@ Controls the red **BREAKING NEWS** bar under the public header.
 **How to see if a link was added**
 - Admin list → **Link** column shows a 🔗 icon. Click it → **Copy** or **Open**. Empty = no link.
 - Public ticker → linked headlines are **underlined** and show a small external-link icon.
+
+---
+
+## Step 2.6 — Website settings (logo + color)
+
+1. Sidebar → **Settings**
+2. **Website logo** — upload (or remove to use the default logo)
+3. **Primary color** — pick a color (buttons, active nav, breaking ticker, accents)
+4. Check the preview → **Save settings**
+
+Public site and admin UI update after save (refresh if needed).
 
 ---
 
@@ -226,6 +238,7 @@ Remove old item
 | Publish Latest / Trending / More | Matching home sections |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
+| **Settings → logo / primary color** | Header/footer logo + site accent color |
 | Open article on site | Increases **Views** in admin table |
 
 Public URLs (local):

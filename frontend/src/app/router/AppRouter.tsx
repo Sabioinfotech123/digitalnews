@@ -19,6 +19,7 @@ import {
   AdminTrendingNewsPage,
 } from '@/pages/admin/AdminNewsPage'
 import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
+import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
@@ -49,7 +50,7 @@ function Placeholder({ title }: { title: string }) {
 function AdminModule({
   titleKey,
 }: {
-  titleKey: 'admin.videos' | 'admin.media' | 'admin.settings' | 'admin.profile'
+  titleKey: 'admin.videos' | 'admin.media' | 'admin.profile'
 }) {
   const { t } = useLanguage()
   return <AdminSectionPage title={t(titleKey)} />
@@ -94,7 +95,7 @@ export function AppRouter() {
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />
           <Route path="users" element={<AdminUsersPage />} />
-          <Route path="settings" element={<AdminModule titleKey="admin.settings" />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="profile" element={<AdminModule titleKey="admin.profile" />} />
         </Route>
       </Route>

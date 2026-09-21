@@ -28,6 +28,10 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 ┌────────────────┐
 │ breaking_news  │  (standalone ticker headlines)
 └────────────────┘
+
+┌────────────────┐
+│ site_settings  │  (logo + primary color — one row)
+└────────────────┘
 ```
 
 **In plain words:**
@@ -36,6 +40,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Tags** can be attached to many news/blogs.
 - **News** and **Blogs** are the main articles.
 - **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
+- **Site settings** stores the website logo and primary color.
 
 ---
 
@@ -174,6 +179,21 @@ Standalone ticker items (not full articles). Managed in Admin → **Breaking new
 **Note:** `news.is_breaking` is a badge on an article. The header bar uses this table.
 
 Migration: `0003_breaking_news.py`
+
+---
+
+### 9) `site_settings` — logo + primary color
+
+One row for the whole site (Admin → **Settings**).
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Fixed singleton UUID |
+| `logo_url` | Uploaded logo URL (optional — default app logo if empty) |
+| `primary_color` | Hex color like `#D71920` |
+| `created_at` / `updated_at` | Timestamps |
+
+Migration: `0004_site_settings.py`
 
 ---
 

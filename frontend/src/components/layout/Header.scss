@@ -56,11 +56,11 @@
 
     &:hover {
       color: var(--color-white);
-      background: rgba(215, 25, 32, 0.25);
+      background: rgba(var(--color-primary-rgb), 0.25);
     }
 
     &--active {
-      color: var(--color-white);
+      color: var(--color-on-primary);
       background: var(--color-primary);
     }
   }
@@ -121,7 +121,7 @@
       &:focus,
       &.ant-input-affix-wrapper-focused {
         border-color: var(--color-primary) !important;
-        background: rgba(215, 25, 32, 0.2) !important;
+        background: rgba(var(--color-primary-rgb), 0.2) !important;
       }
     }
   }
@@ -138,7 +138,7 @@
     &:hover {
       border-color: var(--color-primary) !important;
       color: var(--color-white) !important;
-      background: rgba(215, 25, 32, 0.35) !important;
+      background: rgba(var(--color-primary-rgb), 0.35) !important;
     }
   }
 
@@ -167,7 +167,7 @@
 
     &:hover {
       border-color: var(--color-primary);
-      background: rgba(215, 25, 32, 0.35);
+      background: rgba(var(--color-primary-rgb), 0.35);
       color: var(--color-white);
     }
 
@@ -274,19 +274,19 @@
 
     &--active {
       background: var(--color-primary);
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(215, 25, 32, 0.28);
+      color: var(--color-on-primary);
+      box-shadow: 0 8px 18px rgba(var(--color-primary-rgb), 0.28);
 
       i {
-        color: #fff;
+        color: var(--color-on-primary);
       }
 
       &:hover {
         background: var(--color-primary-hover, #b5141a);
-        color: #fff;
+        color: var(--color-on-primary);
 
         i {
-          color: #fff;
+          color: var(--color-on-primary);
         }
       }
     }
@@ -300,17 +300,21 @@
     padding: 0.85rem 0.95rem;
     border-radius: 14px;
     text-decoration: none;
-    color: #fff;
-    background: linear-gradient(135deg, #d71920 0%, #9f1016 100%);
-    box-shadow: 0 10px 22px rgba(215, 25, 32, 0.32);
+    color: var(--color-on-primary);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-primary-hover) 100%
+    );
+    box-shadow: 0 10px 22px rgba(var(--color-primary-rgb), 0.32);
     transition:
       transform 150ms ease,
       box-shadow 150ms ease;
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 12px 26px rgba(215, 25, 32, 0.4);
-      color: #fff;
+      box-shadow: 0 12px 26px rgba(var(--color-primary-rgb), 0.4);
+      color: var(--color-on-primary);
     }
   }
 

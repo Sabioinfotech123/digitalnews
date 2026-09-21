@@ -260,6 +260,31 @@ Response includes `url` — use that as `image_url` when creating news.
 
 ---
 
+## 11) Site settings (logo + primary color)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/site-settings` | Anyone | Public branding (logo URL + primary color) |
+| GET | `/admin/site-settings` | Admin | Same data for CMS form |
+| PATCH | `/admin/site-settings` | Admin | Update logo and/or color |
+
+### Update fields
+
+| Field | Required? | Notes |
+|-------|-----------|-------|
+| `logo_url` | Optional | From `/admin/media/upload` with `folder=brand` (or `null` to clear) |
+| `primary_color` | Optional | Hex like `#D71920` |
+
+Example:
+
+```text
+GET /api/v1/site-settings
+PATCH /api/v1/admin/site-settings
+{ "logo_url": "https://…", "primary_color": "#D71920" }
+```
+
+---
+
 ## Common workflows
 
 ### A) Publish a news article
@@ -288,6 +313,13 @@ Admin list shows that number in the Views column.
 1. Login as admin  
 2. `POST /admin/breaking-news` with `title`, `language`, `is_active: true`  
 3. Public site calls `GET /breaking-news?language=en` (or `te`) and shows the ticker
+
+### E) Change logo / primary color
+
+1. Login as admin  
+2. Upload logo → `/admin/media/upload` (`folder=brand`) → copy `url`  
+3. `PATCH /admin/site-settings` with `logo_url` + `primary_color`  
+4. Public site loads `GET /site-settings` and applies branding
 
 ---
 
