@@ -76,6 +76,7 @@ export function AdminSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null)
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR)
   const [hexDraft, setHexDraft] = useState(DEFAULT_PRIMARY_COLOR)
   const [customColors, setCustomColors] = useState<string[]>(() => readCustomColors())
@@ -88,6 +89,7 @@ export function AdminSettingsPage() {
         if (!active) return
         const color = (data.primary_color || DEFAULT_PRIMARY_COLOR).toUpperCase()
         setLogoUrl(data.logo_url)
+        setFaviconUrl(data.favicon_url)
         setPrimaryColor(color)
         setHexDraft(color)
         if (!PRESET_SET.has(color)) {
@@ -153,11 +155,13 @@ export function AdminSettingsPage() {
     try {
       const updated = await updateSiteSettings({
         logo_url: logoUrl,
+        favicon_url: faviconUrl,
         primary_color: primaryColor,
       })
       applySettings(updated)
       const color = (updated.primary_color || DEFAULT_PRIMARY_COLOR).toUpperCase()
       setLogoUrl(updated.logo_url)
+      setFaviconUrl(updated.favicon_url)
       setPrimaryColor(color)
       setHexDraft(color)
       if (!PRESET_SET.has(color)) {
@@ -215,6 +219,25 @@ export function AdminSettingsPage() {
               label=""
               value={logoUrl}
               onChange={setLogoUrl}
+            />
+          </div>
+        </section>
+
+        <section className="admin-settings__panel">
+          <div className="admin-settings__panel-head">
+            <h2 className="admin-settings__panel-title">Favicon</h2>
+            <p className="admin-settings__panel-desc">
+              Small icon in the browser tab. Square PNG or ICO (32×32 or 16×16) works best.
+            </p>
+          </div>
+          <div className="admin-settings__favicon-upload">
+            <MediaUploader
+              kind="image"
+              folder="brand"
+              label=""
+              accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/webp,image/gif"
+              value={faviconUrl}
+              onChange={setFaviconUrl}
             />
           </div>
         </section>

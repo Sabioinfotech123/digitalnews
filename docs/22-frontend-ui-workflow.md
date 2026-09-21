@@ -44,7 +44,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **News → Featured / Latest / Trending / More** | Manage that homepage section only |
 | **Blogs** | Blog list + create/edit |
 | **Users** | Admin user accounts |
-| **Settings** | Website logo + primary color |
+| **Settings** | Website logo, favicon + primary color |
 | Header **Add** button | Quick shortcuts to create things |
 
 ---
@@ -105,14 +105,15 @@ Controls the red **BREAKING NEWS** bar under the public header.
 
 ---
 
-## Step 2.6 — Website settings (logo + color)
+## Step 2.6 — Website settings (logo, favicon + color)
 
 1. Sidebar → **Settings**
 2. **Website logo** — upload (or remove to use the default logo)
-3. **Primary color** — pick a color (buttons, active nav, breaking ticker, accents)
-4. Check the preview → **Save settings**
+3. **Favicon** — upload the browser-tab icon (PNG/ICO; or remove for the default)
+4. **Primary color** — pick a color (buttons, active nav, breaking ticker, accents)
+5. Check the preview → **Save settings**
 
-Public site and admin UI update after save (refresh if needed).
+Public site and admin UI update after save (refresh if needed). The favicon updates in the browser tab after save.
 
 ---
 
@@ -238,7 +239,7 @@ Remove old item
 | Publish Latest / Trending / More | Matching home sections |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
-| **Settings → logo / primary color** | Header/footer logo + site accent color |
+| **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | Open article on site | Increases **Views** in admin table |
 
 Public URLs (local):

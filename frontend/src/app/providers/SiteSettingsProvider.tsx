@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { fetchPublicSiteSettings } from '@/api/settings'
 import fallbackLogo from '@/assets/logo/logo.png'
-import { DEFAULT_PRIMARY_COLOR, type SiteSettings } from '@/types/settings'
+import { DEFAULT_FAVICON, DEFAULT_PRIMARY_COLOR, type SiteSettings } from '@/types/settings'
 
 type SiteSettingsContextValue = {
   settings: SiteSettings
   logoUrl: string
+  faviconUrl: string
   primaryColor: string
   ready: boolean
   refreshSettings: () => Promise<void>
@@ -15,6 +16,7 @@ type SiteSettingsContextValue = {
 const defaultSettings: SiteSettings = {
   id: 'local',
   logo_url: null,
+  favicon_url: null,
   primary_color: DEFAULT_PRIMARY_COLOR,
 }
 
@@ -73,8 +75,33 @@ export function applyPrimaryColorToDocument(color: string): void {
   }
 }
 
+function faviconTypeFromUrl(url: string): string | undefined {
+  const path = url.split('?')[0]?.toLowerCase() ?? ''
+  if (path.endsWith('.ico')) return 'image/x-icon'
+  if (path.endsWith('.svg')) return 'image/svg+xml'
+  if (path.endsWith('.webp')) return 'image/webp'
+  if (path.endsWith('.gif')) return 'image/gif'
+  if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg'
+  return 'image/png'
+}
+
+export function applyFaviconToDocument(url: string | null | undefined): void {
+  const href = url?.trim() || DEFAULT_FAVICON
+  let link = document.querySelector<HTMLLinkElement>("link[rel='icon']")
+  if (!link) {
+    link = document.createElement('link')
+    link.rel = 'icon'
+    document.head.appendChild(link)
+  }
+  const type = faviconTypeFromUrl(href)
+  if (type) link.type = type
+  // Bust cache when swapping icons
+  link.href = href.includes('?') ? href : `${href}?v=${encodeURIComponent(href.slice(-24))}`
+}
+
 function applySettingsToDocument(settings: SiteSettings): void {
   applyPrimaryColorToDocument(settings.primary_color || DEFAULT_PRIMARY_COLOR)
+  applyFaviconToDocument(settings.favicon_url)
 }
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
@@ -105,6 +132,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     () => ({
       settings,
       logoUrl: settings.logo_url?.trim() || fallbackLogo,
+      faviconUrl: settings.favicon_url?.trim() || DEFAULT_FAVICON,
       primaryColor: settings.primary_color || DEFAULT_PRIMARY_COLOR,
       ready,
       refreshSettings,

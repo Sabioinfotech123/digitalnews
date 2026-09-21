@@ -6,6 +6,7 @@ HEX_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
 class SiteSettingsUpdate(BaseModel):
     logo_url: str | None = Field(default=None, max_length=500)
+    favicon_url: str | None = Field(default=None, max_length=500)
     primary_color: str | None = Field(default=None, min_length=7, max_length=7)
 
     @field_validator("primary_color")
@@ -21,6 +22,7 @@ class SiteSettingsUpdate(BaseModel):
 class SiteSettingsResponse(BaseModel):
     id: str
     logo_url: str | None
+    favicon_url: str | None
     primary_color: str
 
     model_config = {"from_attributes": True}

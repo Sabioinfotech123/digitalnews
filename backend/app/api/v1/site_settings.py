@@ -9,7 +9,7 @@ router = APIRouter(tags=["site-settings"])
 
 @router.get("/site-settings", response_model=SiteSettingsResponse)
 def get_public_site_settings(db: DbSession) -> SiteSettingsResponse:
-    """Public branding used by the website (logo + primary color)."""
+    """Public branding used by the website (logo, favicon + primary color)."""
     return SiteSettingsService(db).get()
 
 

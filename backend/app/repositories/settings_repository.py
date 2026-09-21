@@ -14,6 +14,7 @@ class SiteSettingsRepository:
         item = SiteSettings(
             id=SITE_SETTINGS_ID,
             logo_url=None,
+            favicon_url=None,
             primary_color=DEFAULT_PRIMARY_COLOR,
         )
         self.db.add(item)

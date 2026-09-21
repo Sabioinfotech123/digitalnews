@@ -30,7 +30,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 └────────────────┘
 
 ┌────────────────┐
-│ site_settings  │  (logo + primary color — one row)
+│ site_settings  │  (logo + favicon + primary color — one row)
 └────────────────┘
 ```
 
@@ -40,7 +40,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Tags** can be attached to many news/blogs.
 - **News** and **Blogs** are the main articles.
 - **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
-- **Site settings** stores the website logo and primary color.
+- **Site settings** stores the website logo, favicon, and primary color.
 
 ---
 
@@ -182,7 +182,7 @@ Migration: `0003_breaking_news.py`
 
 ---
 
-### 9) `site_settings` — logo + primary color
+### 9) `site_settings` — logo, favicon + primary color
 
 One row for the whole site (Admin → **Settings**).
 
@@ -190,10 +190,11 @@ One row for the whole site (Admin → **Settings**).
 |--------|----------------|
 | `id` | Fixed singleton UUID |
 | `logo_url` | Uploaded logo URL (optional — default app logo if empty) |
+| `favicon_url` | Browser tab icon URL (optional — default `/assets/favicon.png` if empty) |
 | `primary_color` | Hex color like `#D71920` |
 | `created_at` / `updated_at` | Timestamps |
 
-Migration: `0004_site_settings.py`
+Migrations: `0004_site_settings.py`, `0005_site_settings_favicon.py`
 
 ---
 
