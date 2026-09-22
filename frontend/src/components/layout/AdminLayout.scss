@@ -12,7 +12,7 @@
   --sb-item-gap: 4px;
   --sb-icon-gap: 8px;
   --sb-active: var(--color-primary);
-  --sb-active-shadow: 0 8px 18px rgba(215, 25, 32, 0.25);
+  --sb-active-shadow: 0 8px 18px rgba(var(--color-primary-rgb), 0.25);
 
   height: 100vh;
   max-height: 100vh;
@@ -247,18 +247,18 @@
     .ant-menu-item-selected:active,
     .ant-menu-item-selected.ant-menu-item:hover {
       background: var(--sb-active) !important;
-      color: #fff !important;
+      color: var(--color-on-primary) !important;
       font-weight: 600;
       box-shadow: var(--sb-active-shadow);
 
       .ant-menu-item-icon,
       .anticon,
       i {
-        color: #fff !important;
+        color: var(--color-on-primary) !important;
       }
 
       a {
-        color: #fff !important;
+        color: var(--color-on-primary) !important;
       }
 
       &::after {
@@ -292,12 +292,18 @@
       .ant-menu-item-selected,
       .ant-menu-item-selected:hover,
       .ant-menu-item-selected:active {
-        color: #fff !important;
+        color: var(--color-on-primary) !important;
         background: var(--sb-active) !important;
         box-shadow: var(--sb-active-shadow) !important;
 
         a {
-          color: #fff !important;
+          color: var(--color-on-primary) !important;
+        }
+
+        .ant-menu-item-icon,
+        .anticon,
+        i {
+          color: var(--color-on-primary) !important;
         }
       }
 

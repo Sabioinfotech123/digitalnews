@@ -81,6 +81,7 @@ class News(Base):
     )
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_breaking: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_local: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     seo_title: Mapped[str | None] = mapped_column(String(300), nullable=True)
     seo_description: Mapped[str | None] = mapped_column(Text, nullable=True)

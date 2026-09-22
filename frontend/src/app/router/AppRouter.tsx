@@ -18,7 +18,12 @@ import {
   AdminNewsPage,
   AdminTrendingNewsPage,
 } from '@/pages/admin/AdminNewsPage'
+import { AdminLocalNewsDetailPage } from '@/pages/admin/AdminLocalNewsDetailPage'
+import { AdminLocalNewsPage } from '@/pages/admin/AdminLocalNewsPage'
+import { AdminVerifiedNewsDetailPage } from '@/pages/admin/AdminVerifiedNewsDetailPage'
+import { AdminVerifiedNewsPage } from '@/pages/admin/AdminVerifiedNewsPage'
 import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
+import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
@@ -49,7 +54,7 @@ function Placeholder({ title }: { title: string }) {
 function AdminModule({
   titleKey,
 }: {
-  titleKey: 'admin.videos' | 'admin.media' | 'admin.settings' | 'admin.profile'
+  titleKey: 'admin.videos' | 'admin.media' | 'admin.profile'
 }) {
   const { t } = useLanguage()
   return <AdminSectionPage title={t(titleKey)} />
@@ -85,6 +90,10 @@ export function AppRouter() {
           <Route path="news/create/:newsType" element={<AdminNewsCreatePage />} />
           <Route path="news/:newsType/edit/:id" element={<AdminNewsEditPage />} />
           <Route path="news/edit/:id" element={<AdminNewsEditPage />} />
+          <Route path="local-news" element={<AdminLocalNewsPage />} />
+          <Route path="local-news/:id" element={<AdminLocalNewsDetailPage />} />
+          <Route path="verified-news" element={<AdminVerifiedNewsPage />} />
+          <Route path="verified-news/:id" element={<AdminVerifiedNewsDetailPage />} />
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="blogs/create" element={<AdminBlogCreatePage />} />
           <Route path="blogs/edit/:id" element={<AdminBlogEditPage />} />
@@ -94,7 +103,7 @@ export function AppRouter() {
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />
           <Route path="users" element={<AdminUsersPage />} />
-          <Route path="settings" element={<AdminModule titleKey="admin.settings" />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="profile" element={<AdminModule titleKey="admin.profile" />} />
         </Route>
       </Route>

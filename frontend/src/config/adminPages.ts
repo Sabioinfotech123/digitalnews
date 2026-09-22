@@ -150,6 +150,54 @@ export function resolveAdminPageMeta(
     }
   }
 
+  const localNewsDetail = pathname.match(/^\/admin\/local-news\/[^/]+$/)
+  if (localNewsDetail) {
+    return {
+      documentTitle: brandTitle(`${t('admin.localNews')} · View`),
+      breadcrumbs: [
+        { title: t('admin.localFeed'), path: '/admin/local-news' },
+        { title: t('admin.localNews'), path: '/admin/local-news' },
+        { title: 'View' },
+      ],
+      menuKey: '/admin/local-news',
+    }
+  }
+
+  if (pathname.startsWith('/admin/local-news')) {
+    return {
+      documentTitle: brandTitle(t('admin.localNews')),
+      breadcrumbs: [
+        { title: t('admin.localFeed'), path: '/admin/local-news' },
+        { title: t('admin.localNews') },
+      ],
+      menuKey: '/admin/local-news',
+    }
+  }
+
+  const verifiedNewsDetail = pathname.match(/^\/admin\/verified-news\/[^/]+$/)
+  if (verifiedNewsDetail) {
+    return {
+      documentTitle: brandTitle(`${t('admin.verifiedNews')} · View`),
+      breadcrumbs: [
+        { title: t('admin.localFeed'), path: '/admin/local-news' },
+        { title: t('admin.verifiedNews'), path: '/admin/verified-news' },
+        { title: 'View' },
+      ],
+      menuKey: '/admin/verified-news',
+    }
+  }
+
+  if (pathname.startsWith('/admin/verified-news')) {
+    return {
+      documentTitle: brandTitle(t('admin.verifiedNews')),
+      breadcrumbs: [
+        { title: t('admin.localFeed'), path: '/admin/local-news' },
+        { title: t('admin.verifiedNews') },
+      ],
+      menuKey: '/admin/verified-news',
+    }
+  }
+
   const createBlog = pathname.match(/^\/admin\/blogs\/create$/)
   if (createBlog) {
     return {

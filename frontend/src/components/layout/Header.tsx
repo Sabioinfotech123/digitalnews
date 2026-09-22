@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
-import logoImg from '@/assets/logo/logo.png'
 import { BRAND } from '@/config/brand'
 import { cn } from '@/utils/cn'
 import { confirmAction } from '@/utils/confirmAction'
@@ -22,6 +22,7 @@ const navItems = [
 export function Header() {
   const { t, uiLanguage, setUiLanguage } = useLanguage()
   const { isAuthenticated, isAdmin, logout } = useAuth()
+  const { logoUrl } = useSiteSettings()
   const { modal } = App.useApp()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -108,7 +109,7 @@ export function Header() {
     <header className="site-header">
       <div className="site-header__top mx-auto flex max-w-[1200px] items-center gap-4 px-5 py-3">
         <Link to="/" className="site-header__brand" aria-label={BRAND.name}>
-          <img src={logoImg} alt={BRAND.name} className="site-header__logo" />
+          <img src={logoUrl} alt={BRAND.name} className="site-header__logo" />
         </Link>
 
         <nav className="site-header__nav hide-on-mobile ml-6 flex flex-1 items-center gap-1" aria-label="Main">
@@ -194,7 +195,7 @@ export function Header() {
       <Drawer
         title={
           <Link to="/" className="site-header__drawer-brand" onClick={() => setOpen(false)}>
-            <img src={logoImg} alt={BRAND.name} className="site-header__drawer-logo" />
+            <img src={logoUrl} alt={BRAND.name} className="site-header__drawer-logo" />
           </Link>
         }
         placement="right"

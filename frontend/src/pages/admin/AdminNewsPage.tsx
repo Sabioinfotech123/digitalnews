@@ -185,10 +185,13 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         title: 'Flags',
         key: 'flags',
         width: 120,
-        sorter: (a, b) => Number(b.is_breaking) - Number(a.is_breaking),
+        sorter: (a, b) =>
+          Number(b.is_breaking) - Number(a.is_breaking) || Number(b.is_local) - Number(a.is_local),
         render: (_, row) => (
           <Space size={4} wrap>
             {row.is_breaking ? <StatusBadge status="breaking" /> : null}
+            {row.is_local ? <StatusBadge status="local" /> : null}
+            {!row.is_breaking && !row.is_local ? '—' : null}
           </Space>
         ),
       },

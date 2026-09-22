@@ -4,7 +4,7 @@
   place-items: center;
   padding: 1.5rem;
   background:
-    linear-gradient(135deg, rgba(215, 25, 32, 0.08), transparent 40%),
+    linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), transparent 40%),
     #f7f7f7;
 
   &__card {
@@ -42,7 +42,7 @@
     font-size: 0.875rem;
 
     a {
-      color: #d71920;
+      color: var(--color-primary);
       font-weight: 600;
     }
   }

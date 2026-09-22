@@ -260,6 +260,87 @@ Response includes `url` — use that as `image_url` when creating news.
 
 ---
 
+## 11) Site settings (logo + primary color)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/site-settings` | Anyone | Public branding (logo, favicon + primary color) |
+| GET | `/admin/site-settings` | Admin | Same data for CMS form |
+| PATCH | `/admin/site-settings` | Admin | Update logo, favicon and/or color |
+
+### Update fields
+
+| Field | Required? | Notes |
+|-------|-----------|-------|
+| `logo_url` | Optional | From `/admin/media/upload` with `folder=brand` (or `null` to clear) |
+| `favicon_url` | Optional | From `/admin/media/upload` with `folder=brand` (PNG/ICO; or `null` to clear) |
+| `primary_color` | Optional | Hex like `#D71920` |
+
+Example:
+
+```text
+GET /api/v1/site-settings
+PATCH /api/v1/admin/site-settings
+{ "logo_url": "https://…", "favicon_url": "https://…", "primary_color": "#D71920" }
+```
+
+---
+
+## 12) Local news (open feed → CMS import)
+
+Admin-only browse of regional headlines. Default provider: **Google News RSS** (fast, no API key). If `NEWS_API_KEY` is set, uses **NewsAPI.org** instead. Default focus: **Telangana / Hyderabad**. Import creates a normal CMS news row (`featured` / `latest` / `trending` / `more`).
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/admin/local-news/states` | Admin | State filter options |
+| GET | `/admin/local-news` | Admin | List headlines (`state`, `q`, `from_date`, `to_date`, `page`, `page_size`). Each item includes `is_verified`, `verified_id`, `verdict` when already AI-checked |
+| GET | `/admin/local-news/{id}` | Admin | Detail (must open from a recent list — cached ~1h) |
+| POST | `/admin/local-news/{id}/import` | Admin | Create CMS news from that article |
+
+### List query params
+
+| Param | Default | Notes |
+|-------|---------|-------|
+| `state` | `Telangana` | Keyword boost for that state (e.g. Hyderabad + Telangana) |
+| `q` | — | Extra city/topic keyword |
+| `from_date` / `to_date` | — | `YYYY-MM-DD` inclusive. Sent to Google as `after:`/`before:` and also filtered server-side (RSS often ignores date operators). If omitted, feed returns recent items (~last days) |
+| `page` / `page_size` | 1 / 10 | Pagination over fetched batch |
+
+### Import body
+
+```json
+{
+  "news_type": "trending",
+  "language": "en",
+  "status": "published",
+  "is_breaking": false,
+  "title": "Optional edited title",
+  "short_description": "Optional edited summary",
+  "image_url": "https://…",
+  "category_id": null,
+  "tag_ids": []
+}
+```
+
+Imported rows set `is_local: true` (shown as a **Local** flag in admin news lists).
+
+After import, the item appears under **All news**, the chosen type list, homepage section (if published), and public `/news`.
+
+### AI verify + verified news
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/admin/local-news/{id}/verify` | Admin | Run Gemini/OpenAI check; save into verified list |
+| GET | `/admin/verified-news` | Admin | List verified items (`search`, `verdict`, page) |
+| GET | `/admin/verified-news/{id}` | Admin | One verified item |
+| POST | `/admin/verified-news/{id}/import` | Admin | Add into CMS news (`is_local: true`); same body as local-news import |
+
+Verdict values: `likely_real`, `likely_fake`, `uncertain`.  
+Env: `AI_VERIFY_PROVIDER=gemini|openai`, `GEMINI_API_KEY` / `OPENAI_API_KEY`.  
+With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPENAI_API_KEY` is set, verify automatically falls back to OpenAI.
+
+---
+
 ## Common workflows
 
 ### A) Publish a news article
@@ -288,6 +369,13 @@ Admin list shows that number in the Views column.
 1. Login as admin  
 2. `POST /admin/breaking-news` with `title`, `language`, `is_active: true`  
 3. Public site calls `GET /breaking-news?language=en` (or `te`) and shows the ticker
+
+### E) Change logo / primary color
+
+1. Login as admin
+2. Upload logo / favicon → `/admin/media/upload` (`folder=brand`) → copy `url`
+3. `PATCH /admin/site-settings` with `logo_url`, `favicon_url`, and/or `primary_color`
+4. Public site loads `GET /site-settings` and applies branding (including browser tab icon)
 
 ---
 

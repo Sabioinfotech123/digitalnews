@@ -33,15 +33,15 @@
 
     &:hover {
       background: #fde8e9;
-      color: #d71920;
+      color: var(--color-primary);
     }
 
     &--active {
-      background: #d71920;
+      background: var(--color-primary);
       color: #fff;
 
       &:hover {
-        background: #b5141a;
+        background: var(--color-primary-hover);
         color: #fff;
       }
     }
@@ -80,12 +80,12 @@
     blockquote {
       margin: 0 0 0.75rem;
       padding-left: 0.85rem;
-      border-left: 3px solid #d71920;
+      border-left: 3px solid var(--color-primary);
       color: #6b7280;
     }
 
     a {
-      color: #d71920;
+      color: var(--color-primary);
       text-decoration: underline;
     }
 
