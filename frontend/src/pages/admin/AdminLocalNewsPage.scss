@@ -1,0 +1,105 @@
+.admin-local-news__action-btn.ant-btn {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  background: #fff !important;
+  font-weight: 600;
+
+  &:hover,
+  &:focus {
+    color: #fff !important;
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+  }
+}
+
+.admin-local-news-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__back {
+    padding-left: 0 !important;
+    margin-bottom: 0.25rem;
+  }
+
+  &__title {
+    margin: 0 0 0.35rem !important;
+    border-left: 4px solid var(--color-primary);
+    padding-left: 0.75rem;
+    font-family: var(--font-heading) !important;
+  }
+
+  &__meta {
+    margin: 0 !important;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: 960px) {
+      grid-template-columns: 1.4fr 0.9fr;
+      align-items: start;
+    }
+  }
+
+  &__preview,
+  &__import {
+    background: var(--color-paper, #fff);
+    border: 1px solid var(--color-line, #e5e7eb);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft, 0 1px 2px rgba(17, 17, 17, 0.06));
+    padding: 1.25rem 1.35rem 1.4rem;
+  }
+
+  &__image {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #f3f4f6;
+
+    &--empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      color: var(--color-ink-muted, #6b7280);
+      font-size: 0.875rem;
+    }
+  }
+
+  &__url {
+    display: block;
+    word-break: break-all;
+    font-size: 0.8rem;
+  }
+
+  &__import-title {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  &__import-desc {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-muted, #6b7280);
+    line-height: 1.45;
+  }
+
+  &__form {
+    margin-top: 0.25rem;
+  }
+}

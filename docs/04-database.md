@@ -114,6 +114,7 @@ These are fixed options used in several tables:
 | `news_type` | featured / latest / trending / more |
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
+| `is_local` | Added from **Local news** import |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -121,6 +122,8 @@ These are fixed options used in several tables:
 | `created_at` / `updated_at` / `deleted_at` | Timestamps + soft delete |
 
 **Rule:** Same slug can exist once in English and once in Telugu (`UNIQUE(language, slug)`).
+
+`is_local` added in migration `0006_news_is_local.py`.
 
 ---
 
