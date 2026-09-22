@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
-import logoImg from '@/assets/logo/logo.png'
 import { resolveAdminPageMeta } from '@/config/adminPages'
 import { cn } from '@/utils/cn'
 import { confirmAction } from '@/utils/confirmAction'
@@ -15,6 +15,7 @@ const { Header, Sider, Content } = Layout
 export function AdminLayout() {
   const { t } = useLanguage()
   const { logout } = useAuth()
+  const { logoUrl } = useSiteSettings()
   const { modal } = App.useApp()
   const location = useLocation()
   const navigate = useNavigate()
@@ -109,6 +110,9 @@ export function AdminLayout() {
 
   const openKeysForRoute = useMemo(() => {
     if (selectedKey.startsWith('/admin/news')) return ['news']
+    if (selectedKey.startsWith('/admin/local-news') || selectedKey.startsWith('/admin/verified-news')) {
+      return ['local-feed']
+    }
     if (['/admin/categories', '/admin/tags'].includes(selectedKey)) return ['taxonomy']
     return []
   }, [selectedKey])
@@ -186,6 +190,21 @@ export function AdminLayout() {
       ],
     },
     {
+      key: 'local-feed',
+      icon: <i className="fa-solid fa-shield-halved" aria-hidden />,
+      label: t('admin.localFeed'),
+      children: [
+        {
+          key: '/admin/local-news',
+          label: <Link to="/admin/local-news">{t('admin.localNews')}</Link>,
+        },
+        {
+          key: '/admin/verified-news',
+          label: <Link to="/admin/verified-news">{t('admin.verifiedNews')}</Link>,
+        },
+      ],
+    },
+    {
       key: '/admin/blogs',
       icon: <i className="fa-solid fa-blog" aria-hidden />,
       label: <Link to="/admin/blogs">{t('admin.blogs')}</Link>,
@@ -230,7 +249,7 @@ export function AdminLayout() {
       >
         <div className="admin-layout__brand">
           {!collapsed ? (
-            <img src={logoImg} alt="AK News" className="admin-layout__brand-name" />
+            <img src={logoUrl} alt="AK News" className="admin-layout__brand-name" />
           ) : null}
           <button
             type="button"

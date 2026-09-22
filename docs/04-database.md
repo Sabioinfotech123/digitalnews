@@ -28,6 +28,10 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 ┌────────────────┐
 │ breaking_news  │  (standalone ticker headlines)
 └────────────────┘
+
+┌────────────────┐
+│ site_settings  │  (logo + favicon + primary color — one row)
+└────────────────┘
 ```
 
 **In plain words:**
@@ -36,6 +40,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Tags** can be attached to many news/blogs.
 - **News** and **Blogs** are the main articles.
 - **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
+- **Site settings** stores the website logo, favicon, and primary color.
 
 ---
 
@@ -109,6 +114,7 @@ These are fixed options used in several tables:
 | `news_type` | featured / latest / trending / more |
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
+| `is_local` | Added from **Local news** import |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -116,6 +122,8 @@ These are fixed options used in several tables:
 | `created_at` / `updated_at` / `deleted_at` | Timestamps + soft delete |
 
 **Rule:** Same slug can exist once in English and once in Telugu (`UNIQUE(language, slug)`).
+
+`is_local` added in migration `0006_news_is_local.py`.
 
 ---
 
@@ -174,6 +182,42 @@ Standalone ticker items (not full articles). Managed in Admin → **Breaking new
 **Note:** `news.is_breaking` is a badge on an article. The header bar uses this table.
 
 Migration: `0003_breaking_news.py`
+
+---
+
+### 9) `site_settings` — logo, favicon + primary color
+
+One row for the whole site (Admin → **Settings**).
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Fixed singleton UUID |
+| `logo_url` | Uploaded logo URL (optional — default app logo if empty) |
+| `favicon_url` | Browser tab icon URL (optional — default `/assets/favicon.png` if empty) |
+| `primary_color` | Hex color like `#D71920` |
+| `created_at` / `updated_at` | Timestamps |
+
+Migrations: `0004_site_settings.py`, `0005_site_settings_favicon.py`
+
+---
+
+### 10) `verified_local_news` — AI credibility checks
+
+Saved when admin runs **Verify** on a Local feed article.
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Unique ID |
+| `external_id` | Local-feed article id (unique) |
+| `title` / `description` / `url` / `image_url` | Snapshot of the article |
+| `source_name` / `published_at` / `country` | Source metadata |
+| `verdict` | `likely_real` / `likely_fake` / `uncertain` |
+| `confidence` | 0–100 |
+| `ai_summary` | Short AI explanation |
+| `ai_provider` | `gemini` or `openai` |
+| `verified_at` | When checked |
+
+Migration: `0007_verified_local_news.py`
 
 ---
 

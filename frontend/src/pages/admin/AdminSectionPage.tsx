@@ -15,7 +15,7 @@ export function AdminSectionPage({ title, description }: AdminSectionPageProps) 
         style={{
           marginTop: 0,
           fontFamily: 'var(--font-heading)',
-          borderLeft: '4px solid #D71920',
+          borderLeft: '4px solid var(--color-primary)',
           paddingLeft: 12,
         }}
       >
