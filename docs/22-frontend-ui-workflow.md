@@ -42,6 +42,8 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Catalog → Tags** | Add/edit/delete tags |
 | **News → All news** | See every news item |
 | **News → Featured / Latest / Trending / More** | Manage that homepage section only |
+| **Local feed → Local news** | Browse regional headlines → verify with AI or add to CMS |
+| **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
@@ -114,6 +116,29 @@ Controls the red **BREAKING NEWS** bar under the public header.
 5. Check the preview → **Save settings**
 
 Public site and admin UI update after save (refresh if needed). The favicon updates in the browser tab after save.
+
+---
+
+## Step 2.7 — Local feed (local news + AI verify)
+
+**Local news** and **Verified news** live under sidebar **Local feed** (not under News).
+
+### Browse & add
+1. Sidebar → **Local feed** → **Local news**
+2. Filter by **State**, **date range**, and optional **city/topic** search
+3. Table shows **Google News** (feed) column — `Google News` by default, or `NewsAPI` if `NEWS_API_KEY` is set
+4. **View & add** → edit title/slug/content/image like create-news → save into Featured/Latest/…
+5. Imported CMS items get a **Local** flag
+6. Rows already checked show **Verified** (solid green) instead of **Verify**; click opens the same modal with the saved result
+
+### Verify with AI
+1. On Local news list → **Verify** (or **Verified** to reopen the result)
+2. Modal shows title, source, date → **Run AI verify** (Gemini or OpenAI — set key in backend `.env`)
+3. Result (likely real / likely fake / uncertain + summary) is saved
+4. Open **Local feed → Verified news** to browse all AI-checked items
+5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on)
+
+Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. AI keys: `GEMINI_API_KEY` and/or `OPENAI_API_KEY`. Default provider `gemini` tries Gemini first and falls back to OpenAI when Gemini is flaky (set `AI_VERIFY_PROVIDER=openai` to use OpenAI only).
 
 ---
 
@@ -240,6 +265,7 @@ Remove old item
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
+| **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
 
 Public URLs (local):

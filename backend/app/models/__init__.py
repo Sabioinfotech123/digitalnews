@@ -11,6 +11,7 @@ from app.models.content import (
 )
 from app.models.settings import SiteSettings
 from app.models.user import User, UserRole
+from app.models.verified_news import VerifiedLocalNews, VerifyVerdict
 
 __all__ = [
     "User",
@@ -23,6 +24,8 @@ __all__ = [
     "BlogTag",
     "BreakingNews",
     "SiteSettings",
+    "VerifiedLocalNews",
+    "VerifyVerdict",
     "ContentLanguage",
     "ContentStatus",
 ]

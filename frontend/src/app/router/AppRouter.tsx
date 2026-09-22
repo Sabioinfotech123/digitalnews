@@ -18,6 +18,10 @@ import {
   AdminNewsPage,
   AdminTrendingNewsPage,
 } from '@/pages/admin/AdminNewsPage'
+import { AdminLocalNewsDetailPage } from '@/pages/admin/AdminLocalNewsDetailPage'
+import { AdminLocalNewsPage } from '@/pages/admin/AdminLocalNewsPage'
+import { AdminVerifiedNewsDetailPage } from '@/pages/admin/AdminVerifiedNewsDetailPage'
+import { AdminVerifiedNewsPage } from '@/pages/admin/AdminVerifiedNewsPage'
 import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
 import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
@@ -86,6 +90,10 @@ export function AppRouter() {
           <Route path="news/create/:newsType" element={<AdminNewsCreatePage />} />
           <Route path="news/:newsType/edit/:id" element={<AdminNewsEditPage />} />
           <Route path="news/edit/:id" element={<AdminNewsEditPage />} />
+          <Route path="local-news" element={<AdminLocalNewsPage />} />
+          <Route path="local-news/:id" element={<AdminLocalNewsDetailPage />} />
+          <Route path="verified-news" element={<AdminVerifiedNewsPage />} />
+          <Route path="verified-news/:id" element={<AdminVerifiedNewsDetailPage />} />
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="blogs/create" element={<AdminBlogCreatePage />} />
           <Route path="blogs/edit/:id" element={<AdminBlogEditPage />} />

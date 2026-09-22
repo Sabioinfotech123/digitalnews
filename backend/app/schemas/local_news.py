@@ -43,6 +43,9 @@ class LocalNewsArticle(BaseModel):
     published_at: str | None = None
     language: str | None = None
     country: str | None = None
+    is_verified: bool = False
+    verified_id: str | None = None
+    verdict: str | None = None
 
 
 class LocalNewsListResponse(BaseModel):

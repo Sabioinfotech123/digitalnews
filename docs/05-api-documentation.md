@@ -286,6 +286,61 @@ PATCH /api/v1/admin/site-settings
 
 ---
 
+## 12) Local news (open feed → CMS import)
+
+Admin-only browse of regional headlines. Default provider: **Google News RSS** (fast, no API key). If `NEWS_API_KEY` is set, uses **NewsAPI.org** instead. Default focus: **Telangana / Hyderabad**. Import creates a normal CMS news row (`featured` / `latest` / `trending` / `more`).
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/admin/local-news/states` | Admin | State filter options |
+| GET | `/admin/local-news` | Admin | List headlines (`state`, `q`, `from_date`, `to_date`, `page`, `page_size`). Each item includes `is_verified`, `verified_id`, `verdict` when already AI-checked |
+| GET | `/admin/local-news/{id}` | Admin | Detail (must open from a recent list — cached ~1h) |
+| POST | `/admin/local-news/{id}/import` | Admin | Create CMS news from that article |
+
+### List query params
+
+| Param | Default | Notes |
+|-------|---------|-------|
+| `state` | `Telangana` | Keyword boost for that state (e.g. Hyderabad + Telangana) |
+| `q` | — | Extra city/topic keyword |
+| `from_date` / `to_date` | — | `YYYY-MM-DD` inclusive. Sent to Google as `after:`/`before:` and also filtered server-side (RSS often ignores date operators). If omitted, feed returns recent items (~last days) |
+| `page` / `page_size` | 1 / 10 | Pagination over fetched batch |
+
+### Import body
+
+```json
+{
+  "news_type": "trending",
+  "language": "en",
+  "status": "published",
+  "is_breaking": false,
+  "title": "Optional edited title",
+  "short_description": "Optional edited summary",
+  "image_url": "https://…",
+  "category_id": null,
+  "tag_ids": []
+}
+```
+
+Imported rows set `is_local: true` (shown as a **Local** flag in admin news lists).
+
+After import, the item appears under **All news**, the chosen type list, homepage section (if published), and public `/news`.
+
+### AI verify + verified news
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/admin/local-news/{id}/verify` | Admin | Run Gemini/OpenAI check; save into verified list |
+| GET | `/admin/verified-news` | Admin | List verified items (`search`, `verdict`, page) |
+| GET | `/admin/verified-news/{id}` | Admin | One verified item |
+| POST | `/admin/verified-news/{id}/import` | Admin | Add into CMS news (`is_local: true`); same body as local-news import |
+
+Verdict values: `likely_real`, `likely_fake`, `uncertain`.  
+Env: `AI_VERIFY_PROVIDER=gemini|openai`, `GEMINI_API_KEY` / `OPENAI_API_KEY`.  
+With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPENAI_API_KEY` is set, verify automatically falls back to OpenAI.
+
+---
+
 ## Common workflows
 
 ### A) Publish a news article

@@ -40,6 +40,13 @@ class Settings(BaseSettings):
         "https://placehold.co/1200x675/111111/ffffff/png?text=Local+News"
     )
 
+    # AI verify (Local feed → Verified news). Provider: gemini | openai
+    ai_verify_provider: str = "gemini"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-3.5-flash-lite"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

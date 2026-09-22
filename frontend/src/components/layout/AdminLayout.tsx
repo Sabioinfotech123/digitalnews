@@ -110,6 +110,9 @@ export function AdminLayout() {
 
   const openKeysForRoute = useMemo(() => {
     if (selectedKey.startsWith('/admin/news')) return ['news']
+    if (selectedKey.startsWith('/admin/local-news') || selectedKey.startsWith('/admin/verified-news')) {
+      return ['local-feed']
+    }
     if (['/admin/categories', '/admin/tags'].includes(selectedKey)) return ['taxonomy']
     return []
   }, [selectedKey])
@@ -183,6 +186,21 @@ export function AdminLayout() {
         {
           key: '/admin/news/more',
           label: <Link to="/admin/news/more">{t('admin.moreNews')}</Link>,
+        },
+      ],
+    },
+    {
+      key: 'local-feed',
+      icon: <i className="fa-solid fa-shield-halved" aria-hidden />,
+      label: t('admin.localFeed'),
+      children: [
+        {
+          key: '/admin/local-news',
+          label: <Link to="/admin/local-news">{t('admin.localNews')}</Link>,
+        },
+        {
+          key: '/admin/verified-news',
+          label: <Link to="/admin/verified-news">{t('admin.verifiedNews')}</Link>,
         },
       ],
     },

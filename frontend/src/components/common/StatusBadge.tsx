@@ -12,6 +12,10 @@ const STATUS_COLOR: Record<string, string> = {
   trending: 'orange',
   more: 'default',
   breaking: 'magenta',
+  local: 'cyan',
+  likely_real: 'success',
+  likely_fake: 'error',
+  uncertain: 'warning',
   USER: 'blue',
   ADMIN: 'red',
 }
@@ -28,6 +32,10 @@ const STATUS_LABEL: Record<string, string> = {
   trending: 'Trending',
   more: 'More',
   breaking: 'Breaking',
+  local: 'Local',
+  likely_real: 'Likely real',
+  likely_fake: 'Likely fake',
+  uncertain: 'Uncertain',
   USER: 'User',
   ADMIN: 'Admin',
 }

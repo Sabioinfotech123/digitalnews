@@ -201,6 +201,26 @@ Migrations: `0004_site_settings.py`, `0005_site_settings_favicon.py`
 
 ---
 
+### 10) `verified_local_news` — AI credibility checks
+
+Saved when admin runs **Verify** on a Local feed article.
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Unique ID |
+| `external_id` | Local-feed article id (unique) |
+| `title` / `description` / `url` / `image_url` | Snapshot of the article |
+| `source_name` / `published_at` / `country` | Source metadata |
+| `verdict` | `likely_real` / `likely_fake` / `uncertain` |
+| `confidence` | 0–100 |
+| `ai_summary` | Short AI explanation |
+| `ai_provider` | `gemini` or `openai` |
+| `verified_at` | When checked |
+
+Migration: `0007_verified_local_news.py`
+
+---
+
 ## Soft delete (important)
 
 For `users`, `news`, `blogs`:

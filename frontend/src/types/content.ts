@@ -40,6 +40,7 @@ export interface NewsItem {
   news_type: NewsType
   is_featured: boolean
   is_breaking: boolean
+  is_local: boolean
   image_url: string | null
   seo_title: string | null
   seo_description: string | null
@@ -70,6 +71,7 @@ export interface NewsPayload {
   news_type?: NewsType
   is_featured?: boolean
   is_breaking?: boolean
+  is_local?: boolean
   image_url?: string | null
   seo_title?: string | null
   seo_description?: string | null

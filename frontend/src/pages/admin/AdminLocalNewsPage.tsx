@@ -1,14 +1,17 @@
-import { App, DatePicker, Select, Space, Tooltip, type TableColumnsType } from 'antd'
+import { App, DatePicker, Modal, Select, Space, Tooltip, Typography, type TableColumnsType } from 'antd'
 import type { Dayjs } from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchLocalNews, fetchLocalNewsStates } from '@/api/localNews'
+import { fetchLocalNews, fetchLocalNewsStates, fetchVerifiedNewsById, verifyLocalNews } from '@/api/localNews'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
-import type { LocalNewsArticle, LocalNewsStateOption } from '@/types/localNews'
+import { StatusBadge } from '@/components/common/StatusBadge'
+import type { LocalNewsArticle, LocalNewsStateOption, VerifiedLocalNewsItem } from '@/types/localNews'
 import { getApiErrorMessage } from '@/utils/apiError'
 import './AdminLocalNewsPage.scss'
+
+const { Paragraph, Text } = Typography
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
   return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
@@ -25,6 +28,19 @@ function formatPublished(value: string | null) {
   })
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function AdminLocalNewsPage() {
   const { t } = useLanguage()
   const { message } = App.useApp()
@@ -34,12 +50,19 @@ export function AdminLocalNewsPage() {
   const [state, setState] = useState('Telangana')
   const [search, setSearch] = useState('')
   const [range, setRange] = useState<[Dayjs | null, Dayjs | null] | null>(null)
+  const [dateFrom, setDateFrom] = useState<string | undefined>()
+  const [dateTo, setDateTo] = useState<string | undefined>()
   const [items, setItems] = useState<LocalNewsArticle[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [loading, setLoading] = useState(false)
   const [provider, setProvider] = useState('google-news-rss')
+
+  const [verifyOpen, setVerifyOpen] = useState(false)
+  const [verifyTarget, setVerifyTarget] = useState<LocalNewsArticle | null>(null)
+  const [verifying, setVerifying] = useState(false)
+  const [verifyResult, setVerifyResult] = useState<VerifiedLocalNewsItem | null>(null)
 
   useEffect(() => {
     let active = true
@@ -62,13 +85,11 @@ export function AdminLocalNewsPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const fromDate = range?.[0]?.format('YYYY-MM-DD')
-      const toDate = range?.[1]?.format('YYYY-MM-DD')
       const data = await fetchLocalNews({
         state,
         q: search || undefined,
-        from_date: fromDate,
-        to_date: toDate,
+        from_date: dateFrom,
+        to_date: dateTo,
         page,
         page_size: pageSize,
       })
@@ -82,7 +103,7 @@ export function AdminLocalNewsPage() {
     } finally {
       setLoading(false)
     }
-  }, [state, search, range, page, pageSize, message])
+  }, [state, search, dateFrom, dateTo, page, pageSize, message])
 
   useEffect(() => {
     void load()
@@ -98,9 +119,19 @@ export function AdminLocalNewsPage() {
     setState(value)
   }
 
-  const handleRangeChange = (value: [Dayjs | null, Dayjs | null] | null) => {
+  const handleRangeChange = (
+    value: [Dayjs | null, Dayjs | null] | null,
+    _dateStrings: [string, string],
+  ) => {
     setPage(1)
     setRange(value)
+    if (value?.[0]?.isValid?.() && value?.[1]?.isValid?.()) {
+      setDateFrom(value[0].format('YYYY-MM-DD'))
+      setDateTo(value[1].format('YYYY-MM-DD'))
+      return
+    }
+    setDateFrom(undefined)
+    setDateTo(undefined)
   }
 
   const handlePageChange = (nextPage: number, nextSize: number) => {
@@ -110,6 +141,46 @@ export function AdminLocalNewsPage() {
 
   const goToView = (row: LocalNewsArticle) => {
     navigate(`/admin/local-news/${row.id}`)
+  }
+
+  const openVerify = async (row: LocalNewsArticle) => {
+    setVerifyTarget(row)
+    setVerifyResult(null)
+    setVerifyOpen(true)
+    if (row.verified_id) {
+      try {
+        const existing = await fetchVerifiedNewsById(row.verified_id)
+        setVerifyResult(existing)
+      } catch {
+        // List still shows Verified; modal can re-run if detail fetch fails.
+      }
+    }
+  }
+
+  const runVerify = async () => {
+    if (!verifyTarget) return
+    setVerifying(true)
+    try {
+      const result = await verifyLocalNews(verifyTarget.id)
+      setVerifyResult(result.item)
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === verifyTarget.id
+            ? {
+                ...item,
+                is_verified: true,
+                verified_id: result.item.id,
+                verdict: result.item.verdict,
+              }
+            : item,
+        ),
+      )
+      message.success('AI verification complete')
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Verification failed'))
+    } finally {
+      setVerifying(false)
+    }
   }
 
   const columns: TableColumnsType<LocalNewsArticle> = useMemo(
@@ -137,6 +208,12 @@ export function AdminLocalNewsPage() {
         render: (value: string | null) => value || '—',
       },
       {
+        title: 'Google News',
+        key: 'provider',
+        width: 130,
+        render: () => (provider === 'newsapi' ? 'NewsAPI' : 'Google News'),
+      },
+      {
         title: 'Published',
         dataIndex: 'published_at',
         key: 'published_at',
@@ -149,11 +226,23 @@ export function AdminLocalNewsPage() {
       {
         title: 'Actions',
         key: 'actions',
-        width: 170,
+        width: 280,
         align: 'center',
         fixed: 'right',
         render: (_, row) => (
-          <Space size={6}>
+          <Space size={6} wrap>
+            <AppButton
+              type={row.is_verified ? 'primary' : 'default'}
+              size="small"
+              className={
+                row.is_verified
+                  ? 'admin-local-news__action-btn admin-local-news__action-btn--verified'
+                  : 'admin-local-news__action-btn'
+              }
+              onClick={() => void openVerify(row)}
+            >
+              {row.is_verified ? 'Verified' : 'Verify'}
+            </AppButton>
             <AppButton
               type="default"
               size="small"
@@ -179,56 +268,139 @@ export function AdminLocalNewsPage() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate],
+    [navigate, provider],
   )
 
   const pageHint =
-    `Local/regional press for your state (not TV channels). Add as Featured, Latest, Trending, or More. Provider: ${provider}.`
+    `Local/regional press for your state (not TV channels). Verify with AI, or add to CMS. Provider: ${provider}.`
 
   return (
-    <AppTable<LocalNewsArticle>
-      title={
-        <span className="inline-flex items-center gap-2">
-          {t('admin.localNews')}
-          <Tooltip title={pageHint}>
-            <i
-              className="fa-solid fa-circle-info text-ink-muted cursor-help text-sm"
-              aria-label="About local news"
+    <>
+      <AppTable<LocalNewsArticle>
+        title={
+          <span className="inline-flex items-center gap-2">
+            {t('admin.localNews')}
+            <Tooltip title={pageHint}>
+              <i
+                className="fa-solid fa-circle-info text-ink-muted cursor-help text-sm"
+                aria-label="About local news"
+              />
+            </Tooltip>
+          </span>
+        }
+        loading={loading}
+        dataSource={items}
+        columns={columns}
+        rowKey="id"
+        onRefresh={() => void load()}
+        searchValue={search}
+        searchPlaceholder="Search city or topic…"
+        onSearchChange={handleSearchChange}
+        searchExtra={
+          <Space wrap>
+            <Select
+              value={state}
+              style={{ width: 160 }}
+              options={states.map((s) => ({ value: s.value, label: s.label }))}
+              onChange={handleStateChange}
+              aria-label="State"
             />
-          </Tooltip>
-        </span>
-      }
-      loading={loading}
-      dataSource={items}
-      columns={columns}
-      rowKey="id"
-      onRefresh={() => void load()}
-      searchValue={search}
-      searchPlaceholder="Search city or topic…"
-      onSearchChange={handleSearchChange}
-      searchExtra={
-        <Space wrap>
-          <Select
-            value={state}
-            style={{ width: 160 }}
-            options={states.map((s) => ({ value: s.value, label: s.label }))}
-            onChange={handleStateChange}
-            aria-label="State"
-          />
-          <DatePicker.RangePicker
-            value={range}
-            onChange={handleRangeChange}
-            allowClear
-            format="DD MMM YYYY"
-          />
-        </Space>
-      }
-      pagination={{
-        current: page,
-        pageSize,
-        total,
-        onChange: handlePageChange,
-      }}
-    />
+            <DatePicker.RangePicker
+              value={range}
+              onChange={handleRangeChange}
+              allowClear
+              format="DD MMM YYYY"
+            />
+          </Space>
+        }
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          onChange: handlePageChange,
+        }}
+      />
+
+      <Modal
+        title="Verify news"
+        open={verifyOpen}
+        onCancel={() => {
+          if (verifying) return
+          setVerifyOpen(false)
+        }}
+        footer={null}
+        width={640}
+        destroyOnHidden
+        maskClosable={!verifying}
+        closable={!verifying}
+      >
+        {verifyTarget ? (
+          <div className="admin-local-news-verify">
+            <Paragraph className="admin-local-news-verify__title">{verifyTarget.title}</Paragraph>
+            <Text type="secondary">
+              {verifyTarget.source_name || 'Unknown source'} ·{' '}
+              {formatDateTime(verifyTarget.published_at)}
+              {verifyTarget.country ? ` · ${verifyTarget.country}` : ''}
+            </Text>
+            {verifyTarget.description ? (
+              <Paragraph className="admin-local-news-verify__desc">{verifyTarget.description}</Paragraph>
+            ) : null}
+            <Paragraph type="secondary" className="admin-local-news-verify__url">
+              {verifyTarget.url}
+            </Paragraph>
+
+            <div className="admin-local-news-verify__status">
+              <Text strong>Verify status</Text>
+              {verifyResult ? (
+                <div className="admin-local-news-verify__result">
+                  <Space wrap>
+                    <StatusBadge status={verifyResult.verdict} />
+                    <Text type="secondary">
+                      {verifyResult.confidence}% · {verifyResult.ai_provider}
+                    </Text>
+                  </Space>
+                  <Paragraph className="admin-local-news-verify__summary">
+                    {verifyResult.ai_summary}
+                  </Paragraph>
+                </div>
+              ) : (
+                <Paragraph type="secondary" className="admin-local-news-verify__hint">
+                  Run AI verification. Result is saved under Verified news.
+                </Paragraph>
+              )}
+            </div>
+
+            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+              <AppButton
+                className="admin-local-news__action-btn"
+                block
+                disabled={verifying}
+                onClick={() => {
+                  setVerifyOpen(false)
+                  navigate('/admin/verified-news')
+                }}
+              >
+                Open Verified list
+              </AppButton>
+              {!verifyResult ? (
+                <AppButton
+                  type="primary"
+                  className="btn-soft-primary"
+                  block
+                  loading={verifying}
+                  onClick={() => void runVerify()}
+                >
+                  {verifying ? 'Verifying…' : 'Run AI verify'}
+                </AppButton>
+              ) : (
+                <AppButton block onClick={() => setVerifyOpen(false)}>
+                  Close
+                </AppButton>
+              )}
+            </Space>
+          </div>
+        ) : null}
+      </Modal>
+    </>
   )
 }

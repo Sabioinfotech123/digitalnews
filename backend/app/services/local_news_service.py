@@ -14,7 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from email.utils import parsedate_to_datetime
 from threading import Lock
 
@@ -341,6 +341,64 @@ def _parse_rfc822(value: str | None) -> str | None:
         return value
 
 
+def _article_calendar_day(published_at: str | None) -> date | None:
+    """Best-effort UTC calendar day from ISO or RFC822 published strings."""
+    if not published_at:
+        return None
+    value = published_at.strip()
+    if not value:
+        return None
+    try:
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).date()
+    except ValueError:
+        pass
+    try:
+        dt = parsedate_to_datetime(published_at)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).date()
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def _parse_ymd(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(value.strip()[:10])
+    except ValueError:
+        return None
+
+
+def _filter_by_date_range(
+    articles: list[LocalNewsArticle],
+    *,
+    from_date: str | None,
+    to_date: str | None,
+) -> list[LocalNewsArticle]:
+    """Inclusive local-day filter. Google RSS often ignores after:/before: — enforce here."""
+    start = _parse_ymd(from_date)
+    end = _parse_ymd(to_date)
+    if start is None and end is None:
+        return articles
+    kept: list[LocalNewsArticle] = []
+    for article in articles:
+        day = _article_calendar_day(article.published_at)
+        if day is None:
+            continue
+        if start is not None and day < start:
+            continue
+        if end is not None and day > end:
+            continue
+        kept.append(article)
+    return kept
+
+
 def _map_newsapi_article(raw: dict) -> LocalNewsArticle | None:
     url = (raw.get("url") or "").strip()
     title = (raw.get("title") or "").strip()
@@ -465,6 +523,7 @@ class LocalNewsService:
             _cache_put(mapped)
             articles.append(mapped)
         articles = _filter_articles(articles)
+        articles = _filter_by_date_range(articles, from_date=from_date, to_date=to_date)
         total = len(articles)
         # NewsAPI totalResults includes channels we dropped — report filtered count for this page batch
         return LocalNewsListResponse(
@@ -487,16 +546,19 @@ class LocalNewsService:
         page: int,
         page_size: int,
     ) -> LocalNewsListResponse:
-        # Prefer local/regional press sites; exclude major TV channel domains
-        q_parts = [f"({query})"]
+        # Prefer local/regional press sites; exclude major TV channel domains.
+        # Put after:/before: first — Google often ignores them when buried under many site: clauses.
+        q_parts: list[str] = []
+        if from_date:
+            q_parts.append(f"after:{from_date}")
+        if to_date:
+            # before: is inclusive on the given day for News RSS; keep as selected end date.
+            q_parts.append(f"before:{to_date}")
+        q_parts.append(f"({query})")
         press = _local_press_site_clause(state)
         if press:
             q_parts.append(press)
         q_parts.append(_channel_site_exclusions())
-        if from_date:
-            q_parts.append(f"after:{from_date}")
-        if to_date:
-            q_parts.append(f"before:{to_date}")
         params = {
             "q": " ".join(part for part in q_parts if part),
             "hl": "en-IN",
@@ -524,6 +586,7 @@ class LocalNewsService:
             articles.append(mapped)
 
         articles = _filter_articles(articles)
+        articles = _filter_by_date_range(articles, from_date=from_date, to_date=to_date)
         total = len(articles)
         start = (page - 1) * page_size
         end = start + page_size
