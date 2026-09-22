@@ -117,4 +117,12 @@ docker compose logs -f db     # DB logs
 
 ## Documentation
 
-Start with [docs/01-project-architecture.md](docs/01-project-architecture.md) and [docs/13-development-setup.md](docs/13-development-setup.md).
+**Start here (simple):**
+- [FE UI Workflow](docs/22-frontend-ui-workflow.md) — categories → tags → news/blogs (how to use CMS)
+- [DB Schema](docs/04-database.md) — tables explained in plain language
+- [API Documentation](docs/05-api-documentation.md) — endpoints + examples
+
+Also useful:
+- [Project architecture](docs/01-project-architecture.md)
+- [Development setup](docs/13-development-setup.md)
+- [Postgres / Docker DB](docs/21-database.md)

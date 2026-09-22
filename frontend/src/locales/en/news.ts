@@ -9,7 +9,13 @@ export const news = {
   readMore: 'Read more',
   viewAllNews: 'View all news',
   loadingArticle: 'Loading article…',
+  loadingList: 'Loading news…',
+  emptyList: 'No news published yet.',
+  viewMode: 'View mode',
+  viewGrid: 'Grid view',
+  viewList: 'List view',
   articleNotFound: 'Article not found',
   backHome: 'Back to home',
+  backAllNews: 'Back to all news',
   byAuthor: 'By',
 } as const

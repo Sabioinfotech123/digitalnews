@@ -1,44 +1,67 @@
 import { useEffect, useState } from 'react'
-import { fetchPublicNews } from '@/api/content'
+import { Link } from 'react-router-dom'
+import { fetchPublicBreakingNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import type { BreakingNewsItem } from '@/types/content'
 import './BreakingNewsTicker.scss'
 
-const PLACEHOLDER_ITEMS = [
-  { en: 'Platform foundation is live — more stories coming soon', te: 'ప్లాట్‌ఫామ్ ఫౌండేషన్ సిద్ధం — మరిన్ని వార్తలు త్వరలో' },
-  { en: 'English and Telugu news publishing supported', te: 'ఇంగ్లీష్ మరియు తెలుగు వార్తా ప్రచురణకు మద్దతు' },
-]
+function itemHref(linkUrl: string | null): string | null {
+  if (!linkUrl?.trim()) return null
+  return linkUrl.trim()
+}
+
+function TickerText({ item }: { item: BreakingNewsItem }) {
+  const href = itemHref(item.link_url)
+  if (!href) return <span className="breaking-ticker__text">{item.title}</span>
+
+  const label = (
+    <>
+      {item.title}
+      <i className="fa-solid fa-arrow-up-right-from-square breaking-ticker__link-icon" aria-hidden />
+    </>
+  )
+
+  if (href.startsWith('http://') || href.startsWith('https://')) {
+    return (
+      <a className="breaking-ticker__link" href={href} target="_blank" rel="noopener noreferrer">
+        {label}
+      </a>
+    )
+  }
+  return (
+    <Link className="breaking-ticker__link" to={href}>
+      {label}
+    </Link>
+  )
+}
 
 export function BreakingNewsTicker() {
   const { t, contentLanguage } = useLanguage()
-  const [items, setItems] = useState<string[]>(
-    PLACEHOLDER_ITEMS.map((item) => (contentLanguage === 'te' ? item.te : item.en)),
-  )
+  const [items, setItems] = useState<BreakingNewsItem[]>([])
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let active = true
     ;(async () => {
       try {
-        const data = await fetchPublicNews({
-          is_breaking: true,
-          language: contentLanguage,
-          page: 1,
-          page_size: 8,
-        })
+        const data = await fetchPublicBreakingNews(contentLanguage)
         if (!active) return
-        if (data.items.length > 0) {
-          setItems(data.items.map((item) => item.title))
-          return
-        }
+        setItems(data)
       } catch {
-        // keep placeholders
+        if (!active) return
+        setItems([])
+      } finally {
+        if (active) setReady(true)
       }
-      if (!active) return
-      setItems(PLACEHOLDER_ITEMS.map((item) => (contentLanguage === 'te' ? item.te : item.en)))
     })()
     return () => {
       active = false
     }
   }, [contentLanguage])
+
+  if (!ready || items.length === 0) return null
+
+  const loop = [...items, ...items]
 
   return (
     <div className="breaking-ticker" role="region" aria-label={t('news.breakingNews')}>
@@ -48,9 +71,9 @@ export function BreakingNewsTicker() {
       </div>
       <div className="breaking-ticker__track">
         <div className="breaking-ticker__marquee">
-          {[...items, ...items].map((text, index) => (
-            <span key={`${text}-${index}`} className="breaking-ticker__item">
-              {text}
+          {loop.map((item, index) => (
+            <span key={`${item.id}-${index}`} className="breaking-ticker__item">
+              <TickerText item={item} />
             </span>
           ))}
         </div>

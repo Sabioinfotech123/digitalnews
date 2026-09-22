@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.content import Blog, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
+from app.models.content import Blog, BreakingNews, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
 
 
 class CategoryRepository:
@@ -145,6 +145,14 @@ class NewsRepository:
             stmt = stmt.where(News.language == language)
         return self.db.scalar(stmt)
 
+    def increment_view(self, news_id: str) -> None:
+        self.db.execute(
+            update(News)
+            .where(News.id == news_id, News.deleted_at.is_(None))
+            .values(view_count=News.view_count + 1)
+        )
+        self.db.commit()
+
     def create(self, news: News) -> News:
         self.db.add(news)
         self.db.commit()
@@ -230,3 +238,45 @@ class BlogRepository:
         return int(
             self.db.scalar(select(func.count()).select_from(Blog).where(Blog.deleted_at.is_(None))) or 0
         )
+
+
+class BreakingNewsRepository:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def list(
+        self,
+        *,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        active_only: bool = False,
+    ) -> list[BreakingNews]:
+        stmt = select(BreakingNews).order_by(BreakingNews.sort_order.asc(), BreakingNews.created_at.desc())
+        if language:
+            stmt = stmt.where(BreakingNews.language == language)
+        if active_only:
+            stmt = stmt.where(BreakingNews.is_active.is_(True))
+        if search:
+            like = f"%{search}%"
+            stmt = stmt.where(BreakingNews.title.ilike(like))
+        return list(self.db.scalars(stmt).all())
+
+    def get(self, item_id: str) -> BreakingNews | None:
+        return self.db.get(BreakingNews, item_id)
+
+    def create(self, **kwargs) -> BreakingNews:
+        item = BreakingNews(**kwargs)
+        self.db.add(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def save(self, item: BreakingNews) -> BreakingNews:
+        self.db.add(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def delete(self, item: BreakingNews) -> None:
+        self.db.delete(item)
+        self.db.commit()

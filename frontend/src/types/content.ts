@@ -40,6 +40,7 @@ export interface NewsItem {
   news_type: NewsType
   is_featured: boolean
   is_breaking: boolean
+  is_local: boolean
   image_url: string | null
   seo_title: string | null
   seo_description: string | null
@@ -70,6 +71,7 @@ export interface NewsPayload {
   news_type?: NewsType
   is_featured?: boolean
   is_breaking?: boolean
+  is_local?: boolean
   image_url?: string | null
   seo_title?: string | null
   seo_description?: string | null
@@ -121,4 +123,23 @@ export interface BlogPayload {
   seo_description?: string | null
   seo_keywords?: string | null
   published_at?: string | null
+}
+
+export interface BreakingNewsItem {
+  id: string
+  title: string
+  language: ContentLanguage
+  link_url: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BreakingNewsPayload {
+  title: string
+  language: ContentLanguage
+  link_url?: string | null
+  is_active?: boolean
+  sort_order?: number
 }

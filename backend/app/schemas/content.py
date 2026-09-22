@@ -61,7 +61,8 @@ class NewsCreate(BaseModel):
     news_type: NewsType = NewsType.latest
     is_featured: bool = False
     is_breaking: bool = False
-    image_url: str | None = None
+    is_local: bool = False
+    image_url: str = Field(min_length=1, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None
@@ -80,7 +81,8 @@ class NewsUpdate(BaseModel):
     news_type: NewsType | None = None
     is_featured: bool | None = None
     is_breaking: bool | None = None
-    image_url: str | None = None
+    is_local: bool | None = None
+    image_url: str | None = Field(default=None, min_length=1, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None
@@ -102,6 +104,7 @@ class NewsResponse(BaseModel):
     news_type: NewsType
     is_featured: bool
     is_breaking: bool
+    is_local: bool = False
     image_url: str | None = None
     seo_title: str | None
     seo_description: str | None
@@ -184,3 +187,32 @@ class PaginatedBlogs(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class BreakingNewsCreate(BaseModel):
+    title: str = Field(min_length=3, max_length=300)
+    language: ContentLanguage
+    link_url: str | None = Field(default=None, max_length=500)
+    is_active: bool = True
+    sort_order: int = 0
+
+
+class BreakingNewsUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=3, max_length=300)
+    language: ContentLanguage | None = None
+    link_url: str | None = Field(default=None, max_length=500)
+    is_active: bool | None = None
+    sort_order: int | None = None
+
+
+class BreakingNewsResponse(BaseModel):
+    id: str
+    title: str
+    language: ContentLanguage
+    link_url: str | None
+    is_active: bool
+    sort_order: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}

@@ -74,7 +74,7 @@ Do **not** call Axios directly from presentational components.
 
 **Public:** `/`, `/today-news`, `/news`, `/news/:slug`, `/blogs`, `/blogs/:slug`, `/videos`, `/videos/:slug`, `/category/:slug`, `/search`, `/login`, `/register`, `/profile`, `/bookmarks`, `*`
 
-**Admin:** `/admin/login`, `/admin`, `/admin/news`, `/admin/news/create`, `/admin/news/edit/:id`, (blogs/videos mirrors), `/admin/categories`, `/admin/tags`, `/admin/media`, `/admin/users`, `/admin/settings`, `/admin/profile`
+**Admin:** `/admin/login`, `/admin`, `/admin/breaking-news`, `/admin/news`, `/admin/news/create`, `/admin/news/edit/:id`, (blogs/videos mirrors), `/admin/categories`, `/admin/tags`, `/admin/media`, `/admin/users`, `/admin/settings`, `/admin/profile`
 
 ## Design system
 

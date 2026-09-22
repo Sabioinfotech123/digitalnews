@@ -2,6 +2,8 @@ import { apiClient } from '@/api/client'
 import type {
   BlogItem,
   BlogPayload,
+  BreakingNewsItem,
+  BreakingNewsPayload,
   Category,
   NewsItem,
   NewsPayload,
@@ -171,4 +173,36 @@ export async function fetchPublicBlogBySlug(slug: string, language?: string): Pr
 export async function fetchPublicBlogById(id: string): Promise<BlogItem> {
   const { data } = await apiClient.get<BlogItem>(`/blogs/by-id/${id}`)
   return data
+}
+
+export async function fetchPublicBreakingNews(language?: string): Promise<BreakingNewsItem[]> {
+  const { data } = await apiClient.get<BreakingNewsItem[]>('/breaking-news', {
+    params: language ? { language } : undefined,
+  })
+  return data
+}
+
+export async function fetchAdminBreakingNews(params?: {
+  search?: string
+  language?: string
+}): Promise<BreakingNewsItem[]> {
+  const { data } = await apiClient.get<BreakingNewsItem[]>('/admin/breaking-news', { params })
+  return data
+}
+
+export async function createBreakingNews(payload: BreakingNewsPayload): Promise<BreakingNewsItem> {
+  const { data } = await apiClient.post<BreakingNewsItem>('/admin/breaking-news', payload)
+  return data
+}
+
+export async function updateBreakingNews(
+  id: string,
+  payload: Partial<BreakingNewsPayload>,
+): Promise<BreakingNewsItem> {
+  const { data } = await apiClient.patch<BreakingNewsItem>(`/admin/breaking-news/${id}`, payload)
+  return data
+}
+
+export async function deleteBreakingNews(id: string): Promise<void> {
+  await apiClient.delete(`/admin/breaking-news/${id}`)
 }

@@ -16,13 +16,6 @@
     min-width: 0;
   }
 
-  &__loading {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-family: var(--font-ui);
-    font-size: var(--font-size-sm);
-  }
-
   &__split {
     display: grid;
     gap: 2rem;
