@@ -18,11 +18,11 @@ const { Title, Paragraph, Text } = Typography
 const PRESET_COLORS = [
   '#D71920',
   '#E11D48',
-  '#1D4ED8',
-  '#0F766E',
-  '#CA8A04',
-  '#7C2D12',
-  '#6D28D9',
+  // '#1D4ED8',
+  // '#0F766E',
+  // '#CA8A04',
+  // '#7C2D12',
+  // '#6D28D9',
   '#111827',
 ]
 
@@ -182,7 +182,7 @@ export function AdminSettingsPage() {
   const previewLogo = logoUrl?.trim() || fallbackLogo
 
   return (
-    <div className="admin-settings">
+    <div className="admin-settings news-form-page">
       <AppLoader fullscreen spinning={saving} tip="Saving…" />
 
       <header className="admin-settings__header">
@@ -257,6 +257,7 @@ export function AdminSettingsPage() {
                 onChange={handleColorChange}
                 disabledAlpha
                 size="large"
+                disabled
               />
               <Input
                 value={hexDraft}
@@ -266,6 +267,7 @@ export function AdminSettingsPage() {
                 maxLength={7}
                 className="admin-settings__hex"
                 aria-label="Primary color hex"
+                readOnly
               />
               {hexPending ? (
                 <AppButton type="default" className="admin-settings__hex-apply" onClick={applyHexColor}>
