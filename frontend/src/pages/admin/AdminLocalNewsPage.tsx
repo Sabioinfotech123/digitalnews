@@ -300,7 +300,10 @@ export function AdminLocalNewsPage() {
           <Space wrap>
             <Select
               value={state}
-              style={{ width: 160 }}
+              style={{ width: 180 }}
+              showSearch
+              optionFilterProp="label"
+              placeholder="Select state"
               options={states.map((s) => ({ value: s.value, label: s.label }))}
               onChange={handleStateChange}
               aria-label="State"

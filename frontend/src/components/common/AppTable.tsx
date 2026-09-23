@@ -176,6 +176,7 @@ export function AppTable<T extends object>({
                     showSizeChanger: true,
                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
                     ...pagination,
+                    pageSizeOptions: ['10', '20', '50'],
                   }
             }
           />

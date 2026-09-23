@@ -12,6 +12,7 @@ from app.api.v1 import (
     site_settings,
     taxonomy,
     verified_news,
+    videos,
 )
 
 api_router = APIRouter()
@@ -23,6 +24,7 @@ api_router.include_router(blogs.router)
 api_router.include_router(breaking_news.router)
 api_router.include_router(local_news.router)
 api_router.include_router(verified_news.router)
+api_router.include_router(videos.router)
 api_router.include_router(site_settings.router)
 api_router.include_router(taxonomy.router)
 api_router.include_router(media.router)

@@ -126,7 +126,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 
 ### Browse & add
 1. Sidebar → **Local feed** → **Local news**
-2. Filter by **State**, **date range**, and optional **city/topic** search
+2. Filter by **State** (searchable dropdown — includes **Hyderabad**), **date range**, and optional **city/topic** search
 3. Table shows **Google News** (feed) column — `Google News` by default, or `NewsAPI` if `NEWS_API_KEY` is set
 4. **View & add** → edit title/slug/content/image like create-news → save into Featured/Latest/…
 5. Imported CMS items get a **Local** flag

@@ -88,6 +88,12 @@ export function AdminLayout() {
         onClick: () => navigate('/admin/blogs/create'),
       },
       {
+        key: 'video',
+        icon: <i className="fa-solid fa-film" aria-hidden />,
+        label: t('admin.addVideo'),
+        onClick: () => navigate('/admin/videos/create'),
+      },
+      {
         key: 'user',
         icon: <i className="fa-solid fa-user-plus" aria-hidden />,
         label: t('admin.addUser'),

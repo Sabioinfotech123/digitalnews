@@ -324,7 +324,7 @@ Admin-only browse of regional headlines. Default provider: **Google News RSS** (
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| GET | `/admin/local-news/states` | Admin | State filter options |
+| GET | `/admin/local-news/states` | Admin | State/city filter options (includes **Hyderabad** plus common Indian states) |
 | GET | `/admin/local-news` | Admin | List headlines (`state`, `q`, `from_date`, `to_date`, `page`, `page_size`). Each item includes `is_verified`, `verified_id`, `verdict` when already AI-checked |
 | GET | `/admin/local-news/{id}` | Admin | Detail (must open from a recent list — cached ~1h) |
 | POST | `/admin/local-news/{id}/import` | Admin | Create CMS news from that article |
@@ -333,7 +333,7 @@ Admin-only browse of regional headlines. Default provider: **Google News RSS** (
 
 | Param | Default | Notes |
 |-------|---------|-------|
-| `state` | `Telangana` | Keyword boost for that state (e.g. Hyderabad + Telangana) |
+| `state` | `Telangana` | Keyword boost for that state/city (e.g. `Telangana`, `Hyderabad`) |
 | `q` | — | Extra city/topic keyword |
 | `from_date` / `to_date` | — | `YYYY-MM-DD` inclusive. Sent to Google as `after:`/`before:` and also filtered server-side (RSS often ignores date operators). If omitted, feed returns recent items (~last days) |
 | `page` / `page_size` | 1 / 10 | Pagination over fetched batch |

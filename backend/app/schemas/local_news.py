@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field
 
 from app.models.content import ContentLanguage, ContentStatus, NewsType
 
-# Common Indian states / UT for the Local news filter (keyword-based).
+# Common Indian states / UT / cities for the Local news filter (keyword-based).
 INDIA_STATES: list[str] = [
     "Telangana",
+    "Hyderabad",
     "Andhra Pradesh",
     "Karnataka",
     "Maharashtra",
