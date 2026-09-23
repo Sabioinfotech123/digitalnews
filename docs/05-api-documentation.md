@@ -177,6 +177,37 @@ Blogs have no `news_type` / breaking flags.
 
 ---
 
+## 6b) Videos (public + admin)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/videos` | Anyone | List **published** videos |
+| GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/admin/videos` | Admin | List all |
+| POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
+| GET | `/admin/videos/{id}` | Admin | Get one |
+| PATCH | `/admin/videos/{id}` | Admin | Update |
+| DELETE | `/admin/videos/{id}` | Admin | Soft delete |
+
+### Create video — important fields
+
+| Field | Required? | Notes |
+|-------|-----------|-------|
+| `title` / `slug` / `language` | Yes | Slug unique per language |
+| `description` | Yes (admin form) | Short summary |
+| `content` | Yes (admin form) | Full HTML body |
+| `category_id` / `tag_ids` | Optional | Same idea as news/blogs |
+| `video_url` | One of these | Uploaded file URL |
+| `youtube_url` | One of these | Full YouTube URL |
+| `thumbnail_url` | Required if `video_url` | Optional when YouTube-only |
+| `status` | Optional | default `draft` |
+| `sort_order` | Optional | lower first |
+| SEO fields | Optional | `seo_title` / `seo_description` / `seo_keywords` |
+
+At least one of `video_url` or `youtube_url` is required.
+
+---
+
 ## 7) Breaking news ticker
 
 Header ticker headlines (separate from `news.is_breaking`).

@@ -19,6 +19,9 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+        // Large video uploads (up to ~100MB) need more than the default proxy idle timeout
+        timeout: 600_000,
+        proxyTimeout: 600_000,
       },
     },
   },

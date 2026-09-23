@@ -1,74 +1,209 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { fetchPublicVideoBySlug, fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
-import { AppButton } from '@/components/common/AppButton'
+import { AppLoader } from '@/components/common/AppLoader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import { VideoCard } from '@/components/common/VideoCard'
 import { BRAND } from '@/config/brand'
-import { SAMPLE_VIDEOS } from '@/constants/sampleVideos'
+import type { VideoItem } from '@/types/content'
+import { stripHtml } from '@/utils/publicNews'
+import { mapApiVideoToCard, type PublicVideoCardModel } from '@/utils/publicVideo'
+import { extractYoutubeId, youtubeWatchUrl } from '@/utils/youtube'
 import './VideoDetailPage.scss'
+
+function NativeVideoPlayer({
+  src,
+  poster,
+  title,
+}: {
+  src: string
+  poster?: string
+  title: string
+}) {
+  return (
+    <div className="video-detail__player video-detail__player--native">
+      <video
+        key={src}
+        src={src}
+        poster={poster}
+        controls
+        playsInline
+        preload="metadata"
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        aria-label={title}
+      >
+        <track kind="captions" />
+      </video>
+    </div>
+  )
+}
 
 export function VideoDetailPage() {
   const { slug } = useParams()
-  const { t, uiLanguage } = useLanguage()
-  const video = SAMPLE_VIDEOS.find((item) => item.slug === slug)
+  const navigate = useNavigate()
+  const { t, contentLanguage } = useLanguage()
+  const [video, setVideo] = useState<VideoItem | null>(null)
+  const [related, setRelated] = useState<PublicVideoCardModel[]>([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  useDocumentTitle(video ? video.title[uiLanguage] : `Video | ${BRAND.name}`)
+  const goBack = () => navigate(-1)
 
-  if (!video) {
-    return <Navigate to="/videos" replace />
+  useDocumentTitle(video ? `${video.title} | ${BRAND.name}` : `Video | ${BRAND.name}`)
+
+  useEffect(() => {
+    if (!slug) {
+      setNotFound(true)
+      setLoading(false)
+      return
+    }
+
+    let active = true
+    setLoading(true)
+    setNotFound(false)
+    ;(async () => {
+      try {
+        const [item, list] = await Promise.all([
+          fetchPublicVideoBySlug(slug, contentLanguage),
+          fetchPublicVideos({ page: 1, page_size: 4, language: contentLanguage }),
+        ])
+        if (!active) return
+        setVideo(item)
+        setRelated(
+          list.items
+            .filter((row) => row.id !== item.id)
+            .slice(0, 3)
+            .map((row) => mapApiVideoToCard(row, contentLanguage)),
+        )
+      } catch {
+        if (!active) return
+        setVideo(null)
+        setRelated([])
+        setNotFound(true)
+      } finally {
+        if (active) setLoading(false)
+      }
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [slug, contentLanguage])
+
+  if (loading) {
+    return (
+      <main className="video-detail">
+        <div className="video-detail__container">
+          <AppLoader tip={t('videos.loadingArticle')} />
+        </div>
+      </main>
+    )
   }
 
-  const related = SAMPLE_VIDEOS.filter((item) => item.id !== video.id && !item.isShort).slice(0, 3)
+  if (notFound || !video) {
+    return (
+      <main className="video-detail">
+        <div className="video-detail__container">
+          <p className="video-detail__empty">{t('videos.articleNotFound')}</p>
+          <button type="button" className="video-detail__back" onClick={goBack}>
+            ← {t('videos.back')}
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  const file = video.video_url?.trim() || null
+  const yt = video.youtube_url?.trim() || null
+  const thumb = video.thumbnail_url?.trim() || undefined
+  const ytId = extractYoutubeId(yt)
+  const watchHref = yt ? youtubeWatchUrl(yt) : null
+  const excerpt = stripHtml(video.description)
   const sourceLabel =
-    video.source === 'youtube'
-      ? t('videos.youtube')
-      : video.source === 'tv'
-        ? t('videos.tvChannel')
+    file && yt
+      ? t('videos.websiteUpload')
+      : yt
+        ? t('videos.youtube')
         : t('videos.websiteUpload')
 
   return (
     <main className="video-detail">
-      <div className="video-detail__container mx-auto max-w-[960px] px-5 py-6 pb-12">
-        <div className="video-detail__player" style={{ background: video.accent }}>
-          <i className="fa-solid fa-circle-play video-detail__play-icon" aria-hidden />
-          <span className="video-detail__duration">{video.duration}</span>
+      <div className="video-detail__container">
+        <button type="button" className="video-detail__back" onClick={goBack}>
+          ← {t('videos.back')}
+        </button>
+
+        <div className="video-detail__media">
+          {file ? (
+            <NativeVideoPlayer src={file} poster={thumb} title={video.title} />
+          ) : ytId ? (
+            <div className="video-detail__player video-detail__player--embed">
+              <iframe
+                src={`https://www.youtube.com/embed/${ytId}`}
+                title={video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          ) : null}
+
+          {file && yt && watchHref ? (
+            <a
+              className="video-detail__yt-card"
+              href={watchHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="video-detail__yt-icon" aria-hidden>
+                <i className="fa-brands fa-youtube" />
+              </span>
+              <span className="video-detail__yt-copy">
+                <span className="video-detail__yt-label">{t('videos.watchOnYoutube')}</span>
+                <span className="video-detail__yt-title">{video.title}</span>
+              </span>
+              <span className="video-detail__yt-arrow" aria-hidden>
+                <i className="fa-solid fa-arrow-up-right-from-square" />
+              </span>
+            </a>
+          ) : null}
         </div>
 
-        <div className="video-detail__meta flex flex-wrap gap-2">
-          <span className="video-detail__category">{video.category[uiLanguage]}</span>
+        <div className="video-detail__meta">
+          {video.category_name ? (
+            <span className="video-detail__category">{video.category_name}</span>
+          ) : null}
           <span className="video-detail__source">{sourceLabel}</span>
         </div>
-        <h1 className="video-detail__title font-heading text-ink">{video.title[uiLanguage]}</h1>
-        <p className="video-detail__desc text-ink-muted">{video.description[uiLanguage]}</p>
-        <p className="video-detail__time text-ink-muted">{video.publishedLabel[uiLanguage]}</p>
 
-        <div className="video-detail__actions mt-5 flex flex-wrap gap-2.5">
-          <AppButton
-            type="primary"
-            className="btn-soft-primary"
-            icon={<i className="fa-solid fa-circle-play" aria-hidden />}
-          >
-            {t('videos.play')}
-          </AppButton>
-          <a href={BRAND.youtubeChannelUrl} target="_blank" rel="noopener noreferrer">
-            <AppButton icon={<i className="fa-brands fa-youtube" aria-hidden />}>
-              {t('videos.watchOnYoutube')}
-            </AppButton>
-          </a>
-          <Link to="/live">
-            <AppButton>{t('videos.watchLive')}</AppButton>
-          </Link>
-        </div>
+        <h1 className="video-detail__title">{video.title}</h1>
+        {excerpt ? <p className="video-detail__desc">{excerpt}</p> : null}
 
-        <section className="video-detail__related mt-10">
-          <SectionHeader title={t('videos.relatedVideos')} moreLabel={t('videos.viewAllVideos')} moreTo="/videos" />
-          <div className="video-detail__grid grid gap-4 md:grid-cols-3">
-            {related.map((item) => (
-              <VideoCard key={item.id} video={item} />
-            ))}
-          </div>
-        </section>
+        {video.content ? (
+          <div
+            className="video-detail__body"
+            dangerouslySetInnerHTML={{ __html: video.content }}
+          />
+        ) : null}
+
+        {related.length > 0 ? (
+          <section className="video-detail__related">
+            <SectionHeader
+              title={t('videos.relatedVideos')}
+              moreLabel={t('videos.viewAllVideos')}
+              moreTo="/videos"
+            />
+            <div className="video-detail__grid">
+              {related.map((item) => (
+                <VideoCard key={item.id} video={item} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   )

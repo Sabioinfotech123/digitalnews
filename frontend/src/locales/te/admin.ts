@@ -45,5 +45,6 @@ export const admin = {
   addTrendingNews: 'ట్రెండింగ్ వార్త',
   addMoreNews: 'మరిన్ని వార్తలు',
   addBlog: 'బ్లాగ్',
+  addVideo: 'వీడియో',
   addUser: 'వినియోగదారు',
 } as const

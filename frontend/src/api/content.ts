@@ -9,7 +9,10 @@ import type {
   NewsPayload,
   PaginatedBlogs,
   PaginatedNews,
+  PaginatedVideos,
   TagItem,
+  VideoItem,
+  VideoPayload,
 } from '@/types/content'
 
 export async function fetchAdminNews(params: {
@@ -205,4 +208,57 @@ export async function updateBreakingNews(
 
 export async function deleteBreakingNews(id: string): Promise<void> {
   await apiClient.delete(`/admin/breaking-news/${id}`)
+}
+
+export async function fetchAdminVideos(params: {
+  page?: number
+  page_size?: number
+  search?: string
+  language?: string
+  status?: string
+}): Promise<PaginatedVideos> {
+  const { data } = await apiClient.get<PaginatedVideos>('/admin/videos', { params })
+  return data
+}
+
+export async function fetchAdminVideoById(id: string): Promise<VideoItem> {
+  const { data } = await apiClient.get<VideoItem>(`/admin/videos/${id}`)
+  return data
+}
+
+export async function createAdminVideo(payload: VideoPayload): Promise<VideoItem> {
+  const { data } = await apiClient.post<VideoItem>('/admin/videos', payload)
+  return data
+}
+
+export async function updateAdminVideo(
+  id: string,
+  payload: Partial<VideoPayload>,
+): Promise<VideoItem> {
+  const { data } = await apiClient.patch<VideoItem>(`/admin/videos/${id}`, payload)
+  return data
+}
+
+export async function deleteAdminVideo(id: string): Promise<void> {
+  await apiClient.delete(`/admin/videos/${id}`)
+}
+
+export async function fetchPublicVideos(params: {
+  page?: number
+  page_size?: number
+  search?: string
+  language?: string
+}): Promise<PaginatedVideos> {
+  const { data } = await apiClient.get<PaginatedVideos>('/videos', { params })
+  return data
+}
+
+export async function fetchPublicVideoBySlug(
+  slug: string,
+  language?: string,
+): Promise<VideoItem> {
+  const { data } = await apiClient.get<VideoItem>(`/videos/${slug}`, {
+    params: language ? { language } : undefined,
+  })
+  return data
 }

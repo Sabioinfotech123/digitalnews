@@ -64,6 +64,8 @@ class NewsCreate(BaseModel):
     is_local: bool = False
     sort_order: int = 0
     image_url: str = Field(min_length=1, max_length=500)
+    video_url: str | None = Field(default=None, max_length=500)
+    youtube_url: str | None = Field(default=None, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None
@@ -85,6 +87,8 @@ class NewsUpdate(BaseModel):
     is_local: bool | None = None
     sort_order: int | None = Field(default=None, ge=0)
     image_url: str | None = Field(default=None, min_length=1, max_length=500)
+    video_url: str | None = Field(default=None, max_length=500)
+    youtube_url: str | None = Field(default=None, max_length=500)
     seo_title: str | None = None
     seo_description: str | None = None
     seo_keywords: str | None = None
@@ -109,6 +113,8 @@ class NewsResponse(BaseModel):
     is_local: bool = False
     sort_order: int = 0
     image_url: str | None = None
+    video_url: str | None = None
+    youtube_url: str | None = None
     seo_title: str | None
     seo_description: str | None
     seo_keywords: str | None
@@ -219,3 +225,74 @@ class BreakingNewsResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class VideoCreate(BaseModel):
+    title: str = Field(min_length=3, max_length=300)
+    slug: str = Field(min_length=3, max_length=320)
+    language: ContentLanguage
+    description: str | None = None
+    content: str = ""
+    category_id: str | None = None
+    tag_ids: list[str] = Field(default_factory=list)
+    video_url: str | None = Field(default=None, max_length=500)
+    youtube_url: str | None = Field(default=None, max_length=500)
+    thumbnail_url: str | None = Field(default=None, max_length=500)
+    status: ContentStatus = ContentStatus.draft
+    sort_order: int = 0
+    seo_title: str | None = None
+    seo_description: str | None = None
+    seo_keywords: str | None = None
+    published_at: datetime | None = None
+
+
+class VideoUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=3, max_length=300)
+    slug: str | None = Field(default=None, min_length=3, max_length=320)
+    language: ContentLanguage | None = None
+    description: str | None = None
+    content: str | None = None
+    category_id: str | None = None
+    tag_ids: list[str] | None = None
+    video_url: str | None = Field(default=None, max_length=500)
+    youtube_url: str | None = Field(default=None, max_length=500)
+    thumbnail_url: str | None = Field(default=None, max_length=500)
+    status: ContentStatus | None = None
+    sort_order: int | None = Field(default=None, ge=0)
+    seo_title: str | None = None
+    seo_description: str | None = None
+    seo_keywords: str | None = None
+    published_at: datetime | None = None
+
+
+class VideoResponse(BaseModel):
+    id: str
+    title: str
+    slug: str
+    language: ContentLanguage
+    description: str | None
+    content: str = ""
+    category_id: str | None = None
+    category_name: str | None = None
+    video_url: str | None
+    youtube_url: str | None
+    thumbnail_url: str | None
+    status: ContentStatus
+    sort_order: int
+    seo_title: str | None = None
+    seo_description: str | None = None
+    seo_keywords: str | None = None
+    view_count: int
+    published_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+    tags: list[TagResponse] = Field(default_factory=list)
+
+    model_config = {"from_attributes": True}
+
+
+class PaginatedVideos(BaseModel):
+    items: list[VideoResponse]
+    total: int
+    page: int
+    page_size: int
