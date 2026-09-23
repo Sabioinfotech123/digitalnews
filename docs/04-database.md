@@ -115,6 +115,7 @@ These are fixed options used in several tables:
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
 | `is_local` | Added from **Local news** import |
+| `sort_order` | Display order within type (lower = first on public site) |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -123,7 +124,8 @@ These are fixed options used in several tables:
 
 **Rule:** Same slug can exist once in English and once in Telugu (`UNIQUE(language, slug)`).
 
-`is_local` added in migration `0006_news_is_local.py`.
+`is_local` added in migration `0006_news_is_local.py`.  
+`sort_order` added in migration `0008_news_sort_order.py`. Lists (admin + public) order by `sort_order ASC`, then `created_at DESC`.
 
 ---
 

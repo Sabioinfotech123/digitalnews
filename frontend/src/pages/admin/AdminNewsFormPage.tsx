@@ -1,4 +1,4 @@
-import { App, Col, Form, Input, Row, Select, Space, Switch, Typography } from 'antd'
+import { App, Col, Form, Input, InputNumber, Row, Select, Space, Switch, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -107,6 +107,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
             news_type: lockedType,
             is_featured: lockedType === 'featured',
             is_breaking: false,
+            sort_order: 0,
             image_url: null,
             content: '',
             short_description: '',
@@ -273,6 +274,14 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
                     { value: 'scheduled', label: 'Scheduled' },
                   ]}
                 />
+              </Form.Item>
+
+              <Form.Item
+                name="sort_order"
+                label="Display order"
+                tooltip="Lower number shows first on the public site (0, 1, 2…)"
+              >
+                <InputNumber min={0} step={1} className="w-full" />
               </Form.Item>
 
               <Form.Item name="category_id" label="Category">
