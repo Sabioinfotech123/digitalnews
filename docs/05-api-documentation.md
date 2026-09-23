@@ -266,7 +266,11 @@ Optional query: `?search=sports`
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| POST | `/admin/media/upload` | Admin | Upload image to S3, get public URL |
+| POST | `/admin/media/upload` | Admin | Upload image/thumbnail (multipart) to S3, get public URL |
+| POST | `/admin/media/multipart/start` | Admin | Start chunked **video** upload |
+| POST | `/admin/media/multipart/{id}/parts/{n}` | Admin | Upload one video chunk |
+| POST | `/admin/media/multipart/complete` | Admin | Finish chunked video upload → public URL |
+| POST | `/admin/media/multipart/{id}/abort` | Admin | Cancel chunked upload |
 
 Send as **multipart/form-data**:
 

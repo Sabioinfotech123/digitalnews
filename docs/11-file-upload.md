@@ -2,14 +2,22 @@
 
 ## Flow (S3 only)
 
+**Images / thumbnails** (small):
+
 ```
 Admin picks file
-  → FE sends binary (multipart FormData)
-  → BE validates MIME + size
-  → Upload to AWS S3
-  → BE returns { url, key, ... }
-  → FE stores url on news.image_url / news.video_url / videos.video_url / thumbnail
-  → Save content
+  → FE multipart → API validates → API put_object → S3
+  → FE stores returned url
+```
+
+**Videos** (chunked — size counter advances):
+
+```
+Admin picks video
+  → FE POST /admin/media/multipart/start
+  → FE sends 5MB parts → API upload_part → S3 (repeat)
+  → FE POST /admin/media/multipart/complete
+  → FE stores public url on videos.video_url
 ```
 
 AWS keys stay in `backend/.env` only — never in the frontend.
@@ -42,6 +50,17 @@ Bucket objects must be readable publicly (bucket policy `s3:GetObject`) so image
 - multipart: `file`, `kind` (`image` | `thumbnail` | `video`), `folder` (`news` | `videos`)
 - response: `{ key, url, content_type, size_bytes, original_filename, media_kind }`
 
+### Video chunked upload
+
+| Method | Path | What |
+|--------|------|------|
+| POST | `/admin/media/multipart/start` | JSON `{ kind, folder, filename, content_type, size_bytes }` → `{ session_id, part_size }` |
+| POST | `/admin/media/multipart/{session_id}/parts/{n}` | multipart `file` (one chunk) |
+| POST | `/admin/media/multipart/complete` | JSON `{ session_id }` → same as upload response |
+| POST | `/admin/media/multipart/{session_id}/abort` | Cancel |
+
+Part size is **5MB** (S3 minimum for non-final parts). The UI shows **uploaded / total** while parts run.
+
 ## Allowed types
 
 - Images / thumbnails: jpeg, png, webp, gif (max `MAX_IMAGE_SIZE_MB`)
@@ -49,12 +68,7 @@ Bucket objects must be readable publicly (bucket policy `s3:GetObject`) so image
 
 ## Timeouts (large videos)
 
-Upload goes browser → API → S3. Default axios timeout (20s) is too short for video.
-
 | Layer | Limit |
 |-------|--------|
-| FE `uploadMediaFile` | image/thumbnail **2 min**; video **10 min** |
-| Vite dev proxy | **10 min** |
+| FE part / upload requests | image/thumbnail **2 min**; video **10 min** |
 | nginx `/api/` (QA/prod) | `proxy_send_timeout` / `proxy_read_timeout` **600s** |
-
-Progress in the uploader is an indeterminate sliding bar (no %) while the request runs.

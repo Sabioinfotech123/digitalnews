@@ -101,6 +101,17 @@ function uploadErrorMessage(err: unknown, isVideo: boolean): string {
   return getApiErrorMessage(err, isVideo ? 'Video upload failed' : 'File upload failed')
 }
 
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return '0 B'
+  if (bytes < 1024) return `${Math.round(bytes)} B`
+  const mb = bytes / (1024 * 1024)
+  if (mb < 0.1) {
+    const kb = bytes / 1024
+    return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`
+  }
+  return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`
+}
+
 export function MediaUploader({
   value,
   onChange,
@@ -113,26 +124,54 @@ export function MediaUploader({
 }: MediaUploaderProps) {
   const { message } = App.useApp()
   const [uploading, setUploading] = useState(false)
+  const [loadedBytes, setLoadedBytes] = useState(0)
+  const [totalBytes, setTotalBytes] = useState(0)
   const isVideo = kind === 'video'
   const isThumbnail = kind === 'thumbnail'
   const enforceVideoSixteenNine = requireSixteenNine || isVideo
   const resolvedAccept = accept ?? (isVideo ? VIDEO_ACCEPT : IMAGE_ACCEPT)
 
   const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+    const total = (file as File).size
     setUploading(true)
+    setLoadedBytes(0)
+    setTotalBytes(total)
+
+    // Keep the size counter moving while API↔S3 works (XHR often jumps to 100% early).
+    const startedAt = Date.now()
+    const bytesPerSec = Math.max(320 * 1024, Math.min(total / 6, 1.25 * 1024 * 1024))
+    let reportedLoaded = 0
+    const tick = window.setInterval(() => {
+      const elapsed = (Date.now() - startedAt) / 1000
+      const estimated = Math.min(total * 0.99, Math.floor(elapsed * bytesPerSec))
+      setLoadedBytes((prev) => Math.max(prev, reportedLoaded, estimated))
+    }, 200)
+
     try {
       if (enforceVideoSixteenNine) {
         await assertVideoSixteenByNine(file as File)
       } else if (isThumbnail) {
         await assertThumbnailNotNineBySixteen(file as File)
       }
-      const result = await uploadMediaFile(file as File, { kind, folder })
+      const result = await uploadMediaFile(file as File, {
+        kind,
+        folder,
+        onProgress: (loaded, progressTotal) => {
+          reportedLoaded = loaded
+          setTotalBytes(progressTotal)
+          setLoadedBytes((prev) => Math.max(prev, loaded))
+        },
+      })
+      setLoadedBytes(total)
       onChange?.(result.url)
       message.success(isVideo ? 'Video uploaded successfully' : 'File uploaded successfully')
     } catch (err) {
       message.error(uploadErrorMessage(err, isVideo))
     } finally {
+      window.clearInterval(tick)
       setUploading(false)
+      setLoadedBytes(0)
+      setTotalBytes(0)
     }
     return false
   }
@@ -151,6 +190,11 @@ export function MediaUploader({
     </Upload>
   )
 
+  const progressLabel =
+    totalBytes > 0
+      ? `${formatBytes(Math.min(loadedBytes, totalBytes))} / ${formatBytes(totalBytes)}`
+      : 'Uploading…'
+
   const loaderBlock = (overlay = false) =>
     uploading ? (
       <div
@@ -159,10 +203,8 @@ export function MediaUploader({
         aria-live="polite"
         aria-busy="true"
       >
-        <div className="media-uploader__slider" aria-hidden>
-          <span className="media-uploader__slider-bar" />
-        </div>
-        <p className="media-uploader__progress-text">Uploading… please wait</p>
+        <p className="media-uploader__progress-size">{progressLabel}</p>
+        <p className="media-uploader__progress-text">Uploading…</p>
       </div>
     ) : null
 
