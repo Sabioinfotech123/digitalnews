@@ -180,17 +180,18 @@ You can create from:
 | Category | Pick from Catalog |
 | Tags | Pick one or more |
 | Breaking | Optional flag |
+| **Display order** | Lower number shows first on the public homepage for that type (0, 1, 2…) |
 | SEO fields | Optional |
 
 4. Click **Create news**
 
 **After create:** you stay on edit page for that item (easy to fix and re-save).
 
-### 3C) Edit news
+### 3C) Edit news / change order
 
-1. Open list (All news or typed list)
-2. Click **Edit** (pencil)
-3. Change fields → **Save changes**
+1. Open a typed list (**Featured** / **Latest** / **Trending** / **More**) — Order is not shown on **All news**
+2. Change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
+3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
 
 ### 3D) Delete news
 

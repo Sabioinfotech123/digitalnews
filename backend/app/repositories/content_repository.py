@@ -133,7 +133,11 @@ class NewsRepository:
             count_stmt = count_stmt.where(filter_expr)
 
         total = int(self.db.scalar(count_stmt) or 0)
-        stmt = stmt.order_by(News.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        stmt = (
+            stmt.order_by(News.sort_order.asc(), News.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         return list(self.db.scalars(stmt).all()), total
 
     def get(self, news_id: str) -> News | None:
@@ -144,6 +148,23 @@ class NewsRepository:
         if language:
             stmt = stmt.where(News.language == language)
         return self.db.scalar(stmt)
+
+    def get_by_sort_order(
+        self,
+        *,
+        news_type: NewsType,
+        language: ContentLanguage,
+        sort_order: int,
+        exclude_id: str | None = None,
+    ) -> News | None:
+        stmt = self._base().where(
+            News.news_type == news_type,
+            News.language == language,
+            News.sort_order == sort_order,
+        )
+        if exclude_id:
+            stmt = stmt.where(News.id != exclude_id)
+        return self.db.scalar(stmt.order_by(News.created_at.desc()).limit(1))
 
     def increment_view(self, news_id: str) -> None:
         self.db.execute(

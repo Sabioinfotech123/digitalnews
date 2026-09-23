@@ -49,6 +49,7 @@ def _news_response(item: News) -> NewsResponse:
         is_featured=item.is_featured,
         is_breaking=item.is_breaking,
         is_local=bool(getattr(item, "is_local", False)),
+        sort_order=int(getattr(item, "sort_order", 0) or 0),
         image_url=item.image_url,
         seo_title=item.seo_title,
         seo_description=item.seo_description,
@@ -189,6 +190,7 @@ class NewsService:
             is_featured=is_featured,
             is_breaking=payload.is_breaking,
             is_local=payload.is_local,
+            sort_order=max(0, int(payload.sort_order or 0)),
             image_url=payload.image_url,
             seo_title=payload.seo_title,
             seo_description=payload.seo_description,
@@ -211,6 +213,25 @@ class NewsService:
             clash = self.repo.get_by_slug(next_slug, next_language)
             if clash and clash.id != item.id:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+
+        # Swap display order within same type + language when target slot is taken.
+        if "sort_order" in data:
+            new_order = max(0, int(data["sort_order"] or 0))
+            old_order = int(getattr(item, "sort_order", 0) or 0)
+            data["sort_order"] = new_order
+            if new_order != old_order:
+                target_type = data.get("news_type", item.news_type)
+                target_lang = data.get("language", item.language)
+                other = self.repo.get_by_sort_order(
+                    news_type=target_type,
+                    language=target_lang,
+                    sort_order=new_order,
+                    exclude_id=item.id,
+                )
+                if other:
+                    other.sort_order = old_order
+                    self.repo.db.add(other)
+
         for key, value in data.items():
             setattr(item, key, value)
         if "news_type" in data:
