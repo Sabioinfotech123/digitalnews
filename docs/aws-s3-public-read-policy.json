@@ -9,6 +9,7 @@
       "Resource": [
         "arn:aws:s3:::digitalnews-media/news/*",
         "arn:aws:s3:::digitalnews-media/brand/*",
+        "arn:aws:s3:::digitalnews-media/videos/*",
         "arn:aws:s3:::digitalnews-media/thumbnails/*"
       ]
     }

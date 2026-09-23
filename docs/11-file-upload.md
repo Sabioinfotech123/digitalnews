@@ -8,8 +8,8 @@ Admin picks file
   → BE validates MIME + size
   → Upload to AWS S3
   → BE returns { url, key, ... }
-  → FE stores url on news.image_url (or video thumbnail later)
-  → Save news
+  → FE stores url on news.image_url / news.video_url / videos.video_url / thumbnail
+  → Save content
 ```
 
 AWS keys stay in `backend/.env` only — never in the frontend.
@@ -18,8 +18,9 @@ AWS keys stay in `backend/.env` only — never in the frontend.
 
 | Content | Media field | Required |
 |---------|-------------|----------|
-| News (featured / latest / trending / more) | `image_url` | Yes (admin form) |
-| Video | `thumbnail_url` | Optional (`kind=thumbnail`) |
+| News | `image_url` | Yes (admin form) |
+| Videos catalog | `video_url` and/or `youtube_url` | At least one; uploaded video must be **16:9** |
+| Videos catalog | `thumbnail_url` | Required if `video_url` is set; any size **except 9:16**; optional for YouTube-only |
 
 ## Env (`backend/.env`)
 
@@ -45,3 +46,15 @@ Bucket objects must be readable publicly (bucket policy `s3:GetObject`) so image
 
 - Images / thumbnails: jpeg, png, webp, gif (max `MAX_IMAGE_SIZE_MB`)
 - Videos: mp4, webm (max `MAX_VIDEO_SIZE_MB`)
+
+## Timeouts (large videos)
+
+Upload goes browser → API → S3. Default axios timeout (20s) is too short for video.
+
+| Layer | Limit |
+|-------|--------|
+| FE `uploadMediaFile` | image/thumbnail **2 min**; video **10 min** |
+| Vite dev proxy | **10 min** |
+| nginx `/api/` (QA/prod) | `proxy_send_timeout` / `proxy_read_timeout` **600s** |
+
+Progress in the uploader is an indeterminate sliding bar (no %) while the request runs.

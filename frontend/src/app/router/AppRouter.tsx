@@ -26,6 +26,8 @@ import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
 import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
+import { AdminVideoCreatePage, AdminVideoEditPage } from '@/pages/admin/AdminVideoFormPage'
+import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
 import { BlogsPage } from '@/pages/public/BlogsPage'
 import { HomePage } from '@/pages/public/HomePage'
@@ -54,7 +56,7 @@ function Placeholder({ title }: { title: string }) {
 function AdminModule({
   titleKey,
 }: {
-  titleKey: 'admin.videos' | 'admin.media' | 'admin.profile'
+  titleKey: 'admin.media' | 'admin.profile'
 }) {
   const { t } = useLanguage()
   return <AdminSectionPage title={t(titleKey)} />
@@ -97,7 +99,9 @@ export function AppRouter() {
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="blogs/create" element={<AdminBlogCreatePage />} />
           <Route path="blogs/edit/:id" element={<AdminBlogEditPage />} />
-          <Route path="videos" element={<AdminModule titleKey="admin.videos" />} />
+          <Route path="videos" element={<AdminVideosPage />} />
+          <Route path="videos/create" element={<AdminVideoCreatePage />} />
+          <Route path="videos/edit/:id" element={<AdminVideoEditPage />} />
           <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="tags" element={<AdminTagsPage />} />

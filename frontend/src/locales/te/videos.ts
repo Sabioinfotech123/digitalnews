@@ -9,6 +9,7 @@ export const videos = {
   watchOnYoutube: 'YouTubeలో చూడండి',
   subscribeYoutube: 'YouTubeలో సబ్‌స్క్రైబ్',
   viewAllVideos: 'అన్ని వీడియోలు',
+  back: 'వెనుకకు',
   duration: 'నిడివి',
   play: 'ప్లే',
   comingSoon: 'లైవ్ స్ట్రీమ్ కాన్ఫిగర్ అయిన తర్వాత ఇక్కడ కనిపిస్తుంది',
@@ -17,4 +18,8 @@ export const videos = {
   tvChannel: 'టీవీ ఛానల్',
   relatedVideos: 'సంబంధిత వీడియోలు',
   featuredVideo: 'ఫీచర్డ్ వీడియో',
+  loadingList: 'వీడియోలు లోడ్ అవుతున్నాయి…',
+  loadingArticle: 'వీడియో లోడ్ అవుతోంది…',
+  emptyList: 'ఇంకా వీడియోలు ప్రచురించబడలేదు.',
+  articleNotFound: 'వీడియో కనబడలేదు',
 } as const

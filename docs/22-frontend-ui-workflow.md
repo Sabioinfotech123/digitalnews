@@ -45,6 +45,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Local feed → Local news** | Browse regional headlines → verify with AI or add to CMS |
 | **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
+| **Videos** | Upload video file and/or YouTube URL; list + create/edit |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
 | Header **Add** button | Quick shortcuts to create things |
@@ -230,6 +231,23 @@ Categories + Tags ready  →  Blogs → Create / Edit / Delete
 ### Edit / Delete
 
 Same pattern as news: pencil / trash on the blog table.
+
+---
+
+## Step 4.5 — Videos workflow
+
+1. Sidebar → **Videos** (or header **Add → Video**)
+2. **+ Create video**
+3. Fill title, slug, language, status
+4. **Short description** + **Content** (rich editor — same as news)
+5. Provide **at least one**:
+   - **Video file** — upload mp4/webm (**16:9 only**)
+   - **YouTube URL** — paste a full YouTube link
+6. Category, tags, SEO (same as news/blogs). **Thumbnail required** if you upload a video file (any size except **9:16**); optional for YouTube-only → Create
+
+**Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
+
+**Public site:** published videos show on Home → Latest Videos, `/videos` list, and `/videos/:slug` detail (uploaded file plays; if YouTube is also set, a YouTube link card shows below).
 
 ---
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchPublicNews } from '@/api/content'
+import { fetchPublicNews, fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { FeaturedNewsSection } from '@/components/news/FeaturedNewsSection'
 import { HomeNewsSkeleton } from '@/components/news/HomeNewsSkeleton'
@@ -9,13 +9,13 @@ import { TrendingNewsSection } from '@/components/news/TrendingNewsSection'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import { VideoCard } from '@/components/common/VideoCard'
 import { sampleNewsByType } from '@/constants/sampleNews'
-import { SAMPLE_VIDEOS } from '@/constants/sampleVideos'
 import type { NewsType } from '@/types/content'
 import {
   mapApiNewsToCard,
   mapSampleNewsToCard,
   type PublicNewsCardModel,
 } from '@/utils/publicNews'
+import { mapApiVideoToCard, type PublicVideoCardModel } from '@/utils/publicVideo'
 import './HomePage.scss'
 
 const NEWS_TYPE_LIMITS: Record<NewsType, number> = {
@@ -50,25 +50,28 @@ export function HomePage() {
   const [latest, setLatest] = useState<PublicNewsCardModel[]>([])
   const [trending, setTrending] = useState<PublicNewsCardModel[]>([])
   const [more, setMore] = useState<PublicNewsCardModel[]>([])
+  const [videos, setVideos] = useState<PublicVideoCardModel[]>([])
   const [loading, setLoading] = useState(true)
-
-  const videos = SAMPLE_VIDEOS.filter((v) => !v.isShort).slice(0, 2)
 
   useEffect(() => {
     let active = true
     setLoading(true)
     ;(async () => {
-      const [featuredItems, latestItems, trendingItems, moreItems] = await Promise.all([
+      const [featuredItems, latestItems, trendingItems, moreItems, videoList] = await Promise.all([
         loadType('featured', contentLanguage),
         loadType('latest', contentLanguage),
         loadType('trending', contentLanguage),
         loadType('more', contentLanguage),
+        fetchPublicVideos({ page: 1, page_size: 2, language: contentLanguage })
+          .then((data) => data.items.map((item) => mapApiVideoToCard(item, contentLanguage)))
+          .catch(() => [] as PublicVideoCardModel[]),
       ])
       if (!active) return
       setFeatured(featuredItems)
       setLatest(latestItems)
       setTrending(trendingItems)
       setMore(moreItems)
+      setVideos(videoList)
       setLoading(false)
     })()
     return () => {
@@ -93,18 +96,20 @@ export function HomePage() {
           </>
         )}
 
-        <section className="home__section">
-          <SectionHeader
-            title={t('videos.latestVideos')}
-            moreLabel={t('videos.viewAllVideos')}
-            moreTo="/videos"
-          />
-          <div className="home__videos">
-            {videos.map((video) => (
-              <VideoCard key={video.id} video={video} />
-            ))}
-          </div>
-        </section>
+        {videos.length > 0 ? (
+          <section className="home__section">
+            <SectionHeader
+              title={t('videos.latestVideos')}
+              moreLabel={t('videos.viewAllVideos')}
+              moreTo="/videos"
+            />
+            <div className="home__videos">
+              {videos.map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   )

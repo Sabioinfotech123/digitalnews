@@ -30,6 +30,10 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 └────────────────┘
 
 ┌────────────────┐
+│    videos      │  (uploaded file and/or YouTube URL)
+└────────────────┘
+
+┌────────────────┐
 │ site_settings  │  (logo + favicon + primary color — one row)
 └────────────────┘
 ```
@@ -39,6 +43,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Categories** group content (Sports, Tech…).
 - **Tags** can be attached to many news/blogs.
 - **News** and **Blogs** are the main articles.
+- **Videos** are a separate catalog (file upload and/or YouTube), with category/tags/SEO like blogs.
 - **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
 - **Site settings** stores the website logo, favicon, and primary color.
 
@@ -203,7 +208,36 @@ Migrations: `0004_site_settings.py`, `0005_site_settings_favicon.py`
 
 ---
 
-### 10) `verified_local_news` — AI credibility checks
+### 10) `videos` — video catalog
+
+Admin → **Videos**. Each row needs at least one source: uploaded file and/or YouTube URL.
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Unique ID |
+| `title` / `slug` / `language` | Same idea as news (`UNIQUE(language, slug)`) |
+| `description` | Short summary |
+| `content` | Full body HTML (same idea as news content) |
+| `category_id` | Optional category |
+| `video_url` | Uploaded file URL (optional if YouTube set) |
+| `youtube_url` | YouTube link (optional if file set) |
+| `thumbnail_url` | Poster image — **required** if a video file is uploaded; optional for YouTube-only |
+| `status` | draft / published / … |
+| `sort_order` | Display order (lower first) |
+| `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
+| `view_count` | Views |
+| `published_at` | When published |
+| `created_at` / `updated_at` / `deleted_at` | Timestamps + soft delete |
+
+Also: `video_tags` links videos ↔ tags (same pattern as `news_tags` / `blog_tags`).
+
+Migration: `0009_news_and_videos_media.py`  
+`content` added in `0010_videos_content.py`  
+Category / SEO / tags in `0011_videos_catalog_fields.py`
+
+---
+
+### 11) `verified_local_news` — AI credibility checks
 
 Saved when admin runs **Verify** on a Local feed article.
 
@@ -265,4 +299,4 @@ A: Same title/slug can exist in English and Telugu as separate posts.
 A: Public article open increments it. Admin tables show Views.
 
 **Q: Are videos in DB?**  
-A: Not yet as a full table in current backend (dashboard shows videos = 0 for now).
+A: Yes — `videos` table (+ `video_tags`). Managed under Admin → Videos.

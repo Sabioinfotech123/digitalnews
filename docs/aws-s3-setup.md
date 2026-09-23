@@ -9,11 +9,12 @@ Upload uses your IAM key (`s3:PutObject`).
 Opening the URL in a browser uses **anonymous** `s3:GetObject`.  
 If public read is missing for that prefix → **AccessDenied**.
 
-This often happens for **logo / `brand/`** when the bucket policy only allows `news/*`.
+This often happens for **logo / `brand/`** or **videos / `videos/`** when the bucket policy only allows `news/*`.
 
 ### Fix (AWS Console) — public read for media objects
 
-1. Open **S3 → Buckets → digitalnews-media → Permissions**
+1. Open **S3 → Buckets → digitalnews-media → Permissions**  
+   (use your real bucket name if different, e.g. `digitalnews-media-prod`)
 2. **Block public access** → Edit  
    - Turn **off** “Block all public access”  
    - Or at least allow public bucket policies  
@@ -32,6 +33,7 @@ This often happens for **logo / `brand/`** when the bucket policy only allows `n
       "Resource": [
         "arn:aws:s3:::digitalnews-media/news/*",
         "arn:aws:s3:::digitalnews-media/brand/*",
+        "arn:aws:s3:::digitalnews-media/videos/*",
         "arn:aws:s3:::digitalnews-media/thumbnails/*"
       ]
     }
@@ -40,13 +42,23 @@ This often happens for **logo / `brand/`** when the bucket policy only allows `n
 ```
 
 4. Save  
-5. Open the logo URL again (hard refresh). No re-upload needed.
+5. Open the video / logo URL again (hard refresh). No re-upload needed.
 
-If your existing policy already has `"Resource": "arn:aws:s3:::digitalnews-media/*"`, logos should work — then check Block public access instead.
+If your existing policy already has `"Resource": "arn:aws:s3:::digitalnews-media/*"`, videos should work — then check Block public access instead.
+
+### Prefixes the app uses
+
+| Folder / prefix | Used for |
+|-----------------|----------|
+| `news/` | News cover images + news article video files |
+| `brand/` | Logo + favicon (Settings) |
+| `videos/` | Videos admin uploads (`folder=videos`) |
+| `thumbnails/` | Optional video thumbnails (`kind=thumbnail`) |
 
 ### IAM user (upload permission)
 
-Attach `docs/aws-s3-iam-policy.json` to the IAM user in `.env` so Put/Get/Delete work on this bucket (including `brand/`).
+Attach `docs/aws-s3-iam-policy.json` to the IAM user in `.env` so Put/Get/Delete work on this bucket (including `brand/` and `videos/`).  
+If that policy already uses `arn:aws:s3:::YOUR-BUCKET/*`, uploads to `videos/` already work — you only need the **public GetObject** line above so browsers can play the file.
 
 ## App env
 

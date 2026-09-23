@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.content import Blog, BreakingNews, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
+from app.models.content import Blog, BreakingNews, Category, ContentLanguage, ContentStatus, News, NewsType, Tag, Video
 
 
 class CategoryRepository:
@@ -301,3 +301,79 @@ class BreakingNewsRepository:
     def delete(self, item: BreakingNews) -> None:
         self.db.delete(item)
         self.db.commit()
+
+
+class VideoRepository:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def _base(self):
+        return select(Video).where(Video.deleted_at.is_(None)).options(
+            selectinload(Video.tags),
+            selectinload(Video.category),
+        )
+
+    def list(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        status: ContentStatus | None = None,
+        published_only: bool = False,
+    ) -> tuple[list[Video], int]:
+        page = max(1, page)
+        page_size = min(max(1, page_size), 50)
+        stmt = self._base()
+        count_stmt = select(func.count()).select_from(Video).where(Video.deleted_at.is_(None))
+        if language:
+            stmt = stmt.where(Video.language == language)
+            count_stmt = count_stmt.where(Video.language == language)
+        if status:
+            stmt = stmt.where(Video.status == status)
+            count_stmt = count_stmt.where(Video.status == status)
+        if published_only:
+            stmt = stmt.where(Video.status == ContentStatus.published)
+            count_stmt = count_stmt.where(Video.status == ContentStatus.published)
+        if search:
+            like = f"%{search.strip()}%"
+            filt = or_(Video.title.ilike(like), Video.slug.ilike(like), Video.description.ilike(like))
+            stmt = stmt.where(filt)
+            count_stmt = count_stmt.where(filt)
+        total = int(self.db.scalar(count_stmt) or 0)
+        items = self.db.scalars(
+            stmt.order_by(Video.sort_order.asc(), Video.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        ).all()
+        return list(items), total
+
+    def get(self, video_id: str) -> Video | None:
+        return self.db.scalar(self._base().where(Video.id == video_id))
+
+    def get_by_slug(self, slug: str, language: ContentLanguage | None = None) -> Video | None:
+        stmt = self._base().where(Video.slug == slug)
+        if language:
+            stmt = stmt.where(Video.language == language)
+        return self.db.scalar(stmt)
+
+    def increment_view(self, video_id: str) -> None:
+        self.db.execute(
+            update(Video)
+            .where(Video.id == video_id, Video.deleted_at.is_(None))
+            .values(view_count=Video.view_count + 1)
+        )
+        self.db.commit()
+
+    def create(self, video: Video) -> Video:
+        self.db.add(video)
+        self.db.commit()
+        self.db.refresh(video)
+        return self.get(video.id) or video
+
+    def save(self, video: Video) -> Video:
+        self.db.add(video)
+        self.db.commit()
+        self.db.refresh(video)
+        return self.get(video.id) or video

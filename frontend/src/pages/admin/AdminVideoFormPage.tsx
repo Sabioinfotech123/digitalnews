@@ -1,75 +1,59 @@
-import { App, Form, Input, InputNumber, Select, Switch, Typography } from 'antd'
+import { App, Form, Input, InputNumber, Select, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  createAdminNews,
-  fetchAdminNewsById,
+  createAdminVideo,
+  fetchAdminVideoById,
   fetchCategories,
   fetchTags,
-  updateAdminNews,
+  updateAdminVideo,
 } from '@/api/content'
 import { AppButton } from '@/components/common/AppButton'
 import { AppEditor } from '@/components/common/AppEditor'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
-import type { Category, NewsItem, NewsPayload, NewsType, TagItem } from '@/types/content'
-import { NEWS_TYPES } from '@/types/content'
+import type { Category, TagItem, VideoItem, VideoPayload } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
 import { BRAND } from '@/config/brand'
-import { adminNewsEditPath } from '@/config/adminPages'
 import './AdminNewsFormPage.scss'
 
 const { Title } = Typography
 
-const TYPE_TITLES: Record<NewsType, string> = {
-  featured: 'Featured news',
-  latest: 'Latest news',
-  trending: 'Trending news',
-  more: 'More news',
-}
-
-function isNewsType(value: string | undefined): value is NewsType {
-  return value === 'featured' || value === 'latest' || value === 'trending' || value === 'more'
-}
-
-interface AdminNewsFormPageProps {
+interface AdminVideoFormPageProps {
   mode: 'create' | 'edit'
-  defaultNewsType?: NewsType
 }
 
-export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNewsFormPageProps) {
-  const { id, newsType: routeType } = useParams()
-  const typeFromRoute = isNewsType(routeType) ? routeType : undefined
-  const lockedType = typeFromRoute ?? defaultNewsType
-  const typeLocked = Boolean(typeFromRoute)
+function hasVideoSource(values: Partial<VideoPayload>) {
+  return Boolean(values.video_url?.trim() || values.youtube_url?.trim())
+}
+
+function hasUploadedVideo(values: Partial<VideoPayload>) {
+  return Boolean(values.video_url?.trim())
+}
+
+export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
+  const { id } = useParams()
   const navigate = useNavigate()
   const { message } = App.useApp()
-  const [form] = Form.useForm<NewsPayload>()
+  const [form] = Form.useForm<VideoPayload>()
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
-  const [news, setNews] = useState<NewsItem | null>(null)
-
-  const listPath =
-    mode === 'edit' && news?.news_type
-      ? `/admin/news/${news.news_type}`
-      : typeFromRoute
-        ? `/admin/news/${typeFromRoute}`
-        : '/admin/news'
+  const [video, setVideo] = useState<VideoItem | null>(null)
+  const watchedVideoUrl = Form.useWatch('video_url', form)
+  const thumbnailRequired = Boolean(String(watchedVideoUrl || '').trim())
 
   useDocumentTitle(
     mode === 'create'
-      ? typeFromRoute
-        ? `Create ${TYPE_TITLES[typeFromRoute]} | ${BRAND.name} CMS`
-        : `Create News | ${BRAND.name} CMS`
-      : news?.title
-        ? `Edit: ${news.title} | ${BRAND.name} CMS`
-        : `Edit News | ${BRAND.name} CMS`,
+      ? `Create Video | ${BRAND.name} CMS`
+      : video?.title
+        ? `Edit: ${video.title} | ${BRAND.name} CMS`
+        : `Edit Video | ${BRAND.name} CMS`,
   )
 
   useEffect(() => {
@@ -83,40 +67,37 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
         setTags(tagList)
 
         if (mode === 'create') {
-          if (!cats.length) {
-            message.warning('Please create a category before adding news')
-          }
-          if (!tagList.length) {
-            message.warning('Please create a tag before adding news')
-          }
+          if (!cats.length) message.warning('Please create a category before adding videos')
+          if (!tagList.length) message.warning('Please create a tag before adding videos')
         }
 
         if (mode === 'edit' && id) {
-          const item = await fetchAdminNewsById(id)
+          const item = await fetchAdminVideoById(id)
           if (!active) return
-          setNews(item)
+          setVideo(item)
           form.setFieldsValue({
             ...item,
             tag_ids: item.tags.map((tag) => tag.id),
-            short_description: stripHtml(item.short_description),
+            description: stripHtml(item.description),
+            content: item.content || '',
           })
         } else {
           form.setFieldsValue({
             language: 'en',
             status: 'draft',
-            news_type: lockedType,
-            is_featured: lockedType === 'featured',
-            is_breaking: false,
             sort_order: 0,
-            image_url: null,
+            video_url: null,
+            youtube_url: null,
+            thumbnail_url: null,
+            description: '',
             content: '',
-            short_description: '',
+            tag_ids: [],
           })
         }
       } catch {
         if (!active) return
-        message.error(mode === 'edit' ? 'News not found' : 'Failed to load form data')
-        if (mode === 'edit') navigate('/admin/news')
+        message.error(mode === 'edit' ? 'Video not found' : 'Failed to load form')
+        if (mode === 'edit') navigate('/admin/videos')
       } finally {
         if (active) setLoading(false)
       }
@@ -126,10 +107,10 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
     return () => {
       active = false
     }
-  }, [mode, id, form, message, navigate, lockedType])
+  }, [mode, id, form, message, navigate])
 
   const goBackToList = () => {
-    navigate(listPath)
+    navigate('/admin/videos')
   }
 
   const handleTitleBlur = (value: string) => {
@@ -138,12 +119,12 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
     }
   }
 
-  const handleValuesChange = (changed: Partial<NewsPayload>, all: NewsPayload) => {
+  const handleValuesChange = (changed: Partial<VideoPayload>, all: VideoPayload) => {
     if (mode === 'create' && 'title' in changed && !form.isFieldTouched('slug')) {
       form.setFieldValue('slug', slugify(String(all.title || '')))
     }
-    if ('news_type' in changed) {
-      form.setFieldValue('is_featured', all.news_type === 'featured')
+    if ('video_url' in changed) {
+      void form.validateFields(['thumbnail_url']).catch(() => undefined)
     }
   }
 
@@ -151,49 +132,54 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
     message.error(getFormValidationMessage(info))
   }
 
-  const handleFinish = async (values: NewsPayload) => {
+  const handleFinish = async (values: VideoPayload) => {
+    if (!hasVideoSource(values)) {
+      message.error('Upload a video file or add a YouTube URL (or both)')
+      return
+    }
+    if (hasUploadedVideo(values) && !values.thumbnail_url?.trim()) {
+      message.error('Thumbnail is required when uploading a video file')
+      return
+    }
+
     setSaving(true)
     try {
-      const payload: NewsPayload = {
+      const payload: VideoPayload = {
         ...values,
-        news_type: values.news_type || lockedType,
-        is_featured: values.news_type === 'featured' || Boolean(values.is_featured),
         category_id: values.category_id || null,
         tag_ids: values.tag_ids || [],
+        video_url: values.video_url?.trim() || null,
+        youtube_url: values.youtube_url?.trim() || null,
+        thumbnail_url: values.thumbnail_url?.trim() || null,
+        description: values.description?.trim() || null,
+        content: values.content || '',
+        sort_order: values.sort_order ?? 0,
       }
       if (mode === 'create') {
-        const created = await createAdminNews(payload)
-        message.success('News created successfully')
-        const newsType = created.news_type || lockedType
-        navigate(adminNewsEditPath(newsType, created.id))
+        const created = await createAdminVideo(payload)
+        message.success('Video created successfully')
+        navigate(`/admin/videos/edit/${created.id}`)
       } else if (id) {
-        const updated = await updateAdminNews(id, payload)
-        setNews(updated)
-        message.success('News updated successfully')
+        const updated = await updateAdminVideo(id, payload)
+        setVideo(updated)
+        message.success('Video updated successfully')
       }
     } catch (err) {
       applyApiFieldErrors(form, err)
       message.error(
-        getApiErrorMessage(err, mode === 'create' ? 'Could not create news' : 'Save failed'),
+        getApiErrorMessage(err, mode === 'create' ? 'Could not create video' : 'Save failed'),
       )
     } finally {
       setSaving(false)
     }
   }
 
-  const pageTitle =
-    mode === 'create'
-      ? typeFromRoute
-        ? `Create ${TYPE_TITLES[typeFromRoute].toLowerCase()}`
-        : 'Create news'
-      : `Edit ${news ? TYPE_TITLES[news.news_type].toLowerCase() : 'news'}`
-
   return (
     <div className="news-form-page">
       <AppLoader fullscreen spinning={saving} tip={mode === 'create' ? 'Creating…' : 'Saving…'} />
       <div className="news-form-page__header">
         <Title level={3} className="news-form-page__title">
-          {pageTitle}
+          {mode === 'create' ? 'Create video' : 'Edit video'}
         </Title>
         <AppButton onClick={goBackToList}>Back to list</AppButton>
       </div>
@@ -222,7 +208,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
             </Form.Item>
 
             <Form.Item
-              name="short_description"
+              name="description"
               label="Short description"
               rules={[{ required: true, message: 'Description is required' }]}
               className="w-full"
@@ -242,39 +228,67 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               rules={[{ required: true, message: 'Content is required' }]}
               className="w-full"
             >
-              <AppEditor placeholder="Write the full article…" minHeight={360} />
+              <AppEditor placeholder="Write the full video details…" minHeight={360} />
             </Form.Item>
           </div>
 
           <div className="news-form-page__side lg:col-span-4 lg:sticky lg:top-4">
             <Form.Item
-              name="image_url"
-              label="News image"
-              rules={[{ required: true, message: 'News image is required' }]}
+              name="video_url"
+              label="Video file"
+              extra="Upload MP4/WEBM, and/or add a YouTube URL below."
               className="w-full"
             >
-              <MediaUploader kind="image" folder="news" label="" required />
+              <MediaUploader kind="video" folder="videos" label="" />
             </Form.Item>
 
-            <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
-              <Form.Item name="news_type" label="News type" rules={[{ required: true }]} className="w-full">
-                <Select
-                  className="w-full"
-                  options={NEWS_TYPES}
-                  disabled={mode === 'create' && typeLocked}
-                />
-              </Form.Item>
+            <Form.Item
+              name="youtube_url"
+              label="YouTube URL"
+              extra="Paste a full YouTube link. You can use this alone, or together with an uploaded file."
+              className="w-full"
+            >
+              <Input className="w-full" placeholder="https://www.youtube.com/watch?v=…" allowClear />
+            </Form.Item>
 
-              <Form.Item name="language" label="Content language" rules={[{ required: true }]} className="w-full">
-                <Select
-                  className="w-full"
-                  options={[
-                    { value: 'en', label: 'English' },
-                    { value: 'te', label: 'తెలుగు' },
-                  ]}
-                />
-              </Form.Item>
-            </div>
+            <Form.Item
+              name="thumbnail_url"
+              label="Thumbnail"
+              className="w-full"
+              required={thumbnailRequired}
+              extra={
+                thumbnailRequired
+                  ? 'Required when a video file is uploaded.'
+                  : 'Optional for YouTube-only videos.'
+              }
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    if (!thumbnailRequired) return
+                    if (!String(value || '').trim()) {
+                      throw new Error('Thumbnail is required when uploading a video file')
+                    }
+                  },
+                },
+              ]}
+            >
+              <MediaUploader
+                kind="thumbnail"
+                folder="videos"
+                label=""
+                required={thumbnailRequired}
+              />
+            </Form.Item>
+
+            <Form.Item name="language" label="Content language" rules={[{ required: true }]} className="w-full">
+              <Select
+                className="w-full"
+                options={[
+                  { value: 'en', label: 'English' },
+                  { value: 'te', label: 'తెలుగు' },
+                ]}
+              />
+            </Form.Item>
 
             <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
               <Form.Item name="status" label="Status" className="w-full">
@@ -292,7 +306,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               <Form.Item
                 name="sort_order"
                 label="Display order"
-                tooltip="Lower number shows first on the public site (0, 1, 2…)"
+                tooltip="Lower number shows first (0, 1, 2…)"
                 className="w-full"
               >
                 <InputNumber min={0} step={1} className="!w-full" />
@@ -322,10 +336,6 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               />
             </Form.Item>
 
-            <Form.Item name="is_breaking" label="Breaking" valuePropName="checked" className="mb-4 w-full">
-              <Switch />
-            </Form.Item>
-
             <Form.Item name="seo_title" label="SEO title" className="w-full">
               <Input className="w-full" />
             </Form.Item>
@@ -336,14 +346,12 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               <Input className="w-full" />
             </Form.Item>
 
-            {news ? (
-              <p className="news-form-page__meta">
-                Author: {news.author_name || '—'} · Views: {news.view_count}
-              </p>
+            {video ? (
+              <p className="news-form-page__meta">Views: {video.view_count}</p>
             ) : null}
 
             <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary w-full">
-              {mode === 'create' ? 'Create news' : 'Save changes'}
+              {mode === 'create' ? 'Create video' : 'Save changes'}
             </AppButton>
           </div>
         </div>
@@ -352,10 +360,10 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
   )
 }
 
-export function AdminNewsCreatePage() {
-  return <AdminNewsFormPage mode="create" />
+export function AdminVideoCreatePage() {
+  return <AdminVideoFormPage mode="create" />
 }
 
-export function AdminNewsEditPage() {
-  return <AdminNewsFormPage mode="edit" />
+export function AdminVideoEditPage() {
+  return <AdminVideoFormPage mode="edit" />
 }
