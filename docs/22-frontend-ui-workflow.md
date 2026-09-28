@@ -36,7 +36,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 
 | Menu | What you do there |
 |------|-------------------|
-| **Dashboard** | Counts / overview |
+| **Dashboard** | Overview counts, publish %, quick actions |
 | **Breaking news** | Header ticker headlines (CRUD) |
 | **Catalog → Categories** | Add/edit/delete categories |
 | **Catalog → Tags** | Add/edit/delete tags |

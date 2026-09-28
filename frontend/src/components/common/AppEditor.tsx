@@ -17,6 +17,8 @@ export interface AppEditorProps {
   placeholder?: string
   className?: string
   minHeight?: number
+  /** Caps editor body height; content scrolls inside. */
+  maxHeight?: number
   disabled?: boolean
 }
 
@@ -53,8 +55,10 @@ export function AppEditor({
   placeholder = 'Write content…',
   className,
   minHeight = 220,
+  maxHeight = 420,
   disabled = false,
 }: AppEditorProps) {
+  const cappedMax = Math.max(maxHeight, minHeight)
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -75,7 +79,7 @@ export function AppEditor({
     editorProps: {
       attributes: {
         class: 'app-editor__content',
-        style: `min-height:${minHeight}px`,
+        style: `min-height:${minHeight}px;max-height:${cappedMax}px`,
       },
     },
   })

@@ -20,6 +20,7 @@
 
   &__preview {
     position: relative;
+    min-height: 140px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -28,8 +29,10 @@
     img {
       display: block;
       width: 100%;
+      min-height: 140px;
       max-height: 220px;
       object-fit: cover;
+      background: #eee;
     }
 
     video {

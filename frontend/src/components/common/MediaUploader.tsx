@@ -232,7 +232,15 @@ export function MediaUploader({
               disablePictureInPicture
             />
           ) : (
-            <img src={value} alt="" />
+            <img
+              src={value}
+              alt=""
+              onError={(e) => {
+                const el = e.currentTarget
+                el.style.objectFit = 'contain'
+                el.alt = 'Image failed to load'
+              }}
+            />
           )}
           <div className="media-uploader__actions">
             {required ? (

@@ -1,10 +1,43 @@
 .news-detail {
   background: var(--color-white);
 
-  &__container {
-    max-width: 760px;
+  &__shell {
+    width: 100%;
+    max-width: 1140px;
     margin: 0 auto;
     padding: 1.5rem 1.25rem 3rem;
+  }
+
+  &__container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+
+    &--with-aside {
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 2rem 2.5rem;
+    }
+  }
+
+  &__main {
+    min-width: 0;
+    max-width: 720px;
+  }
+
+  &__layout--with-aside &__main {
+    max-width: none;
+  }
+
+  &__aside {
+    min-width: 0;
   }
 
   &__back {
@@ -58,7 +91,7 @@
   &__title {
     margin: 0;
     font-family: var(--font-heading);
-    font-size: clamp(1.6rem, 3vw, 2.15rem);
+    font-size: clamp(1.55rem, 2.8vw, 2.05rem);
     font-weight: var(--font-weight-bold);
     line-height: 1.25;
     color: var(--color-black);
@@ -81,7 +114,9 @@
 
   &__hero {
     margin: 1.35rem 0 1.5rem;
-    background: var(--color-black);
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
 
     img {
       display: block;
@@ -89,118 +124,14 @@
       max-height: 420px;
       object-fit: cover;
     }
-  }
 
-  &__media {
-    margin: 0 0 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-
-  &__player {
-    position: relative;
-    width: 100%;
-    background: #0b0b0b;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-
-    video {
-      display: block;
-      width: 100%;
-      max-height: 480px;
-      background: #000;
-    }
-
-    &--embed {
-      aspect-ratio: 16 / 9;
-
-      iframe {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        border: 0;
-      }
+    &--hidden {
+      display: none;
     }
   }
 
-  &__yt-card {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 0.85rem 1rem;
-    text-decoration: none;
-    color: inherit;
-    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 55%, #f7f7f8 100%);
-    border: 1px solid rgba(215, 25, 32, 0.18);
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 14px rgba(215, 25, 32, 0.08);
-    transition:
-      transform 0.18s ease,
-      box-shadow 0.18s ease,
-      border-color 0.18s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      border-color: rgba(215, 25, 32, 0.35);
-      box-shadow: 0 8px 20px rgba(215, 25, 32, 0.14);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-  }
-
-  &__yt-icon {
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #ff0000;
-    color: #fff;
-    font-size: 1.15rem;
-  }
-
-  &__yt-copy {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  &__yt-label {
-    font-family: var(--font-ui);
-    font-size: 0.7rem;
-    font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #c40000;
-  }
-
-  &__yt-title {
-    font-family: var(--font-ui);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-black);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__yt-arrow {
-    flex-shrink: 0;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
-  }
-
-  &__body {
+  &__body,
+  &__content {
     font-family: var(--font-body);
     font-size: 1.05rem;
     line-height: 1.75;
@@ -265,5 +196,22 @@
     font-family: var(--font-heading);
     font-size: var(--font-size-xl);
     color: var(--color-black);
+  }
+
+  @media (max-width: 980px) {
+    &__layout--with-aside {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    &__aside {
+      order: 2;
+      padding-top: 0.25rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    &__main {
+      max-width: none;
+    }
   }
 }

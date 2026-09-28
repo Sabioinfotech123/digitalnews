@@ -34,7 +34,8 @@ This often happens for **logo / `brand/`** or **videos / `videos/`** when the bu
         "arn:aws:s3:::digitalnews-media/news/*",
         "arn:aws:s3:::digitalnews-media/brand/*",
         "arn:aws:s3:::digitalnews-media/videos/*",
-        "arn:aws:s3:::digitalnews-media/thumbnails/*"
+        "arn:aws:s3:::digitalnews-media/thumbnails/*",
+        "arn:aws:s3:::digitalnews-media/blogs/*"
       ]
     }
   ]
@@ -50,10 +51,11 @@ If your existing policy already has `"Resource": "arn:aws:s3:::digitalnews-media
 
 | Folder / prefix | Used for |
 |-----------------|----------|
-| `news/` | News cover images + news article video files |
+| `news/` | News + blog cover images |
 | `brand/` | Logo + favicon (Settings) |
 | `videos/` | Videos admin uploads (`folder=videos`) |
 | `thumbnails/` | Optional video thumbnails (`kind=thumbnail`) |
+| `blogs/` | Legacy blog covers (prefer `news/` for new uploads) |
 
 ### IAM user (upload permission)
 

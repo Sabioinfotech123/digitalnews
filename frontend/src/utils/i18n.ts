@@ -1,12 +1,14 @@
 import type { SupportedLanguage } from '@/config/app'
 import { admin as enAdmin } from '@/locales/en/admin'
 import { auth as enAuth } from '@/locales/en/auth'
+import { blogs as enBlogs } from '@/locales/en/blogs'
 import { common as enCommon } from '@/locales/en/common'
 import { navigation as enNavigation } from '@/locales/en/navigation'
 import { news as enNews } from '@/locales/en/news'
 import { videos as enVideos } from '@/locales/en/videos'
 import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
+import { blogs as teBlogs } from '@/locales/te/blogs'
 import { common as teCommon } from '@/locales/te/common'
 import { navigation as teNavigation } from '@/locales/te/navigation'
 import { news as teNews } from '@/locales/te/news'
@@ -19,6 +21,7 @@ const catalogs = {
     auth: enAuth,
     news: enNews,
     videos: enVideos,
+    blogs: enBlogs,
     admin: enAdmin,
   },
   te: {
@@ -27,6 +30,7 @@ const catalogs = {
     auth: teAuth,
     news: teNews,
     videos: teVideos,
+    blogs: teBlogs,
     admin: teAdmin,
   },
 } as const
