@@ -32,11 +32,6 @@ export function Header() {
 
   const toggleLanguage = () => setUiLanguage(uiLanguage === 'en' ? 'te' : 'en')
 
-  const openDashboard = () => {
-    window.open('/admin', '_blank', 'noopener,noreferrer')
-    setOpen(false)
-  }
-
   const handleLogout = () => {
     confirmAction({
       modal,
@@ -92,8 +87,11 @@ export function Header() {
       items.push({
         key: 'admin',
         icon: <i className="fa-solid fa-gauge-high" aria-hidden />,
-        label: t('admin.dashboard'),
-        onClick: openDashboard,
+        label: (
+          <a href="/admin" target="_blank" rel="noopener noreferrer">
+            {t('admin.dashboard')}
+          </a>
+        ),
       })
     }
     items.push({
@@ -271,7 +269,10 @@ export function Header() {
                     type="primary"
                     block
                     icon={<i className="fa-solid fa-gauge-high" aria-hidden />}
-                    onClick={openDashboard}
+                    href="/admin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setOpen(false)}
                   >
                     {t('admin.dashboard')}
                   </AppButton>

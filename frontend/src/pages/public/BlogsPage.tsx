@@ -132,30 +132,34 @@ export function BlogsPage() {
               <p className="blogs-page__excerpt blogs-page__excerpt--lead">
                 {stripHtml(featured.short_description)}
               </p>
-              <BlogMeta item={featured} language={contentLanguage} byLabel={t('blogs.byAuthor')} />
-              <span className="blogs-page__read">{t('blogs.readMore')}</span>
+              <div className="blogs-page__featured-foot">
+                <BlogMeta item={featured} language={contentLanguage} byLabel={t('blogs.byAuthor')} />
+                <span className="blogs-page__read">{t('blogs.readMore')}</span>
+              </div>
             </div>
           </Link>
         ) : null}
 
         {!loading && rest.length > 0 ? (
-          <div className="blogs-page__grid">
-            {rest.map((item) => (
-              <Link key={item.id} to={`/blogs/${item.slug}`} className="blogs-page__card">
-                <div className="blogs-page__media">
-                  <BlogCover src={item.image_url} className="blogs-page__image" />
-                </div>
-                <div className="blogs-page__body">
-                  {item.category_name ? (
-                    <span className="blogs-page__cat">{item.category_name}</span>
-                  ) : null}
-                  <h2 className="blogs-page__card-title">{item.title}</h2>
-                  <p className="blogs-page__excerpt">{stripHtml(item.short_description)}</p>
-                  <BlogMeta item={item} language={contentLanguage} byLabel={t('blogs.byAuthor')} />
-                </div>
-              </Link>
-            ))}
-          </div>
+          <section className="blogs-page__more" aria-label={t('blogs.allPosts')}>
+            <div className="blogs-page__grid">
+              {rest.map((item) => (
+                <Link key={item.id} to={`/blogs/${item.slug}`} className="blogs-page__card">
+                  <div className="blogs-page__media">
+                    <BlogCover src={item.image_url} className="blogs-page__image" />
+                  </div>
+                  <div className="blogs-page__body">
+                    {item.category_name ? (
+                      <span className="blogs-page__cat">{item.category_name}</span>
+                    ) : null}
+                    <h2 className="blogs-page__card-title">{item.title}</h2>
+                    <p className="blogs-page__excerpt">{stripHtml(item.short_description)}</p>
+                    <BlogMeta item={item} language={contentLanguage} byLabel={t('blogs.byAuthor')} />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         ) : null}
       </div>
     </main>

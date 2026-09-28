@@ -308,7 +308,7 @@ export function AdminLayout() {
                 <i className="fa-solid fa-plus" aria-hidden /> {t('admin.quickAdd')}
               </AppButton>
             </Dropdown>
-            <AppButton type="default" onClick={() => navigate('/')}>
+            <AppButton type="default" href="/" target="_blank" rel="noopener noreferrer">
               <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden /> {t('admin.backToSite')}
             </AppButton>
             <AppButton type="primary" onClick={handleLogout}>
