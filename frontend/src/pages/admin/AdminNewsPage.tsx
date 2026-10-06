@@ -1,7 +1,7 @@
-import { App, Select, Space, Tooltip, type TableColumnsType } from 'antd'
+import { App, InputNumber, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { deleteAdminNews, fetchAdminNews } from '@/api/content'
+import { deleteAdminNews, fetchAdminNews, updateAdminNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
@@ -82,7 +82,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     void load()
   }, [load])
 
-  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create/latest'
+  const createPath = newsType ? `/admin/news/create/${newsType}` : '/admin/news/create'
   const title = newsType ? TYPE_LABELS[newsType] : t('admin.news')
 
   const handleSearchChange = (value: string) => {
@@ -118,6 +118,19 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     navigate(adminNewsEditPath(row.news_type, row.id))
   }
 
+  const saveSortOrder = async (row: NewsItem, nextOrder: number | null) => {
+    const sortOrder = Math.max(0, Math.floor(Number(nextOrder ?? 0)))
+    if (sortOrder === (row.sort_order ?? 0)) return
+    try {
+      await updateAdminNews(row.id, { sort_order: sortOrder })
+      message.success('Order swapped')
+      void load()
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Could not update order'))
+      void load()
+    }
+  }
+
   const handleDelete = async (id: string) => {
     try {
       await deleteAdminNews(id)
@@ -138,7 +151,34 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
   }
 
   const columns: TableColumnsType<NewsItem> = useMemo(
-    () => [
+    () => {
+      const orderColumn: TableColumnsType<NewsItem>[number] = {
+        title: 'Order',
+        dataIndex: 'sort_order',
+        key: 'sort_order',
+        width: 100,
+        align: 'center',
+        sorter: (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        defaultSortOrder: 'ascend',
+        render: (value: number | undefined, row) => (
+          <InputNumber
+            min={0}
+            step={1}
+            size="small"
+            value={value ?? 0}
+            className="w-full"
+            onPressEnter={(e) => {
+              const target = e.target as HTMLInputElement
+              void saveSortOrder(row, Number(target.value))
+            }}
+            onBlur={(e) => {
+              void saveSortOrder(row, Number(e.target.value))
+            }}
+          />
+        ),
+      }
+
+      return [
       {
         title: 'Title',
         dataIndex: 'title',
@@ -153,6 +193,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           </div>
         ),
       },
+      ...(newsType ? [orderColumn] : []),
       {
         title: 'Type',
         dataIndex: 'news_type',
@@ -161,7 +202,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         render: (value: string) => <StatusBadge status={value} />,
       },
       {
-        title: 'Language',
+        title: 'Lun',
         dataIndex: 'language',
         width: 110,
         sorter: (a, b) => compareText(a.language, b.language),
@@ -185,12 +226,24 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         title: 'Flags',
         key: 'flags',
         width: 120,
-        sorter: (a, b) => Number(b.is_breaking) - Number(a.is_breaking),
+        sorter: (a, b) =>
+          Number(b.is_breaking) - Number(a.is_breaking) || Number(b.is_local) - Number(a.is_local),
         render: (_, row) => (
           <Space size={4} wrap>
             {row.is_breaking ? <StatusBadge status="breaking" /> : null}
+            {row.is_local ? <StatusBadge status="local" /> : null}
+            {!row.is_breaking && !row.is_local ? '—' : null}
           </Space>
         ),
+      },
+      {
+        title: 'Views',
+        dataIndex: 'view_count',
+        key: 'view_count',
+        width: 90,
+        align: 'right',
+        sorter: (a, b) => a.view_count - b.view_count,
+        render: (value: number) => value.toLocaleString('en-IN'),
       },
       {
         title: 'Updated',
@@ -198,7 +251,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         key: 'updated_at',
         width: 130,
         sorter: (a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
-        defaultSortOrder: 'descend',
+        ...(!newsType ? { defaultSortOrder: 'descend' as const } : {}),
         render: (value: string) => formatUpdatedAt(value),
       },
       {
@@ -230,9 +283,10 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           </Space>
         ),
       },
-    ],
+    ]
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [load, message, navigate],
+    [load, message, navigate, newsType],
   )
 
   return (
@@ -242,6 +296,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
       dataSource={items}
       columns={columns}
       rowKey="id"
+      onRefresh={() => void load()}
       searchValue={search}
       searchPlaceholder="Search title or slug…"
       onSearchChange={handleSearchChange}

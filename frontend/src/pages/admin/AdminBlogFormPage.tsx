@@ -216,6 +216,8 @@ export function AdminBlogFormPage({ mode }: AdminBlogFormPageProps) {
               <Form.Item name="category_id" label="Category">
                 <Select
                   allowClear
+                  showSearch
+                  optionFilterProp="label"
                   options={categories.map((c) => ({ value: c.id, label: c.name }))}
                   placeholder="Select category"
                 />
@@ -225,6 +227,8 @@ export function AdminBlogFormPage({ mode }: AdminBlogFormPageProps) {
                 <Select
                   mode="multiple"
                   allowClear
+                  showSearch
+                  optionFilterProp="label"
                   options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
                   placeholder="Select tags"
                 />

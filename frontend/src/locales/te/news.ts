@@ -9,7 +9,13 @@ export const news = {
   readMore: 'మరింత చదవండి',
   viewAllNews: 'అన్ని వార్తలు',
   loadingArticle: 'వార్త లోడ్ అవుతోంది…',
+  loadingList: 'వార్తలు లోడ్ అవుతున్నాయి…',
+  emptyList: 'ఇంకా వార్తలు ప్రచురించబడలేదు.',
+  viewMode: 'వీక్షణ మోడ్',
+  viewGrid: 'గ్రిడ్ వీక్షణ',
+  viewList: 'జాబితా వీక్షణ',
   articleNotFound: 'వార్త కనబడలేదు',
   backHome: 'హోమ్‌కు తిరిగి వెళ్లండి',
+  backAllNews: 'అన్ని వార్తలకు తిరిగి వెళ్లండి',
   byAuthor: 'రచయిత',
 } as const

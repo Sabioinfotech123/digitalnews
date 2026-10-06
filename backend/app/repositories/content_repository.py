@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.content import Blog, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
+from app.models.content import Blog, BreakingNews, Category, ContentLanguage, ContentStatus, News, NewsType, Tag
 
 
 class CategoryRepository:
@@ -133,7 +133,11 @@ class NewsRepository:
             count_stmt = count_stmt.where(filter_expr)
 
         total = int(self.db.scalar(count_stmt) or 0)
-        stmt = stmt.order_by(News.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        stmt = (
+            stmt.order_by(News.sort_order.asc(), News.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         return list(self.db.scalars(stmt).all()), total
 
     def get(self, news_id: str) -> News | None:
@@ -144,6 +148,31 @@ class NewsRepository:
         if language:
             stmt = stmt.where(News.language == language)
         return self.db.scalar(stmt)
+
+    def get_by_sort_order(
+        self,
+        *,
+        news_type: NewsType,
+        language: ContentLanguage,
+        sort_order: int,
+        exclude_id: str | None = None,
+    ) -> News | None:
+        stmt = self._base().where(
+            News.news_type == news_type,
+            News.language == language,
+            News.sort_order == sort_order,
+        )
+        if exclude_id:
+            stmt = stmt.where(News.id != exclude_id)
+        return self.db.scalar(stmt.order_by(News.created_at.desc()).limit(1))
+
+    def increment_view(self, news_id: str) -> None:
+        self.db.execute(
+            update(News)
+            .where(News.id == news_id, News.deleted_at.is_(None))
+            .values(view_count=News.view_count + 1)
+        )
+        self.db.commit()
 
     def create(self, news: News) -> News:
         self.db.add(news)
@@ -230,3 +259,45 @@ class BlogRepository:
         return int(
             self.db.scalar(select(func.count()).select_from(Blog).where(Blog.deleted_at.is_(None))) or 0
         )
+
+
+class BreakingNewsRepository:
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def list(
+        self,
+        *,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        active_only: bool = False,
+    ) -> list[BreakingNews]:
+        stmt = select(BreakingNews).order_by(BreakingNews.sort_order.asc(), BreakingNews.created_at.desc())
+        if language:
+            stmt = stmt.where(BreakingNews.language == language)
+        if active_only:
+            stmt = stmt.where(BreakingNews.is_active.is_(True))
+        if search:
+            like = f"%{search}%"
+            stmt = stmt.where(BreakingNews.title.ilike(like))
+        return list(self.db.scalars(stmt).all())
+
+    def get(self, item_id: str) -> BreakingNews | None:
+        return self.db.get(BreakingNews, item_id)
+
+    def create(self, **kwargs) -> BreakingNews:
+        item = BreakingNews(**kwargs)
+        self.db.add(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def save(self, item: BreakingNews) -> BreakingNews:
+        self.db.add(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+
+    def delete(self, item: BreakingNews) -> None:
+        self.db.delete(item)
+        self.db.commit()

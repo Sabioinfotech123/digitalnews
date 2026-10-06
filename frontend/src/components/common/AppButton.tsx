@@ -16,7 +16,7 @@ export function AppButton({ className, type = 'default', ...props }: AppButtonPr
       type={type}
       className={cn(
         'font-ui font-semibold',
-        type === 'primary' && 'shadow-[0_2px_8px_rgba(215,25,32,0.3)]',
+        type === 'primary' && 'shadow-[0_2px_8px_rgba(var(--color-primary-rgb),0.3)]',
         className,
       )}
       {...props}

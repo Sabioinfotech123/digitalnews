@@ -1,5 +1,6 @@
 import { App, Form, Input, Modal, Select, Space, Switch, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   createAdminUser,
   deleteAdminUser,
@@ -34,6 +35,8 @@ export function AdminUsersPage() {
   const { t } = useLanguage()
   const { user: currentUser } = useAuth()
   const { message, modal } = App.useApp()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [items, setItems] = useState<AuthUser[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -57,12 +60,18 @@ export function AdminUsersPage() {
     void load()
   }, [load])
 
-  const openCreateModal = () => {
+  const openCreateModal = useCallback(() => {
     setEditing(null)
     form.resetFields()
     form.setFieldsValue({ role: 'USER', is_active: true })
     setOpen(true)
-  }
+  }, [form])
+
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    openCreateModal()
+    navigate('/admin/users', { replace: true })
+  }, [searchParams, openCreateModal, navigate])
 
   const openEditModal = (row: AuthUser) => {
     setEditing(row)
@@ -207,6 +216,7 @@ export function AdminUsersPage() {
         loading={loading}
         dataSource={items}
         columns={columns}
+        onRefresh={() => void load()}
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search name or email…"

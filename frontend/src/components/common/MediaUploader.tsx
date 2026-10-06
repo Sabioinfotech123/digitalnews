@@ -23,7 +23,7 @@ export function MediaUploader({
   folder = 'news',
   label = 'Image',
   required = false,
-  accept = 'image/jpeg,image/png,image/webp,image/gif',
+  accept = 'image/jpeg,image/png,image/webp,image/gif,image/x-icon,image/vnd.microsoft.icon',
 }: MediaUploaderProps) {
   const { message } = App.useApp()
   const [uploading, setUploading] = useState(false)
@@ -58,14 +58,28 @@ export function MediaUploader({
         <div className="media-uploader__preview">
           <img src={value} alt="" />
           <div className="media-uploader__actions">
-            <AppButton
-              size="small"
-              danger
-              onClick={() => onChange?.(null)}
-              disabled={uploading}
-            >
-              Remove
-            </AppButton>
+            {required ? (
+              <Upload
+                accept={accept}
+                multiple={false}
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+                disabled={uploading}
+              >
+                <AppButton size="small" disabled={uploading}>
+                  Change
+                </AppButton>
+              </Upload>
+            ) : (
+              <AppButton
+                size="small"
+                danger
+                onClick={() => onChange?.(null)}
+                disabled={uploading}
+              >
+                Remove
+              </AppButton>
+            )}
           </div>
         </div>
       ) : (
@@ -82,7 +96,7 @@ export function MediaUploader({
               <i className="fa-solid fa-cloud-arrow-up" aria-hidden />
             </p>
             <p className="media-uploader__hint">Click or drop an image</p>
-            <p className="media-uploader__sub">JPG, PNG, WEBP, GIF · max 5MB</p>
+            <p className="media-uploader__sub">JPG, PNG, WEBP, GIF, ICO · max 5MB</p>
           </Upload.Dragger>
         </Spin>
       )}

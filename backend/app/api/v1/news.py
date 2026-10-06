@@ -37,7 +37,7 @@ def get_public_news_by_id(news_id: str, db: DbSession) -> NewsResponse:
     item = service.repo.get(news_id)
     if not item or item.status != ContentStatus.published:
         raise HTTPException(status_code=404, detail="News not found")
-    return service.get(item.id)
+    return service.get(item.id, increment_view=True)
 
 
 @router.get("/news/{slug}", response_model=NewsResponse)
@@ -48,9 +48,9 @@ def get_public_news(slug: str, db: DbSession, language: ContentLanguage | None =
         # Allow UUID in /news/:param as id fallback
         by_id = service.repo.get(slug)
         if by_id and by_id.status == ContentStatus.published:
-            return service.get(by_id.id)
+            return service.get(by_id.id, increment_view=True)
         raise HTTPException(status_code=404, detail="News not found")
-    return service.get(item.id)
+    return service.get(item.id, increment_view=True)
 
 
 @router.get("/admin/news", response_model=PaginatedNews)

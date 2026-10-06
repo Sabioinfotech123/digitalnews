@@ -4,7 +4,7 @@
   display: flex;
   align-items: stretch;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-on-primary);
   min-height: 40px;
   overflow: hidden;
 
@@ -39,6 +39,10 @@
     padding-left: 1rem;
   }
 
+  &:hover &__marquee {
+    animation-play-state: paused;
+  }
+
   &__item {
     font-family: var(--font-body);
     font-size: var(--font-size-sm);
@@ -49,6 +53,24 @@
       margin-right: 0.65rem;
       opacity: 0.7;
     }
+  }
+
+  &__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  &__link-icon {
+    margin-left: 0.35rem;
+    font-size: 0.7em;
+    opacity: 0.85;
   }
 }
 

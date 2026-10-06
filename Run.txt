@@ -11,6 +11,35 @@ Repo root:
 
 
 ================================================================================
+EVERY TIME YOU RUN (quick — after first-time setup is done)
+================================================================================
+
+# Terminal 1 — Database
+cd d:\SabioInfotech\digitalnews
+docker compose up -d
+
+# Terminal 2 — Backend
+cd d:\SabioInfotech\digitalnews\backend
+.\.venv\Scripts\activate
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 3 — Frontend
+cd d:\SabioInfotech\digitalnews\frontend
+npm i
+npm run dev
+
+Open:
+  App   : http://localhost:5173
+  Admin : http://localhost:5173/admin/login
+  API   : http://localhost:8000/docs
+
+Notes:
+  - FE: npm i then npm run dev (npm i is safe every time; skip if deps unchanged)
+  - BE: always activate .venv first, then uvicorn
+  - DB: Docker Desktop must be running before docker compose up -d
+
+
+================================================================================
 PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
 ================================================================================
 

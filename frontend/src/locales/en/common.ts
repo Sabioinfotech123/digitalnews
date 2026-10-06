@@ -6,4 +6,12 @@ export const common = {
   save: 'Save',
   cancel: 'Cancel',
   search: 'Search',
+  searchPlaceholder: 'Search news and blogs…',
+  searchTitle: 'Search',
+  searchResultsFor: 'Results for',
+  searchEmpty: 'No results found',
+  searchHint: 'Type a keyword to search news and blogs',
+  searchNews: 'News',
+  searchBlogs: 'Blogs',
+  backHome: 'Back to home',
 } as const

@@ -1,18 +1,19 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
-import logoImg from '@/assets/logo/logo.png'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { BRAND } from '@/config/brand'
 import './Footer.scss'
 
 export function Footer() {
   const { t } = useLanguage()
+  const { logoUrl } = useSiteSettings()
   const year = new Date().getFullYear()
 
   return (
     <footer className="site-footer mt-auto border-t-[3px] border-primary bg-ink text-white/85">
       <div className="mx-auto grid max-w-[1200px] gap-5 px-5 pt-8 pb-6">
         <div>
-          <img src={logoImg} alt={BRAND.name} className="site-footer__name" />
+          <img src={logoUrl} alt={BRAND.name} className="site-footer__name" />
           <p className="mt-2 mb-0 text-sm text-white/65">{BRAND.tagline}</p>
         </div>
         <nav className="flex flex-wrap gap-4" aria-label="Footer">

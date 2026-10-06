@@ -6,6 +6,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AdminBlogCreatePage, AdminBlogEditPage } from '@/pages/admin/AdminBlogFormPage'
 import { AdminBlogsPage } from '@/pages/admin/AdminBlogsPage'
+import { AdminBreakingNewsPage } from '@/pages/admin/AdminBreakingNewsPage'
 import { AdminCategoriesPage } from '@/pages/admin/AdminCategoriesPage'
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
@@ -17,7 +18,12 @@ import {
   AdminNewsPage,
   AdminTrendingNewsPage,
 } from '@/pages/admin/AdminNewsPage'
+import { AdminLocalNewsDetailPage } from '@/pages/admin/AdminLocalNewsDetailPage'
+import { AdminLocalNewsPage } from '@/pages/admin/AdminLocalNewsPage'
+import { AdminVerifiedNewsDetailPage } from '@/pages/admin/AdminVerifiedNewsDetailPage'
+import { AdminVerifiedNewsPage } from '@/pages/admin/AdminVerifiedNewsPage'
 import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
+import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
@@ -26,7 +32,9 @@ import { HomePage } from '@/pages/public/HomePage'
 import { LivePage } from '@/pages/public/LivePage'
 import { LoginPage } from '@/pages/public/LoginPage'
 import { NewsDetailPage } from '@/pages/public/NewsDetailPage'
+import { NewsPage } from '@/pages/public/NewsPage'
 import { RegisterPage } from '@/pages/public/RegisterPage'
+import { SearchPage } from '@/pages/public/SearchPage'
 import { ShortsPage } from '@/pages/public/ShortsPage'
 import { VideoDetailPage } from '@/pages/public/VideoDetailPage'
 import { VideosPage } from '@/pages/public/VideosPage'
@@ -46,7 +54,7 @@ function Placeholder({ title }: { title: string }) {
 function AdminModule({
   titleKey,
 }: {
-  titleKey: 'admin.videos' | 'admin.media' | 'admin.settings' | 'admin.profile'
+  titleKey: 'admin.videos' | 'admin.media' | 'admin.profile'
 }) {
   const { t } = useLanguage()
   return <AdminSectionPage title={t(titleKey)} />
@@ -61,10 +69,11 @@ export function AppRouter() {
       <Route path="/videos/:slug" element={<PublicPage><VideoDetailPage /></PublicPage>} />
       <Route path="/shorts" element={<PublicPage><ShortsPage /></PublicPage>} />
       <Route path="/today-news" element={<PublicPage><Placeholder title="Today News" /></PublicPage>} />
-      <Route path="/news" element={<PublicPage><Placeholder title="News" /></PublicPage>} />
+      <Route path="/news" element={<PublicPage><NewsPage /></PublicPage>} />
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />
       <Route path="/blogs" element={<PublicPage><BlogsPage /></PublicPage>} />
       <Route path="/blogs/:slug" element={<PublicPage><BlogDetailPage /></PublicPage>} />
+      <Route path="/search" element={<PublicPage><SearchPage /></PublicPage>} />
       <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
       <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
 
@@ -81,15 +90,20 @@ export function AppRouter() {
           <Route path="news/create/:newsType" element={<AdminNewsCreatePage />} />
           <Route path="news/:newsType/edit/:id" element={<AdminNewsEditPage />} />
           <Route path="news/edit/:id" element={<AdminNewsEditPage />} />
+          <Route path="local-news" element={<AdminLocalNewsPage />} />
+          <Route path="local-news/:id" element={<AdminLocalNewsDetailPage />} />
+          <Route path="verified-news" element={<AdminVerifiedNewsPage />} />
+          <Route path="verified-news/:id" element={<AdminVerifiedNewsDetailPage />} />
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="blogs/create" element={<AdminBlogCreatePage />} />
           <Route path="blogs/edit/:id" element={<AdminBlogEditPage />} />
           <Route path="videos" element={<AdminModule titleKey="admin.videos" />} />
+          <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />
           <Route path="users" element={<AdminUsersPage />} />
-          <Route path="settings" element={<AdminModule titleKey="admin.settings" />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
           <Route path="profile" element={<AdminModule titleKey="admin.profile" />} />
         </Route>
       </Route>

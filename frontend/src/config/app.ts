@@ -1,5 +1,6 @@
 export const APP_CONFIG = {
-  apiUrl: import.meta.env.VITE_API_URL ?? '/api/v1',
+  /** Axios baseURL — set in frontend/.env as VITE_API_URL */
+  apiUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/v1',
   defaultUiLanguage: 'en' as const,
   supportedLanguages: ['en', 'te'] as const,
   uiLanguageStorageKey: 'news.uiLanguage',

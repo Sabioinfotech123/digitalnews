@@ -4,6 +4,7 @@ import { APP_CONFIG } from '@/config/app'
 
 export const apiClient = axios.create({
   baseURL: APP_CONFIG.apiUrl,
+  timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
-import logoImg from '@/assets/logo/logo.png'
 import { BRAND } from '@/config/brand'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
@@ -19,6 +19,7 @@ export function RegisterPage() {
   const { t } = useLanguage()
   const { message } = App.useApp()
   const { register, isAuthenticated, loading } = useAuth()
+  const { logoUrl } = useSiteSettings()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -52,7 +53,7 @@ export function RegisterPage() {
       <AppLoader fullscreen spinning={submitting} tip={t('auth.signingUp')} />
       <div className="public-auth__card">
         <div className="public-auth__brand">
-          <img src={logoImg} alt={BRAND.name} className="public-auth__logo" />
+          <img src={logoUrl} alt={BRAND.name} className="public-auth__logo" />
         </div>
         <Title level={3} className="public-auth__title">
           {t('auth.register')}

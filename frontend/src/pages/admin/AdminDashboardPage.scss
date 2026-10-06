@@ -13,7 +13,7 @@
       bottom: 0.2em;
       width: 4px;
       border-radius: 2px;
-      background: #d71920;
+      background: var(--color-primary);
     }
   }
 
@@ -34,8 +34,8 @@
     border-radius: 10px;
     display: grid;
     place-items: center;
-    background: #fde8e9;
-    color: #d71920;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
     font-size: 1.1rem;
     flex-shrink: 0;
   }

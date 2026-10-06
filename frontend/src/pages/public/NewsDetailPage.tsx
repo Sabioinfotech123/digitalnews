@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { fetchPublicNewsById, fetchPublicNewsBySlug } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
@@ -11,6 +11,10 @@ import './NewsDetailPage.scss'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+type DetailLocationState = {
+  from?: string
+}
 
 function formatDate(iso: string | null, language: 'en' | 'te'): string {
   if (!iso) return ''
@@ -25,10 +29,16 @@ function formatDate(iso: string | null, language: 'en' | 'te'): string {
 
 export function NewsDetailPage() {
   const { slug: param } = useParams()
+  const location = useLocation()
   const { t, contentLanguage } = useLanguage()
   const [article, setArticle] = useState<NewsItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+
+  const fromPath = (location.state as DetailLocationState | null)?.from
+  const backToAllNews = fromPath === '/news'
+  const backTo = backToAllNews ? '/news' : '/'
+  const backLabel = backToAllNews ? t('news.backAllNews') : t('news.backHome')
 
   useDocumentTitle(article?.title ? `${article.title} | ${BRAND.name}` : `News | ${BRAND.name}`)
 
@@ -78,8 +88,8 @@ export function NewsDetailPage() {
       <main className="news-detail">
         <div className="news-detail__container">
           <p className="news-detail__empty">{t('news.articleNotFound')}</p>
-          <Link to="/" className="news-detail__back">
-            ← {t('news.backHome')}
+          <Link to={backTo} className="news-detail__back">
+            ← {backLabel}
           </Link>
         </div>
       </main>
@@ -92,8 +102,8 @@ export function NewsDetailPage() {
   return (
     <main className="news-detail">
       <article className="news-detail__container">
-        <Link to="/" className="news-detail__back">
-          ← {t('news.backHome')}
+        <Link to={backTo} className="news-detail__back">
+          ← {backLabel}
         </Link>
 
         <div className="news-detail__meta">
