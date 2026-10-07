@@ -266,6 +266,12 @@ export function resolveAdminPageMeta(
       menuKey: '/admin/breaking-news',
     },
     {
+      prefix: '/admin/feedback',
+      titleKey: 'admin.feedback',
+      crumbs: [{ title: t('admin.feedback') }],
+      menuKey: '/admin/feedback',
+    },
+    {
       prefix: '/admin/categories',
       titleKey: 'admin.categories',
       crumbs: [{ title: t('admin.taxonomy') }, { title: t('admin.categories') }],

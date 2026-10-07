@@ -3,6 +3,7 @@ import { admin as enAdmin } from '@/locales/en/admin'
 import { auth as enAuth } from '@/locales/en/auth'
 import { blogs as enBlogs } from '@/locales/en/blogs'
 import { common as enCommon } from '@/locales/en/common'
+import { feedback as enFeedback } from '@/locales/en/feedback'
 import { navigation as enNavigation } from '@/locales/en/navigation'
 import { news as enNews } from '@/locales/en/news'
 import { videos as enVideos } from '@/locales/en/videos'
@@ -10,6 +11,7 @@ import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
 import { blogs as teBlogs } from '@/locales/te/blogs'
 import { common as teCommon } from '@/locales/te/common'
+import { feedback as teFeedback } from '@/locales/te/feedback'
 import { navigation as teNavigation } from '@/locales/te/navigation'
 import { news as teNews } from '@/locales/te/news'
 import { videos as teVideos } from '@/locales/te/videos'
@@ -22,6 +24,7 @@ const catalogs = {
     news: enNews,
     videos: enVideos,
     blogs: enBlogs,
+    feedback: enFeedback,
     admin: enAdmin,
   },
   te: {
@@ -31,6 +34,7 @@ const catalogs = {
     news: teNews,
     videos: teVideos,
     blogs: teBlogs,
+    feedback: teFeedback,
     admin: teAdmin,
   },
 } as const

@@ -9,6 +9,7 @@ import { AdminBlogsPage } from '@/pages/admin/AdminBlogsPage'
 import { AdminBreakingNewsPage } from '@/pages/admin/AdminBreakingNewsPage'
 import { AdminCategoriesPage } from '@/pages/admin/AdminCategoriesPage'
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
+import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage'
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
 import { AdminNewsCreatePage, AdminNewsEditPage } from '@/pages/admin/AdminNewsFormPage'
 import {
@@ -30,6 +31,7 @@ import { AdminVideoCreatePage, AdminVideoEditPage } from '@/pages/admin/AdminVid
 import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
 import { BlogsPage } from '@/pages/public/BlogsPage'
+import { FeedbackPage } from '@/pages/public/FeedbackPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { LivePage } from '@/pages/public/LivePage'
 import { LoginPage } from '@/pages/public/LoginPage'
@@ -76,6 +78,7 @@ export function AppRouter() {
       <Route path="/blogs" element={<PublicPage><BlogsPage /></PublicPage>} />
       <Route path="/blogs/:slug" element={<PublicPage><BlogDetailPage /></PublicPage>} />
       <Route path="/search" element={<PublicPage><SearchPage /></PublicPage>} />
+      <Route path="/feedback" element={<PublicPage><FeedbackPage /></PublicPage>} />
       <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
       <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
 
@@ -103,6 +106,7 @@ export function AppRouter() {
           <Route path="videos/create" element={<AdminVideoCreatePage />} />
           <Route path="videos/edit/:id" element={<AdminVideoEditPage />} />
           <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="tags" element={<AdminTagsPage />} />
           <Route path="media" element={<AdminModule titleKey="admin.media" />} />

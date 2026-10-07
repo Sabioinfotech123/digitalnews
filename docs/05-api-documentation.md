@@ -377,6 +377,49 @@ With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPEN
 
 ---
 
+## 13) Feedback (public form + admin inbox)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/feedback` | Anyone (token optional) | Send feedback |
+| GET | `/admin/feedback` | Admin | List feedback (`search`, `status`, `category`, `page`, `page_size` ≤ 50) |
+| GET | `/admin/feedback/{id}` | Admin | One feedback item |
+| PATCH | `/admin/feedback/{id}` | Admin | Change `status` and/or `admin_note` |
+| DELETE | `/admin/feedback/{id}` | Admin | Remove it |
+
+**Login is optional on `POST /feedback`:**
+- **Guest (no token):** `name` and `email` are required.
+- **Logged in (Bearer token):** `name` / `email` are ignored — the account’s name and email are saved, and the row is linked to the user.
+- An invalid/expired token is treated like a guest (no 401).
+
+Submit body example (guest):
+
+```json
+{
+  "name": "Ravi",
+  "email": "ravi@example.com",
+  "category": "suggestion",
+  "rating": 4,
+  "message": "Please add more Telangana district news.",
+  "page_url": "/news"
+}
+```
+
+| Field | Rule |
+|-------|------|
+| `category` | `general` (default), `suggestion`, `bug`, `content`, `other` |
+| `rating` | Required, 1–5 stars |
+| `message` | Required, 10–2000 characters |
+| `page_url` | Optional — page the visitor came from |
+| `website` | Hidden anti-spam field. Real users leave it empty; if filled → 400 |
+
+Response: `201 { "id": "...", "message": "Thanks for your feedback" }`
+
+Admin list response also returns `new_count` (how many items are still `new`, ignoring filters).  
+Status values: `new`, `in_review`, `resolved`.
+
+---
+
 ## Common workflows
 
 ### A) Publish a news article
@@ -412,6 +455,12 @@ Admin list shows that number in the Views column.
 2. Upload logo / favicon → `/admin/media/upload` (`folder=brand`) → copy `url`
 3. `PATCH /admin/site-settings` with `logo_url`, `favicon_url`, and/or `primary_color`
 4. Public site loads `GET /site-settings` and applies branding (including browser tab icon)
+
+### F) Handle visitor feedback
+
+1. Visitor clicks **Feedback** in the footer → fills the form → `POST /feedback` (token sent automatically if logged in)
+2. Admin opens **Feedback** → `GET /admin/feedback?status=new`
+3. Admin reads it, sets status / note → `PATCH /admin/feedback/{id}`
 
 ---
 

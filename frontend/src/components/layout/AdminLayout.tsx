@@ -221,6 +221,11 @@ export function AdminLayout() {
       label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
     },
     {
+      key: '/admin/feedback',
+      icon: <i className="fa-solid fa-comment-dots" aria-hidden />,
+      label: <Link to="/admin/feedback">{t('admin.feedback')}</Link>,
+    },
+    {
       key: '/admin/media',
       icon: <i className="fa-solid fa-photo-film" aria-hidden />,
       label: <Link to="/admin/media">{t('admin.media')}</Link>,

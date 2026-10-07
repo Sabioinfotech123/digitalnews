@@ -9,6 +9,7 @@ export const admin = {
   allNews: 'All news',
   localNews: 'Local news',
   verifiedNews: 'Verified news',
+  feedback: 'Feedback',
   localFeed: 'Local feed',
   blogs: 'Blogs',
   videos: 'Videos',

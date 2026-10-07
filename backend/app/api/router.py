@@ -5,6 +5,7 @@ from app.api.v1 import (
     auth,
     blogs,
     breaking_news,
+    feedback,
     health,
     local_news,
     media,
@@ -28,3 +29,4 @@ api_router.include_router(videos.router)
 api_router.include_router(site_settings.router)
 api_router.include_router(taxonomy.router)
 api_router.include_router(media.router)
+api_router.include_router(feedback.router)

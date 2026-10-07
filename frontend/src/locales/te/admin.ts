@@ -9,6 +9,7 @@ export const admin = {
   allNews: 'అన్ని వార్తలు',
   localNews: 'స్థానిక వార్తలు',
   verifiedNews: 'వెరిఫైడ్ వార్తలు',
+  feedback: 'అభిప్రాయాలు',
   localFeed: 'లోకల్ ఫీడ్',
   blogs: 'బ్లాగులు',
   videos: 'వీడియోలు',

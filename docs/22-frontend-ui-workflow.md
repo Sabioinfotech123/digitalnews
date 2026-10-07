@@ -46,6 +46,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
 | **Videos** | Upload video file and/or YouTube URL; list + create/edit |
+| **Feedback** | Messages sent from the website footer (guests + logged-in users); set status, add note, delete |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
 | Header **Add** button | Quick shortcuts to create things |
@@ -251,6 +252,23 @@ Same pattern as news: pencil / trash on the blog table.
 
 ---
 
+## Step 4.6 — Feedback inbox
+
+**Visitor side (website):**
+1. Footer → **Feedback** → opens `/feedback`
+2. **Guest:** types name + email. **Logged-in user:** name/email come from the account (form shows “Signed in as *name*”, email is not shown)
+3. Picks a topic (General, Suggestion, Bug, News content, Other), a 1–5 star rating (required), writes the message (min 10 characters) → **Send feedback**
+4. Sees a “Thank you” screen (can send another)
+
+**Admin side:**
+1. Sidebar → **Feedback** (title shows how many are **new**)
+2. Filter by status / topic or search name, email, message
+3. Click a message (or the eye icon) → see full details, the page they came from, and their email (click to reply by mail)
+4. Change **Status** (New → In review → Resolved) and add an **Internal note** → **Save**
+5. Delete spam with the trash icon → Confirm
+
+---
+
 ## Full day-to-day flow (example)
 
 ```text
@@ -286,6 +304,7 @@ Remove old item
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
+| Visitor sends footer **Feedback** | Shows up in Admin → **Feedback** as **New** |
 
 Public URLs (local):
 
@@ -295,6 +314,7 @@ http://localhost:5173/news      All news (list)
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search
+http://localhost:5173/feedback  Feedback form (footer link)
 ```
 
 ---

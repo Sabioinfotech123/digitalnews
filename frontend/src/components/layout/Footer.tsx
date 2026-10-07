@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { BRAND } from '@/config/brand'
@@ -7,6 +7,7 @@ import './Footer.scss'
 export function Footer() {
   const { t } = useLanguage()
   const { logoUrl } = useSiteSettings()
+  const { pathname } = useLocation()
   const year = new Date().getFullYear()
 
   return (
@@ -37,6 +38,13 @@ export function Footer() {
           >
             <i className="fa-brands fa-youtube" aria-hidden /> {t('videos.youtube')}
           </a>
+          <Link
+            to="/feedback"
+            state={{ from: pathname }}
+            className="inline-flex items-center gap-1.5 font-ui text-sm text-white/80 hover:text-primary"
+          >
+            <i className="fa-solid fa-comment-dots" aria-hidden /> {t('feedback.link')}
+          </Link>
         </nav>
         <p className="m-0 border-t border-white/12 pt-3 font-ui text-xs text-white/50">
           © {year} {BRAND.name}. All rights reserved.

@@ -36,6 +36,10 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 ┌────────────────┐
 │ site_settings  │  (logo + favicon + primary color — one row)
 └────────────────┘
+
+┌──────────┐       ┌────────────┐
+│  users   │┄┄┄┄┄┄┄│  feedback  │  (user is optional — guests can send too)
+└──────────┘       └────────────┘
 ```
 
 **In plain words:**
@@ -46,6 +50,7 @@ Database: **PostgreSQL** · Migrations: **Alembic** (`backend/alembic/versions/`
 - **Videos** are a separate catalog (file upload and/or YouTube), with category/tags/SEO like blogs.
 - **Breaking news** is a separate ticker list (header bar), not the same as `news.is_breaking`.
 - **Site settings** stores the website logo, favicon, and primary color.
+- **Feedback** stores messages sent from the website footer “Feedback” page (guest or logged-in).
 
 ---
 
@@ -254,6 +259,30 @@ Saved when admin runs **Verify** on a Local feed article.
 | `verified_at` | When checked |
 
 Migration: `0007_verified_local_news.py`
+
+---
+
+### 12) `feedback` — messages from website visitors
+
+Saved when someone submits the public **Feedback** form (`/feedback`, linked in the footer).  
+Anyone can send it — with or without login.
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Unique ID |
+| `user_id` | Who sent it, if logged in (empty for guests). If the user is removed, this becomes empty |
+| `name` / `email` | Guest types these; for logged-in users they are copied from the account |
+| `category` | `general` / `suggestion` / `bug` / `content` / `other` |
+| `rating` | 1–5 stars (required on the form/API; column allows empty for safety) |
+| `message` | The feedback text (10–2000 characters) |
+| `page_url` | Page the visitor was on when they clicked Feedback (optional) |
+| `status` | `new` → `in_review` → `resolved` (admin changes this) |
+| `admin_note` | Private note for admins (not shown to the visitor) |
+| `created_at` / `updated_at` | Timestamps |
+
+Delete is a **hard delete** (row is removed).
+
+Migration: `0012_feedback.py`
 
 ---
 

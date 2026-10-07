@@ -7,6 +7,7 @@ import {
   useSiteSettings,
 } from '@/app/providers/SiteSettingsProvider'
 import { ZoomProvider } from '@/app/providers/ZoomProvider'
+import { VideoUploadProvider } from '@/app/providers/VideoUploadProvider'
 import { ZoomControls } from '@/components/common/ZoomControls'
 import { DEFAULT_PRIMARY_COLOR } from '@/types/settings'
 
@@ -78,8 +79,10 @@ function ThemedApp({ children }: { children: ReactNode }) {
         <ZoomProvider>
           <LanguageProvider>
             <AuthProvider>
-              {children}
-              <ZoomControls />
+              <VideoUploadProvider>
+                {children}
+                <ZoomControls />
+              </VideoUploadProvider>
             </AuthProvider>
           </LanguageProvider>
         </ZoomProvider>

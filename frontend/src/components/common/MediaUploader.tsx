@@ -3,6 +3,7 @@ import type { UploadProps } from 'antd'
 import axios from 'axios'
 import { useState } from 'react'
 import { uploadMediaFile, type MediaUploadKind } from '@/api/media'
+import { useVideoUpload } from '@/app/providers/VideoUploadProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { getApiErrorMessage } from '@/utils/apiError'
 import './MediaUploader.scss'
@@ -18,6 +19,7 @@ interface MediaUploaderProps {
   accept?: string
   /** When true, reject files that are not ~16:9 */
   requireSixteenNine?: boolean
+  uploadSessionKey?: string
 }
 
 const IMAGE_ACCEPT =
@@ -121,17 +123,33 @@ export function MediaUploader({
   required = false,
   accept,
   requireSixteenNine = false,
+  uploadSessionKey,
 }: MediaUploaderProps) {
   const { message } = App.useApp()
+  const videoUpload = useVideoUpload()
   const [uploading, setUploading] = useState(false)
   const [loadedBytes, setLoadedBytes] = useState(0)
   const [totalBytes, setTotalBytes] = useState(0)
   const isVideo = kind === 'video'
   const isThumbnail = kind === 'thumbnail'
+  const isGlobalVideoBusy =
+    isVideo && (videoUpload?.upload.status === 'uploading' || videoUpload?.upload.status === 'saving')
+  const isUploadBusy = uploading || isGlobalVideoBusy
   const enforceVideoSixteenNine = requireSixteenNine || isVideo
   const resolvedAccept = accept ?? (isVideo ? VIDEO_ACCEPT : IMAGE_ACCEPT)
 
   const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
+    if (isVideo && videoUpload && uploadSessionKey) {
+      try {
+        await assertVideoSixteenByNine(file as File)
+        const result = await videoUpload.startUpload(uploadSessionKey, file as File)
+        onChange?.(result.url)
+      } catch (err) {
+        message.error(uploadErrorMessage(err, true))
+      }
+      return false
+    }
+
     const total = (file as File).size
     setUploading(true)
     setLoadedBytes(0)
@@ -182,9 +200,9 @@ export function MediaUploader({
       multiple={false}
       showUploadList={false}
       beforeUpload={beforeUpload}
-      disabled={uploading}
+      disabled={isUploadBusy}
     >
-      <AppButton size="small" disabled={uploading}>
+      <AppButton size="small" disabled={isUploadBusy}>
         Change
       </AppButton>
     </Upload>
@@ -252,7 +270,7 @@ export function MediaUploader({
                   size="small"
                   danger
                   onClick={() => onChange?.(null)}
-                  disabled={uploading}
+                  disabled={isUploadBusy}
                 >
                   Remove
                 </AppButton>
@@ -262,13 +280,13 @@ export function MediaUploader({
           {loaderBlock(true)}
         </div>
       ) : (
-        <div className={`media-uploader__drop-wrap${uploading ? ' is-uploading' : ''}`}>
+        <div className={`media-uploader__drop-wrap${isUploadBusy ? ' is-uploading' : ''}`}>
           <Upload.Dragger
             accept={resolvedAccept}
             multiple={false}
             showUploadList={false}
             beforeUpload={beforeUpload}
-            disabled={uploading}
+            disabled={isUploadBusy}
             className="media-uploader__drop"
           >
             <p className="media-uploader__icon">

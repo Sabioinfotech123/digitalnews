@@ -1,6 +1,7 @@
 import { App, Form, Input, InputNumber, Select, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useVideoUpload } from '@/app/providers/VideoUploadProvider'
 import {
   createAdminVideo,
   fetchAdminVideoById,
@@ -39,12 +40,16 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
   const { id } = useParams()
   const navigate = useNavigate()
   const { message } = App.useApp()
+  const videoUpload = useVideoUpload()
+  const getDraftSession = videoUpload?.getDraftSession
+  const updateDraft = videoUpload?.updateDraft
   const [form] = Form.useForm<VideoPayload>()
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
   const [video, setVideo] = useState<VideoItem | null>(null)
+  const draftKey = mode === 'create' ? 'video:create' : `video:edit:${id ?? ''}`
   const watchedVideoUrl = Form.useWatch('video_url', form)
   const thumbnailRequired = Boolean(String(watchedVideoUrl || '').trim())
 
@@ -81,18 +86,32 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
             description: stripHtml(item.description),
             content: item.content || '',
           })
+          updateDraft?.(draftKey, {
+            ...item,
+            tag_ids: item.tags.map((tag) => tag.id),
+            description: stripHtml(item.description),
+          }, item.id)
         } else {
-          form.setFieldsValue({
-            language: 'en',
-            status: 'draft',
-            sort_order: 0,
-            video_url: null,
-            youtube_url: null,
-            thumbnail_url: null,
-            description: '',
-            content: '',
-            tag_ids: [],
-          })
+          const savedDraft = getDraftSession?.(draftKey)
+          if (savedDraft) {
+            form.setFieldsValue(savedDraft.values as VideoPayload)
+          } else {
+            const defaults: VideoPayload = {
+              title: '',
+              slug: '',
+              language: 'en',
+              status: 'draft',
+              sort_order: 0,
+              video_url: null,
+              youtube_url: null,
+              thumbnail_url: null,
+              description: '',
+              content: '',
+              tag_ids: [],
+            }
+            form.setFieldsValue(defaults)
+            updateDraft?.(draftKey, defaults, null)
+          }
         }
       } catch {
         if (!active) return
@@ -107,7 +126,7 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
     return () => {
       active = false
     }
-  }, [mode, id, form, message, navigate])
+  }, [mode, id, form, message, navigate, getDraftSession, updateDraft, draftKey])
 
   const goBackToList = () => {
     navigate('/admin/videos')
@@ -124,8 +143,30 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
       form.setFieldValue('slug', slugify(String(all.title || '')))
     }
     if ('video_url' in changed) {
+      form.setFieldValue('status', 'draft')
+      const savedValues = getDraftSession?.(draftKey)?.values
+      if (String(form.getFieldValue('title') || '').trim().length < 3 && savedValues?.title) {
+        form.setFieldValue('title', savedValues.title)
+      }
+      if (String(form.getFieldValue('slug') || '').trim().length < 3 && savedValues?.slug) {
+        form.setFieldValue('slug', savedValues.slug)
+      }
       void form.validateFields(['thumbnail_url']).catch(() => undefined)
     }
+    const currentValues = form.getFieldsValue(true) as VideoPayload
+    const sessionValues = getDraftSession?.(draftKey)?.values
+    const nextValues = { ...all, ...currentValues }
+    if (String(nextValues.title || '').trim().length < 3 && sessionValues?.title) {
+      nextValues.title = sessionValues.title
+    }
+    if (String(nextValues.slug || '').trim().length < 3 && sessionValues?.slug) {
+      nextValues.slug = sessionValues.slug
+    }
+    updateDraft?.(
+      draftKey,
+      { ...nextValues, status: 'video_url' in changed ? 'draft' : currentValues.status },
+      mode === 'edit' ? id : undefined,
+    )
   }
 
   const handleFinishFailed = (info: FormValidationInfo) => {
@@ -155,13 +196,19 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
         content: values.content || '',
         sort_order: values.sort_order ?? 0,
       }
-      if (mode === 'create') {
+      const existingDraftId = getDraftSession?.(draftKey)?.videoId
+      if (mode === 'create' && !existingDraftId) {
         const created = await createAdminVideo(payload)
+        updateDraft?.(draftKey, payload, created.id)
+        updateDraft?.(`video:edit:${created.id}`, payload, created.id)
         message.success('Video created successfully')
         navigate(`/admin/videos/edit/${created.id}`)
-      } else if (id) {
-        const updated = await updateAdminVideo(id, payload)
+      } else if (existingDraftId || id) {
+        const targetId = existingDraftId || id
+        if (!targetId) return
+        const updated = await updateAdminVideo(targetId, payload)
         setVideo(updated)
+        updateDraft?.(draftKey, payload, updated.id)
         message.success('Video updated successfully')
       }
     } catch (err) {
@@ -239,7 +286,12 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
               extra="Upload MP4/WEBM, and/or add a YouTube URL below."
               className="w-full"
             >
-              <MediaUploader kind="video" folder="videos" label="" />
+              <MediaUploader
+                kind="video"
+                folder="videos"
+                label=""
+                uploadSessionKey={draftKey}
+              />
             </Form.Item>
 
             <Form.Item
