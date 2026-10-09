@@ -286,6 +286,24 @@ Migration: `0012_feedback.py`
 
 ---
 
+### 13) `user_bookmarks` — saved for later (logged-in users)
+
+One row per user + item (news, blog, or video).
+
+| Column | Simple meaning |
+|--------|----------------|
+| `id` | Unique ID |
+| `user_id` | Who saved it (FK → `users`, deleted if user is removed) |
+| `content_type` | `news` / `blog` / `video` |
+| `content_id` | ID of that news/blog/video row |
+| `created_at` | When they saved it |
+
+Unique together: `user_id` + `content_type` + `content_id`.
+
+Migration: `0013_user_bookmarks.py`
+
+---
+
 ## Soft delete (important)
 
 For `users`, `news`, `blogs`:

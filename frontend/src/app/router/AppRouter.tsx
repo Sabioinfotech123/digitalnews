@@ -30,6 +30,7 @@ import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { AdminVideoCreatePage, AdminVideoEditPage } from '@/pages/admin/AdminVideoFormPage'
 import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
+import { BookmarksPage } from '@/pages/public/BookmarksPage'
 import { BlogsPage } from '@/pages/public/BlogsPage'
 import { FeedbackPage } from '@/pages/public/FeedbackPage'
 import { HomePage } from '@/pages/public/HomePage'
@@ -79,6 +80,7 @@ export function AppRouter() {
       <Route path="/blogs/:slug" element={<PublicPage><BlogDetailPage /></PublicPage>} />
       <Route path="/search" element={<PublicPage><SearchPage /></PublicPage>} />
       <Route path="/feedback" element={<PublicPage><FeedbackPage /></PublicPage>} />
+      <Route path="/bookmarks" element={<PublicPage><BookmarksPage /></PublicPage>} />
       <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
       <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
 

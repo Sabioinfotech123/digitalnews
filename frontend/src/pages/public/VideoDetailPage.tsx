@@ -4,6 +4,7 @@ import { fetchPublicVideoBySlug, fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { BookmarkButton } from '@/components/common/BookmarkButton'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import { VideoCard } from '@/components/common/VideoCard'
 import { BRAND } from '@/config/brand'
@@ -180,7 +181,10 @@ export function VideoDetailPage() {
           <span className="video-detail__source">{sourceLabel}</span>
         </div>
 
-        <h1 className="video-detail__title">{video.title}</h1>
+        <div className="video-detail__title-row">
+          <h1 className="video-detail__title">{video.title}</h1>
+          <BookmarkButton contentType="video" contentId={video.id} />
+        </div>
         {excerpt ? <p className="video-detail__desc">{excerpt}</p> : null}
 
         {video.content ? (

@@ -305,6 +305,7 @@ Remove old item
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
 | Visitor sends footer **Feedback** | Shows up in Admin → **Feedback** as **New** |
+| Logged-in user saves an article/video | Appears on **Bookmarks** (`/bookmarks`) |
 
 Public URLs (local):
 
@@ -315,7 +316,13 @@ http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search
 http://localhost:5173/feedback  Feedback form (footer link)
+http://localhost:5173/bookmarks Saved for later (login required)
 ```
+
+**Bookmarks (read later):**
+1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)
+2. Guests are sent to **Login**; after sign-in they can save
+3. Account menu → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
 
 ---
 

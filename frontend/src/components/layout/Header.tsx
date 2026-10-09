@@ -95,6 +95,11 @@ export function Header() {
       })
     }
     items.push({
+      key: 'bookmarks',
+      icon: <i className="fa-solid fa-bookmark" aria-hidden />,
+      label: <Link to="/bookmarks">{t('navigation.bookmarks')}</Link>,
+    })
+    items.push({
       key: 'logout',
       icon: <i className="fa-solid fa-right-from-bracket" aria-hidden />,
       label: t('auth.logout'),
@@ -264,6 +269,17 @@ export function Header() {
 
             {isAuthenticated ? (
               <>
+                <AppButton
+                  type="default"
+                  block
+                  icon={<i className="fa-solid fa-bookmark" aria-hidden />}
+                  onClick={() => {
+                    setOpen(false)
+                    navigate('/bookmarks')
+                  }}
+                >
+                  {t('navigation.bookmarks')}
+                </AppButton>
                 {isAdmin ? (
                   <AppButton
                     type="primary"

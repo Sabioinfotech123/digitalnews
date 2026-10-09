@@ -4,6 +4,7 @@ import { fetchPublicNews, fetchPublicNewsById, fetchPublicNewsBySlug } from '@/a
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { BookmarkButton } from '@/components/common/BookmarkButton'
 import { RelatedFeed } from '@/components/common/RelatedFeed'
 import { BRAND } from '@/config/brand'
 import type { NewsItem } from '@/types/content'
@@ -144,7 +145,10 @@ export function NewsDetailPage() {
               {published ? <time className="news-detail__date">{published}</time> : null}
             </div>
 
-            <h1 className="news-detail__title">{article.title}</h1>
+            <div className="news-detail__title-row">
+              <h1 className="news-detail__title">{article.title}</h1>
+              <BookmarkButton contentType="news" contentId={article.id} />
+            </div>
 
             {excerpt ? <p className="news-detail__excerpt">{excerpt}</p> : null}
 

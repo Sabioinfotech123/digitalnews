@@ -88,6 +88,20 @@
     font-size: var(--font-size-xs);
   }
 
+  &__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  &__title-row &__title {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
   &__title {
     margin: 0;
     font-family: var(--font-heading);

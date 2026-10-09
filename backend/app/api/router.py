@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1 import (
     admin,
     auth,
+    bookmarks,
     blogs,
     breaking_news,
     feedback,
@@ -19,6 +20,7 @@ from app.api.v1 import (
 api_router = APIRouter()
 api_router.include_router(health.router)
 api_router.include_router(auth.router)
+api_router.include_router(bookmarks.router)
 api_router.include_router(admin.router)
 api_router.include_router(news.router)
 api_router.include_router(blogs.router)

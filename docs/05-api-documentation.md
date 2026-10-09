@@ -377,7 +377,28 @@ With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPEN
 
 ---
 
-## 13) Feedback (public form + admin inbox)
+## 13) Bookmarks / read later (logged-in)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/bookmarks/ids` | Logged in | Lightweight list of saved keys (for UI toggle state) |
+| GET | `/bookmarks` | Logged in | Paginated saved items with title, slug, image (`content_type`, `page`, `page_size` ≤ 50) |
+| POST | `/bookmarks` | Logged in | Save an item |
+| DELETE | `/bookmarks/{content_type}/{content_id}` | Logged in | Remove from saved |
+
+**POST body:**
+
+```json
+{ "content_type": "news", "content_id": "uuid-of-published-item" }
+```
+
+`content_type`: `news`, `blog`, or `video`. Item must be **published** and not soft-deleted, or API returns 404.
+
+List items include `is_available: false` if the content was unpublished or removed (user can still delete the bookmark).
+
+---
+
+## 14) Feedback (public form + admin inbox)
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|

@@ -4,6 +4,7 @@ import { fetchPublicBlogById, fetchPublicBlogBySlug, fetchPublicBlogs } from '@/
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { BookmarkButton } from '@/components/common/BookmarkButton'
 import { RelatedFeed } from '@/components/common/RelatedFeed'
 import { BRAND } from '@/config/brand'
 import type { BlogItem } from '@/types/content'
@@ -138,7 +139,10 @@ export function BlogDetailPage() {
               ) : null}
             </div>
 
-            <h1 className="news-detail__title">{article.title}</h1>
+            <div className="news-detail__title-row">
+              <h1 className="news-detail__title">{article.title}</h1>
+              <BookmarkButton contentType="blog" contentId={article.id} />
+            </div>
             {excerpt ? <p className="news-detail__excerpt">{excerpt}</p> : null}
 
             {article.author_name ? (

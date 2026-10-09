@@ -1,6 +1,7 @@
 import { App, ConfigProvider } from 'antd'
 import { useMemo, type ReactNode } from 'react'
 import { AuthProvider } from '@/app/providers/AuthProvider'
+import { BookmarksProvider } from '@/app/providers/BookmarksProvider'
 import { LanguageProvider } from '@/app/providers/LanguageProvider'
 import {
   SiteSettingsProvider,
@@ -79,10 +80,12 @@ function ThemedApp({ children }: { children: ReactNode }) {
         <ZoomProvider>
           <LanguageProvider>
             <AuthProvider>
-              <VideoUploadProvider>
-                {children}
-                <ZoomControls />
-              </VideoUploadProvider>
+              <BookmarksProvider>
+                <VideoUploadProvider>
+                  {children}
+                  <ZoomControls />
+                </VideoUploadProvider>
+              </BookmarksProvider>
             </AuthProvider>
           </LanguageProvider>
         </ZoomProvider>

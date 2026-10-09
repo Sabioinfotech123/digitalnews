@@ -2,6 +2,7 @@ import type { SupportedLanguage } from '@/config/app'
 import { admin as enAdmin } from '@/locales/en/admin'
 import { auth as enAuth } from '@/locales/en/auth'
 import { blogs as enBlogs } from '@/locales/en/blogs'
+import { bookmarks as enBookmarks } from '@/locales/en/bookmarks'
 import { common as enCommon } from '@/locales/en/common'
 import { feedback as enFeedback } from '@/locales/en/feedback'
 import { navigation as enNavigation } from '@/locales/en/navigation'
@@ -10,6 +11,7 @@ import { videos as enVideos } from '@/locales/en/videos'
 import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
 import { blogs as teBlogs } from '@/locales/te/blogs'
+import { bookmarks as teBookmarks } from '@/locales/te/bookmarks'
 import { common as teCommon } from '@/locales/te/common'
 import { feedback as teFeedback } from '@/locales/te/feedback'
 import { navigation as teNavigation } from '@/locales/te/navigation'
@@ -24,6 +26,7 @@ const catalogs = {
     news: enNews,
     videos: enVideos,
     blogs: enBlogs,
+    bookmarks: enBookmarks,
     feedback: enFeedback,
     admin: enAdmin,
   },
@@ -34,6 +37,7 @@ const catalogs = {
     news: teNews,
     videos: teVideos,
     blogs: teBlogs,
+    bookmarks: teBookmarks,
     feedback: teFeedback,
     admin: teAdmin,
   },
