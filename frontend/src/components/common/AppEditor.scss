@@ -60,6 +60,8 @@
     font-family: var(--font-body);
     color: #171717;
     line-height: 1.65;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 
     p {
       margin: 0 0 0.75rem;

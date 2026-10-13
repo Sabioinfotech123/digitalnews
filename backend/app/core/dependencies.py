@@ -30,6 +30,22 @@ def get_current_user(
     return user
 
 
+def get_optional_user(
+    db: Annotated[Session, Depends(get_db)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> User | None:
+    """Like get_current_user, but returns None for guests or bad tokens instead of 401."""
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        return None
+    payload = safe_decode_token(credentials.credentials)
+    if not payload or payload.get("type") != "access":
+        return None
+    user = UserRepository(db).get_by_id(str(payload["sub"]))
+    if not user or not user.is_active:
+        return None
+    return user
+
+
 def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
     if user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
@@ -39,10 +55,13 @@ def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 AdminUser = Annotated[User, Depends(require_admin)]
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 
 __all__ = [
     "get_db",
     "get_current_user",
+    "get_optional_user",
+    "OptionalUser",
     "require_admin",
     "DbSession",
     "CurrentUser",

@@ -17,5 +17,6 @@ export const news = {
   articleNotFound: 'Article not found',
   backHome: 'Back to home',
   backAllNews: 'Back to all news',
+  relatedNews: 'Related news',
   byAuthor: 'By',
 } as const

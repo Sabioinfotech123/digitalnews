@@ -16,6 +16,9 @@ const STATUS_COLOR: Record<string, string> = {
   likely_real: 'success',
   likely_fake: 'error',
   uncertain: 'warning',
+  new: 'processing',
+  in_review: 'warning',
+  resolved: 'success',
   USER: 'blue',
   ADMIN: 'red',
 }
@@ -36,6 +39,9 @@ const STATUS_LABEL: Record<string, string> = {
   likely_real: 'Likely real',
   likely_fake: 'Likely fake',
   uncertain: 'Uncertain',
+  new: 'New',
+  in_review: 'In review',
+  resolved: 'Resolved',
   USER: 'User',
   ADMIN: 'Admin',
 }

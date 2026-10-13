@@ -53,4 +53,11 @@
       grid-template-columns: repeat(3, 1fr);
     }
   }
+
+  &__empty {
+    margin: 1rem 0;
+    color: var(--color-text-muted);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-md);
+  }
 }

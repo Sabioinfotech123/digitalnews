@@ -3,13 +3,14 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.content import Blog, ContentLanguage, ContentStatus, News, NewsType
+from app.models.content import Blog, ContentLanguage, ContentStatus, News, NewsType, Video
 from app.repositories.content_repository import (
     BlogRepository,
     BreakingNewsRepository,
     CategoryRepository,
     NewsRepository,
     TagRepository,
+    VideoRepository,
 )
 from app.schemas.content import (
     BlogCreate,
@@ -26,9 +27,13 @@ from app.schemas.content import (
     NewsUpdate,
     PaginatedBlogs,
     PaginatedNews,
+    PaginatedVideos,
     TagCreate,
     TagResponse,
     TagUpdate,
+    VideoCreate,
+    VideoResponse,
+    VideoUpdate,
 )
 
 
@@ -51,6 +56,8 @@ def _news_response(item: News) -> NewsResponse:
         is_local=bool(getattr(item, "is_local", False)),
         sort_order=int(getattr(item, "sort_order", 0) or 0),
         image_url=item.image_url,
+        video_url=getattr(item, "video_url", None),
+        youtube_url=getattr(item, "youtube_url", None),
         seo_title=item.seo_title,
         seo_description=item.seo_description,
         seo_keywords=item.seo_keywords,
@@ -192,6 +199,8 @@ class NewsService:
             is_local=payload.is_local,
             sort_order=max(0, int(payload.sort_order or 0)),
             image_url=payload.image_url,
+            video_url=payload.video_url,
+            youtube_url=payload.youtube_url,
             seo_title=payload.seo_title,
             seo_description=payload.seo_description,
             seo_keywords=payload.seo_keywords,
@@ -401,3 +410,151 @@ class BreakingNewsService:
         if not item:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Breaking news not found")
         self.repo.delete(item)
+
+
+def _require_video_source(
+    *,
+    video_url: str | None,
+    youtube_url: str | None,
+    thumbnail_url: str | None = None,
+) -> None:
+    has_file = bool((video_url or "").strip())
+    has_yt = bool((youtube_url or "").strip())
+    if not has_file and not has_yt:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Upload a video file or add a YouTube URL (or both)",
+        )
+    if has_file and not (thumbnail_url or "").strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Thumbnail is required when uploading a video file",
+        )
+
+
+def _video_response(item: Video) -> VideoResponse:
+    return VideoResponse(
+        id=item.id,
+        title=item.title,
+        slug=item.slug,
+        language=item.language,
+        description=item.description,
+        content=item.content or "",
+        category_id=item.category_id,
+        category_name=item.category.name if item.category else None,
+        video_url=item.video_url,
+        youtube_url=item.youtube_url,
+        thumbnail_url=item.thumbnail_url,
+        status=item.status,
+        sort_order=int(item.sort_order or 0),
+        seo_title=item.seo_title,
+        seo_description=item.seo_description,
+        seo_keywords=item.seo_keywords,
+        view_count=item.view_count,
+        published_at=item.published_at,
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+        tags=[TagResponse.model_validate(tag) for tag in item.tags],
+    )
+
+
+class VideoService:
+    def __init__(self, db: Session) -> None:
+        self.repo = VideoRepository(db)
+        self.tags = TagRepository(db)
+
+    def list(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        language: ContentLanguage | None = None,
+        status: ContentStatus | None = None,
+        published_only: bool = False,
+    ) -> PaginatedVideos:
+        items, total = self.repo.list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            language=language,
+            status=status,
+            published_only=published_only,
+        )
+        return PaginatedVideos(
+            items=[_video_response(item) for item in items],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+
+    def get(self, video_id: str, *, increment_view: bool = False) -> VideoResponse:
+        item = self.repo.get(video_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        if increment_view:
+            self.repo.increment_view(video_id)
+            item = self.repo.get(video_id) or item
+        return _video_response(item)
+
+    def create(self, payload: VideoCreate) -> VideoResponse:
+        _require_video_source(
+            video_url=payload.video_url,
+            youtube_url=payload.youtube_url,
+            thumbnail_url=payload.thumbnail_url,
+        )
+        if self.repo.get_by_slug(payload.slug, payload.language):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+        tags = self.tags.get_many(payload.tag_ids)
+        video = Video(
+            title=payload.title,
+            slug=payload.slug,
+            language=payload.language,
+            description=payload.description,
+            content=payload.content or "",
+            category_id=payload.category_id,
+            video_url=payload.video_url,
+            youtube_url=payload.youtube_url,
+            thumbnail_url=payload.thumbnail_url,
+            status=payload.status,
+            sort_order=max(0, int(payload.sort_order or 0)),
+            seo_title=payload.seo_title,
+            seo_description=payload.seo_description,
+            seo_keywords=payload.seo_keywords,
+            published_at=payload.published_at
+            or (datetime.now(timezone.utc) if payload.status == ContentStatus.published else None),
+            tags=tags,
+        )
+        return _video_response(self.repo.create(video))
+
+    def update(self, video_id: str, payload: VideoUpdate) -> VideoResponse:
+        item = self.repo.get(video_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        data = payload.model_dump(exclude_unset=True)
+        tag_ids = data.pop("tag_ids", None)
+        next_slug = data.get("slug", item.slug)
+        next_language = data.get("language", item.language)
+        if next_slug != item.slug or next_language != item.language:
+            clash = self.repo.get_by_slug(next_slug, next_language)
+            if clash and clash.id != item.id:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+        for key, value in data.items():
+            setattr(item, key, value)
+        if tag_ids is not None:
+            item.tags = self.tags.get_many(tag_ids)
+        _require_video_source(
+            video_url=item.video_url,
+            youtube_url=item.youtube_url,
+            thumbnail_url=item.thumbnail_url,
+        )
+        if item.status == ContentStatus.published and item.published_at is None:
+            item.published_at = datetime.now(timezone.utc)
+        return _video_response(self.repo.save(item))
+
+    def delete(self, video_id: str) -> None:
+        item = self.repo.get(video_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        item.deleted_at = datetime.now(timezone.utc)
+        self.repo.save(item)

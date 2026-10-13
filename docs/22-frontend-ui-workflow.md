@@ -36,7 +36,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 
 | Menu | What you do there |
 |------|-------------------|
-| **Dashboard** | Counts / overview |
+| **Dashboard** | Overview counts, publish %, quick actions |
 | **Breaking news** | Header ticker headlines (CRUD) |
 | **Catalog → Categories** | Add/edit/delete categories |
 | **Catalog → Tags** | Add/edit/delete tags |
@@ -45,6 +45,8 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Local feed → Local news** | Browse regional headlines → verify with AI or add to CMS |
 | **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
+| **Videos** | Upload video file and/or YouTube URL; list + create/edit |
+| **Feedback** | Messages sent from the website footer (guests + logged-in users); set status, add note, delete |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
 | Header **Add** button | Quick shortcuts to create things |
@@ -125,7 +127,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 
 ### Browse & add
 1. Sidebar → **Local feed** → **Local news**
-2. Filter by **State**, **date range**, and optional **city/topic** search
+2. Filter by **State** (searchable dropdown — includes **Hyderabad**), **date range**, and optional **city/topic** search
 3. Table shows **Google News** (feed) column — `Google News` by default, or `NewsAPI` if `NEWS_API_KEY` is set
 4. **View & add** → edit title/slug/content/image like create-news → save into Featured/Latest/…
 5. Imported CMS items get a **Local** flag
@@ -233,6 +235,40 @@ Same pattern as news: pencil / trash on the blog table.
 
 ---
 
+## Step 4.5 — Videos workflow
+
+1. Sidebar → **Videos** (or header **Add → Video**)
+2. **+ Create video**
+3. Fill title, slug, language, status
+4. **Short description** + **Content** (rich editor — same as news)
+5. Provide **at least one**:
+   - **Video file** — upload mp4/webm (**16:9 only**)
+   - **YouTube URL** — paste a full YouTube link
+6. Category, tags, SEO (same as news/blogs). **Thumbnail required** if you upload a video file (any size except **9:16**); optional for YouTube-only → Create
+
+**Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
+
+**Public site:** published videos show on Home → Latest Videos, `/videos` list, and `/videos/:slug` detail (uploaded file plays; if YouTube is also set, a YouTube link card shows below).
+
+---
+
+## Step 4.6 — Feedback inbox
+
+**Visitor side (website):**
+1. Footer → **Feedback** → opens `/feedback`
+2. **Guest:** types name + email. **Logged-in user:** name/email come from the account (form shows “Signed in as *name*”, email is not shown)
+3. Picks a topic (General, Suggestion, Bug, News content, Other), a 1–5 star rating (required), writes the message (min 10 characters) → **Send feedback**
+4. Sees a “Thank you” screen (can send another)
+
+**Admin side:**
+1. Sidebar → **Feedback** (title shows how many are **new**)
+2. Filter by status / topic or search name, email, message
+3. Click a message (or the eye icon) → see full details, the page they came from, and their email (click to reply by mail)
+4. Change **Status** (New → In review → Resolved) and add an **Internal note** → **Save**
+5. Delete spam with the trash icon → Confirm
+
+---
+
 ## Full day-to-day flow (example)
 
 ```text
@@ -268,6 +304,8 @@ Remove old item
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
+| Visitor sends footer **Feedback** | Shows up in Admin → **Feedback** as **New** |
+| Logged-in user saves an article/video | Appears on **Bookmarks** (`/bookmarks`) |
 
 Public URLs (local):
 
@@ -277,7 +315,14 @@ http://localhost:5173/news      All news (list)
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search
+http://localhost:5173/feedback  Feedback form (footer link)
+http://localhost:5173/bookmarks Saved for later (login required)
 ```
+
+**Bookmarks (read later):**
+1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)
+2. Guests are sent to **Login**; after sign-in they can save
+3. Account menu → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
 
 ---
 

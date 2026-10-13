@@ -9,6 +9,7 @@ export const videos = {
   watchOnYoutube: 'Watch on YouTube',
   subscribeYoutube: 'Subscribe on YouTube',
   viewAllVideos: 'View all videos',
+  back: 'Back',
   duration: 'Duration',
   play: 'Play',
   comingSoon: 'Live stream will appear here once configured',
@@ -17,4 +18,8 @@ export const videos = {
   tvChannel: 'TV Channel',
   relatedVideos: 'Related Videos',
   featuredVideo: 'Featured Video',
+  loadingList: 'Loading videos…',
+  loadingArticle: 'Loading video…',
+  emptyList: 'No videos published yet.',
+  articleNotFound: 'Video not found',
 } as const

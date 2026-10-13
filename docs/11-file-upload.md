@@ -2,14 +2,22 @@
 
 ## Flow (S3 only)
 
+**Images / thumbnails** (small):
+
 ```
 Admin picks file
-  → FE sends binary (multipart FormData)
-  → BE validates MIME + size
-  → Upload to AWS S3
-  → BE returns { url, key, ... }
-  → FE stores url on news.image_url (or video thumbnail later)
-  → Save news
+  → FE multipart → API validates → API put_object → S3
+  → FE stores returned url
+```
+
+**Videos** (chunked — size counter advances):
+
+```
+Admin picks video
+  → FE POST /admin/media/multipart/start
+  → FE sends 5MB parts → API upload_part → S3 (repeat)
+  → FE POST /admin/media/multipart/complete
+  → FE stores public url on videos.video_url
 ```
 
 AWS keys stay in `backend/.env` only — never in the frontend.
@@ -18,8 +26,9 @@ AWS keys stay in `backend/.env` only — never in the frontend.
 
 | Content | Media field | Required |
 |---------|-------------|----------|
-| News (featured / latest / trending / more) | `image_url` | Yes (admin form) |
-| Video | `thumbnail_url` | Optional (`kind=thumbnail`) |
+| News | `image_url` | Yes (admin form) |
+| Videos catalog | `video_url` and/or `youtube_url` | At least one; uploaded video must be **16:9** |
+| Videos catalog | `thumbnail_url` | Required if `video_url` is set; any size **except 9:16**; optional for YouTube-only |
 
 ## Env (`backend/.env`)
 
@@ -41,7 +50,30 @@ Bucket objects must be readable publicly (bucket policy `s3:GetObject`) so image
 - multipart: `file`, `kind` (`image` | `thumbnail` | `video`), `folder` (`news` | `videos`)
 - response: `{ key, url, content_type, size_bytes, original_filename, media_kind }`
 
+### Video chunked upload
+
+| Method | Path | What |
+|--------|------|------|
+| POST | `/admin/media/multipart/start` | JSON `{ kind, folder, filename, content_type, size_bytes }` → `{ session_id, part_size }` |
+| POST | `/admin/media/multipart/{session_id}/parts/{n}` | multipart `file` (one chunk) |
+| POST | `/admin/media/multipart/complete` | JSON `{ session_id }` → same as upload response |
+| POST | `/admin/media/multipart/{session_id}/abort` | Cancel |
+
+Part size is **5MB** (S3 minimum for non-final parts). The UI shows **uploaded / total** while parts run.
+
 ## Allowed types
 
 - Images / thumbnails: jpeg, png, webp, gif (max `MAX_IMAGE_SIZE_MB`)
 - Videos: mp4, webm (max `MAX_VIDEO_SIZE_MB`)
+
+## Timeouts (large videos)
+
+Upload goes browser → API → S3. Default axios timeout (20s) is too short for video.
+
+| Layer | Limit |
+|-------|--------|
+| FE part / upload requests | image/thumbnail **2 min**; video **10 min** |
+| Vite dev proxy | **10 min** |
+| nginx `/api/` (QA/prod) | `proxy_send_timeout` / `proxy_read_timeout` **600s** |
+
+Video uploads show **uploaded / total** size while parts run.

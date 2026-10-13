@@ -8,7 +8,11 @@ from app.models.content import (
     News,
     NewsTag,
     Tag,
+    Video,
+    VideoTag,
 )
+from app.models.bookmark import BookmarkContentType, UserBookmark
+from app.models.feedback import Feedback, FeedbackCategory, FeedbackStatus
 from app.models.settings import SiteSettings
 from app.models.user import User, UserRole
 from app.models.verified_news import VerifiedLocalNews, VerifyVerdict
@@ -23,9 +27,16 @@ __all__ = [
     "Blog",
     "BlogTag",
     "BreakingNews",
+    "Video",
+    "VideoTag",
     "SiteSettings",
     "VerifiedLocalNews",
     "VerifyVerdict",
+    "UserBookmark",
+    "BookmarkContentType",
+    "Feedback",
+    "FeedbackCategory",
+    "FeedbackStatus",
     "ContentLanguage",
     "ContentStatus",
 ]

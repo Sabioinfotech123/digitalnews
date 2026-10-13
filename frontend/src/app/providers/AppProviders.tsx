@@ -1,12 +1,14 @@
 import { App, ConfigProvider } from 'antd'
 import { useMemo, type ReactNode } from 'react'
 import { AuthProvider } from '@/app/providers/AuthProvider'
+import { BookmarksProvider } from '@/app/providers/BookmarksProvider'
 import { LanguageProvider } from '@/app/providers/LanguageProvider'
 import {
   SiteSettingsProvider,
   useSiteSettings,
 } from '@/app/providers/SiteSettingsProvider'
 import { ZoomProvider } from '@/app/providers/ZoomProvider'
+import { VideoUploadProvider } from '@/app/providers/VideoUploadProvider'
 import { ZoomControls } from '@/components/common/ZoomControls'
 import { DEFAULT_PRIMARY_COLOR } from '@/types/settings'
 
@@ -78,8 +80,12 @@ function ThemedApp({ children }: { children: ReactNode }) {
         <ZoomProvider>
           <LanguageProvider>
             <AuthProvider>
-              {children}
-              <ZoomControls />
+              <BookmarksProvider>
+                <VideoUploadProvider>
+                  {children}
+                  <ZoomControls />
+                </VideoUploadProvider>
+              </BookmarksProvider>
             </AuthProvider>
           </LanguageProvider>
         </ZoomProvider>

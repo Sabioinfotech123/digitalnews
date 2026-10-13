@@ -37,6 +37,7 @@ GOOGLE_NEWS_RSS = "https://news.google.com/rss/search"
 
 STATE_QUERY: dict[str, str] = {
     "Telangana": "Hyderabad OR Telangana OR GHMC OR Secunderabad",
+    "Hyderabad": "Hyderabad OR GHMC OR Secunderabad OR Hyd",
     "Andhra Pradesh": '"Andhra Pradesh" OR Visakhapatnam OR Vijayawada OR Amaravati',
     "Karnataka": "Bengaluru OR Bangalore OR Karnataka",
     "Maharashtra": "Mumbai OR Pune OR Maharashtra",
