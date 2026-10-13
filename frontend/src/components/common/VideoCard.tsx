@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { CardActions } from '@/components/common/CardActions'
 import type { PublicVideoCardModel } from '@/utils/publicVideo'
 import { cn } from '@/utils/cn'
 import './VideoCard.scss'
@@ -45,7 +46,15 @@ export function VideoCard({ video, featured = false, className = '' }: VideoCard
           <span className="video-card__category">{video.category}</span>
           <h3 className="video-card__title">{video.title}</h3>
           {video.description ? <p className="video-card__desc">{video.description}</p> : null}
-          <p className="video-card__meta">{video.publishedLabel}</p>
+          <div className="video-card__meta-row">
+            <p className="video-card__meta">{video.publishedLabel}</p>
+            <CardActions
+              contentType="video"
+              contentId={video.id}
+              title={video.title}
+              path={`/videos/${video.slug}`}
+            />
+          </div>
         </div>
       </Link>
     </article>
