@@ -8,7 +8,6 @@ import { feedback as enFeedback } from '@/locales/en/feedback'
 import { navigation as enNavigation } from '@/locales/en/navigation'
 import { news as enNews } from '@/locales/en/news'
 import { share as enShare } from '@/locales/en/share'
-import { speech as enSpeech } from '@/locales/en/speech'
 import { videos as enVideos } from '@/locales/en/videos'
 import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
@@ -19,7 +18,6 @@ import { feedback as teFeedback } from '@/locales/te/feedback'
 import { navigation as teNavigation } from '@/locales/te/navigation'
 import { news as teNews } from '@/locales/te/news'
 import { share as teShare } from '@/locales/te/share'
-import { speech as teSpeech } from '@/locales/te/speech'
 import { videos as teVideos } from '@/locales/te/videos'
 
 const catalogs = {
@@ -33,7 +31,6 @@ const catalogs = {
     bookmarks: enBookmarks,
     feedback: enFeedback,
     share: enShare,
-    speech: enSpeech,
     admin: enAdmin,
   },
   te: {
@@ -46,7 +43,6 @@ const catalogs = {
     bookmarks: teBookmarks,
     feedback: teFeedback,
     share: teShare,
-    speech: teSpeech,
     admin: teAdmin,
   },
 } as const

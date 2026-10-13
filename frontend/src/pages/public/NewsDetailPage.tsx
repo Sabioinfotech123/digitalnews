@@ -5,7 +5,6 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
 import { BookmarkButton } from '@/components/common/BookmarkButton'
-import { ListenToArticle } from '@/components/common/ListenToArticle'
 import { RelatedFeed } from '@/components/common/RelatedFeed'
 import { BRAND } from '@/config/brand'
 import type { NewsItem } from '@/types/content'
@@ -158,13 +157,6 @@ export function NewsDetailPage() {
                 {t('news.byAuthor')} {article.author_name}
               </p>
             ) : null}
-
-            <ListenToArticle
-              title={article.title}
-              summary={excerpt}
-              html={article.content || ''}
-              language={article.language}
-            />
 
             {article.image_url ? (
               <div className="news-detail__hero">
