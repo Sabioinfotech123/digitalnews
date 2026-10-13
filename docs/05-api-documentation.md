@@ -177,6 +177,37 @@ Blogs have no `news_type` / breaking flags.
 
 ---
 
+## 6b) Videos (public + admin)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/videos` | Anyone | List **published** videos |
+| GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/admin/videos` | Admin | List all |
+| POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
+| GET | `/admin/videos/{id}` | Admin | Get one |
+| PATCH | `/admin/videos/{id}` | Admin | Update |
+| DELETE | `/admin/videos/{id}` | Admin | Soft delete |
+
+### Create video — important fields
+
+| Field | Required? | Notes |
+|-------|-----------|-------|
+| `title` / `slug` / `language` | Yes | Slug unique per language |
+| `description` | Yes (admin form) | Short summary |
+| `content` | Yes (admin form) | Full HTML body |
+| `category_id` / `tag_ids` | Optional | Same idea as news/blogs |
+| `video_url` | One of these | Uploaded file URL |
+| `youtube_url` | One of these | Full YouTube URL |
+| `thumbnail_url` | Required if `video_url` | Optional when YouTube-only |
+| `status` | Optional | default `draft` |
+| `sort_order` | Optional | lower first |
+| SEO fields | Optional | `seo_title` / `seo_description` / `seo_keywords` |
+
+At least one of `video_url` or `youtube_url` is required.
+
+---
+
 ## 7) Breaking news ticker
 
 Header ticker headlines (separate from `news.is_breaking`).
@@ -235,7 +266,11 @@ Optional query: `?search=sports`
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| POST | `/admin/media/upload` | Admin | Upload image to S3, get public URL |
+| POST | `/admin/media/upload` | Admin | Upload image/thumbnail (multipart) to S3, get public URL |
+| POST | `/admin/media/multipart/start` | Admin | Start chunked **video** upload |
+| POST | `/admin/media/multipart/{id}/parts/{n}` | Admin | Upload one video chunk |
+| POST | `/admin/media/multipart/complete` | Admin | Finish chunked video upload → public URL |
+| POST | `/admin/media/multipart/{id}/abort` | Admin | Cancel chunked upload |
 
 Send as **multipart/form-data**:
 
@@ -293,7 +328,7 @@ Admin-only browse of regional headlines. Default provider: **Google News RSS** (
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| GET | `/admin/local-news/states` | Admin | State filter options |
+| GET | `/admin/local-news/states` | Admin | State/city filter options (includes **Hyderabad** plus common Indian states) |
 | GET | `/admin/local-news` | Admin | List headlines (`state`, `q`, `from_date`, `to_date`, `page`, `page_size`). Each item includes `is_verified`, `verified_id`, `verdict` when already AI-checked |
 | GET | `/admin/local-news/{id}` | Admin | Detail (must open from a recent list — cached ~1h) |
 | POST | `/admin/local-news/{id}/import` | Admin | Create CMS news from that article |
@@ -302,7 +337,7 @@ Admin-only browse of regional headlines. Default provider: **Google News RSS** (
 
 | Param | Default | Notes |
 |-------|---------|-------|
-| `state` | `Telangana` | Keyword boost for that state (e.g. Hyderabad + Telangana) |
+| `state` | `Telangana` | Keyword boost for that state/city (e.g. `Telangana`, `Hyderabad`) |
 | `q` | — | Extra city/topic keyword |
 | `from_date` / `to_date` | — | `YYYY-MM-DD` inclusive. Sent to Google as `after:`/`before:` and also filtered server-side (RSS often ignores date operators). If omitted, feed returns recent items (~last days) |
 | `page` / `page_size` | 1 / 10 | Pagination over fetched batch |
@@ -342,6 +377,70 @@ With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPEN
 
 ---
 
+## 13) Bookmarks / read later (logged-in)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| GET | `/bookmarks/ids` | Logged in | Lightweight list of saved keys (for UI toggle state) |
+| GET | `/bookmarks` | Logged in | Paginated saved items with title, slug, image (`content_type`, `page`, `page_size` ≤ 50) |
+| POST | `/bookmarks` | Logged in | Save an item |
+| DELETE | `/bookmarks/{content_type}/{content_id}` | Logged in | Remove from saved |
+
+**POST body:**
+
+```json
+{ "content_type": "news", "content_id": "uuid-of-published-item" }
+```
+
+`content_type`: `news`, `blog`, or `video`. Item must be **published** and not soft-deleted, or API returns 404.
+
+List items include `is_available: false` if the content was unpublished or removed (user can still delete the bookmark).
+
+---
+
+## 14) Feedback (public form + admin inbox)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/feedback` | Anyone (token optional) | Send feedback |
+| GET | `/admin/feedback` | Admin | List feedback (`search`, `status`, `category`, `page`, `page_size` ≤ 50) |
+| GET | `/admin/feedback/{id}` | Admin | One feedback item |
+| PATCH | `/admin/feedback/{id}` | Admin | Change `status` and/or `admin_note` |
+| DELETE | `/admin/feedback/{id}` | Admin | Remove it |
+
+**Login is optional on `POST /feedback`:**
+- **Guest (no token):** `name` and `email` are required.
+- **Logged in (Bearer token):** `name` / `email` are ignored — the account’s name and email are saved, and the row is linked to the user.
+- An invalid/expired token is treated like a guest (no 401).
+
+Submit body example (guest):
+
+```json
+{
+  "name": "Ravi",
+  "email": "ravi@example.com",
+  "category": "suggestion",
+  "rating": 4,
+  "message": "Please add more Telangana district news.",
+  "page_url": "/news"
+}
+```
+
+| Field | Rule |
+|-------|------|
+| `category` | `general` (default), `suggestion`, `bug`, `content`, `other` |
+| `rating` | Required, 1–5 stars |
+| `message` | Required, 10–2000 characters |
+| `page_url` | Optional — page the visitor came from |
+| `website` | Hidden anti-spam field. Real users leave it empty; if filled → 400 |
+
+Response: `201 { "id": "...", "message": "Thanks for your feedback" }`
+
+Admin list response also returns `new_count` (how many items are still `new`, ignoring filters).  
+Status values: `new`, `in_review`, `resolved`.
+
+---
+
 ## Common workflows
 
 ### A) Publish a news article
@@ -377,6 +476,12 @@ Admin list shows that number in the Views column.
 2. Upload logo / favicon → `/admin/media/upload` (`folder=brand`) → copy `url`
 3. `PATCH /admin/site-settings` with `logo_url`, `favicon_url`, and/or `primary_color`
 4. Public site loads `GET /site-settings` and applies branding (including browser tab icon)
+
+### F) Handle visitor feedback
+
+1. Visitor clicks **Feedback** in the footer → fills the form → `POST /feedback` (token sent automatically if logged in)
+2. Admin opens **Feedback** → `GET /admin/feedback?status=new`
+3. Admin reads it, sets status / note → `PATCH /admin/feedback/{id}`
 
 ---
 

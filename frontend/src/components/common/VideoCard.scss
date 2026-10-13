@@ -35,6 +35,15 @@
   &__thumb {
     position: relative;
     aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #111;
+  }
+
+  &__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   &__play {
@@ -120,8 +129,16 @@
     overflow: hidden;
   }
 
+  &__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
   &__meta {
-    margin: 0.5rem 0 0;
+    margin: 0;
     color: var(--color-text-muted);
     font-family: var(--font-ui);
     font-size: var(--font-size-xs);

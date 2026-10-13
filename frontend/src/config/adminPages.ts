@@ -222,6 +222,30 @@ export function resolveAdminPageMeta(
     }
   }
 
+  const createVideo = pathname.match(/^\/admin\/videos\/create$/)
+  if (createVideo) {
+    return {
+      documentTitle: brandTitle(`Create - Video`),
+      breadcrumbs: [
+        { title: t('admin.videos'), path: '/admin/videos' },
+        { title: t('admin.createNews') },
+      ],
+      menuKey: '/admin/videos',
+    }
+  }
+
+  const editVideo = pathname.match(/^\/admin\/videos\/edit\/[^/]+$/)
+  if (editVideo) {
+    return {
+      documentTitle: brandTitle(`Edit - Video`),
+      breadcrumbs: [
+        { title: t('admin.videos'), path: '/admin/videos' },
+        { title: t('admin.editNews') },
+      ],
+      menuKey: '/admin/videos',
+    }
+  }
+
   const simple: Array<{ prefix: string; titleKey: TranslationKey; crumbs: AdminCrumb[]; menuKey: string }> = [
     {
       prefix: '/admin/blogs',
@@ -240,6 +264,12 @@ export function resolveAdminPageMeta(
       titleKey: 'admin.breakingNews',
       crumbs: [{ title: t('admin.breakingNews') }],
       menuKey: '/admin/breaking-news',
+    },
+    {
+      prefix: '/admin/feedback',
+      titleKey: 'admin.feedback',
+      crumbs: [{ title: t('admin.feedback') }],
+      menuKey: '/admin/feedback',
     },
     {
       prefix: '/admin/categories',

@@ -81,6 +81,56 @@ export interface NewsPayload {
   published_at?: string | null
 }
 
+export interface VideoItem {
+  id: string
+  title: string
+  slug: string
+  language: ContentLanguage
+  description: string | null
+  content: string
+  category_id: string | null
+  category_name: string | null
+  video_url: string | null
+  youtube_url: string | null
+  thumbnail_url: string | null
+  status: ContentStatus
+  sort_order: number
+  seo_title: string | null
+  seo_description: string | null
+  seo_keywords: string | null
+  view_count: number
+  published_at: string | null
+  created_at: string
+  updated_at: string
+  tags: TagItem[]
+}
+
+export interface PaginatedVideos {
+  items: VideoItem[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface VideoPayload {
+  title: string
+  slug: string
+  language: ContentLanguage
+  description?: string | null
+  content?: string
+  category_id?: string | null
+  tag_ids?: string[]
+  video_url?: string | null
+  youtube_url?: string | null
+  thumbnail_url?: string | null
+  status?: ContentStatus
+  sort_order?: number
+  seo_title?: string | null
+  seo_description?: string | null
+  seo_keywords?: string | null
+  published_at?: string | null
+}
+
 export interface BlogItem {
   id: string
   title: string

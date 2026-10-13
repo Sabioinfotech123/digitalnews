@@ -17,5 +17,6 @@ export const news = {
   articleNotFound: 'వార్త కనబడలేదు',
   backHome: 'హోమ్‌కు తిరిగి వెళ్లండి',
   backAllNews: 'అన్ని వార్తలకు తిరిగి వెళ్లండి',
+  relatedNews: 'సంబంధిత వార్తలు',
   byAuthor: 'రచయిత',
 } as const

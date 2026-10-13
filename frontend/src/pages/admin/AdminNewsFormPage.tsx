@@ -1,4 +1,4 @@
-import { App, Col, Form, Input, InputNumber, Row, Select, Space, Switch, Typography } from 'antd'
+import { App, Form, Input, InputNumber, Select, Switch, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -207,25 +207,28 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
         onFinishFailed={handleFinishFailed}
         onFinish={handleFinish}
       >
-        <Row gutter={[20, 0]}>
-          <Col xs={24} lg={16}>
-            <Form.Item name="title" label="Title" rules={[{ required: true, min: 3 }]}>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+          <div className="flex flex-col lg:col-span-8">
+            <Form.Item name="title" label="Title" rules={[{ required: true, min: 3 }]} className="w-full">
               <Input
                 size="large"
+                className="w-full"
                 onBlur={(e) => handleTitleBlur(e.target.value)}
               />
             </Form.Item>
 
-            <Form.Item name="slug" label="Slug" rules={[{ required: true, min: 3 }]}>
-              <Input />
+            <Form.Item name="slug" label="Slug" rules={[{ required: true, min: 3 }]} className="w-full">
+              <Input className="w-full" />
             </Form.Item>
 
             <Form.Item
               name="short_description"
               label="Short description"
               rules={[{ required: true, message: 'Description is required' }]}
+              className="w-full"
             >
               <Input.TextArea
+                className="w-full"
                 rows={4}
                 placeholder="Write a short summary…"
                 showCount
@@ -237,36 +240,46 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               name="content"
               label="Content"
               rules={[{ required: true, message: 'Content is required' }]}
+              className="w-full"
             >
               <AppEditor placeholder="Write the full article…" minHeight={360} />
             </Form.Item>
-          </Col>
+          </div>
 
-          <Col xs={24} lg={8}>
-            <div className="news-form-page__side">
-              <Form.Item
-                name="image_url"
-                label="News image"
-                rules={[{ required: true, message: 'News image is required' }]}
-              >
-                <MediaUploader kind="image" folder="news" label="" required />
-              </Form.Item>
+          <div className="news-form-page__side lg:col-span-4 lg:sticky lg:top-4">
+            <Form.Item
+              name="image_url"
+              label="News image"
+              rules={[{ required: true, message: 'News image is required' }]}
+              className="w-full"
+            >
+              <MediaUploader kind="image" folder="news" label="" required />
+            </Form.Item>
 
-              <Form.Item name="news_type" label="News type" rules={[{ required: true }]}>
-                <Select options={NEWS_TYPES} disabled={mode === 'create' && typeLocked} />
-              </Form.Item>
-
-              <Form.Item name="language" label="Content language" rules={[{ required: true }]}>
+            <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
+              <Form.Item name="news_type" label="News type" rules={[{ required: true }]} className="w-full">
                 <Select
+                  className="w-full"
+                  options={NEWS_TYPES}
+                  disabled={mode === 'create' && typeLocked}
+                />
+              </Form.Item>
+
+              <Form.Item name="language" label="Content language" rules={[{ required: true }]} className="w-full">
+                <Select
+                  className="w-full"
                   options={[
                     { value: 'en', label: 'English' },
                     { value: 'te', label: 'తెలుగు' },
                   ]}
                 />
               </Form.Item>
+            </div>
 
-              <Form.Item name="status" label="Status">
+            <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
+              <Form.Item name="status" label="Status" className="w-full">
                 <Select
+                  className="w-full"
                   options={[
                     { value: 'draft', label: 'Draft' },
                     { value: 'published', label: 'Published' },
@@ -280,59 +293,60 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
                 name="sort_order"
                 label="Display order"
                 tooltip="Lower number shows first on the public site (0, 1, 2…)"
+                className="w-full"
               >
-                <InputNumber min={0} step={1} className="w-full" />
+                <InputNumber min={0} step={1} className="!w-full" />
               </Form.Item>
-
-              <Form.Item name="category_id" label="Category">
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  options={categories.map((c) => ({ value: c.id, label: c.name }))}
-                  placeholder="Select category"
-                />
-              </Form.Item>
-
-              <Form.Item name="tag_ids" label="Tags">
-                <Select
-                  mode="multiple"
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
-                  placeholder="Select tags"
-                />
-              </Form.Item>
-
-              <Space size="large" className="mb-4">
-                <Form.Item name="is_breaking" label="Breaking" valuePropName="checked" className="!mb-0">
-                  <Switch />
-                </Form.Item>
-              </Space>
-
-              <Form.Item name="seo_title" label="SEO title">
-                <Input />
-              </Form.Item>
-              <Form.Item name="seo_description" label="SEO description">
-                <Input.TextArea rows={3} />
-              </Form.Item>
-              <Form.Item name="seo_keywords" label="SEO keywords">
-                <Input />
-              </Form.Item>
-
-              {news ? (
-                <p className="news-form-page__meta">
-                  Author: {news.author_name || '—'} · Views: {news.view_count}
-                </p>
-              ) : null}
-
-              <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary">
-                {mode === 'create' ? 'Create news' : 'Save changes'}
-              </AppButton>
             </div>
-          </Col>
-        </Row>
+
+            <Form.Item name="category_id" label="Category" className="w-full">
+              <Select
+                className="w-full"
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                placeholder="Select category"
+              />
+            </Form.Item>
+
+            <Form.Item name="tag_ids" label="Tags" className="w-full">
+              <Select
+                className="w-full"
+                mode="multiple"
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                options={tags.map((tag) => ({ value: tag.id, label: tag.name }))}
+                placeholder="Select tags"
+              />
+            </Form.Item>
+
+            <Form.Item name="is_breaking" label="Breaking" valuePropName="checked" className="mb-4 w-full">
+              <Switch />
+            </Form.Item>
+
+            <Form.Item name="seo_title" label="SEO title" className="w-full">
+              <Input className="w-full" />
+            </Form.Item>
+            <Form.Item name="seo_description" label="SEO description" className="w-full">
+              <Input.TextArea className="w-full" rows={3} />
+            </Form.Item>
+            <Form.Item name="seo_keywords" label="SEO keywords" className="w-full">
+              <Input className="w-full" />
+            </Form.Item>
+
+            {news ? (
+              <p className="news-form-page__meta">
+                Author: {news.author_name || '—'} · Views: {news.view_count}
+              </p>
+            ) : null}
+
+            <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary w-full">
+              {mode === 'create' ? 'Create news' : 'Save changes'}
+            </AppButton>
+          </div>
+        </div>
       </Form>
     </div>
   )

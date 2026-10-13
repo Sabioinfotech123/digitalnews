@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { CardActions } from '@/components/common/CardActions'
 import type { PublicNewsCardModel } from '@/utils/publicNews'
 import { cn } from '@/utils/cn'
 import './NewsCard.scss'
@@ -59,7 +60,15 @@ export function NewsCard({
           <span className="news-card__category">{article.category}</span>
           <h3 className="news-card__title">{article.title}</h3>
           {!compact ? <p className="news-card__excerpt">{article.excerpt}</p> : null}
-          <p className="news-card__meta">{article.publishedLabel}</p>
+          <div className="news-card__meta-row">
+            <p className="news-card__meta">{article.publishedLabel}</p>
+            <CardActions
+              contentType="news"
+              contentId={article.id}
+              title={article.title}
+              path={`/news/${article.slug}`}
+            />
+          </div>
         </div>
       </Link>
     </article>

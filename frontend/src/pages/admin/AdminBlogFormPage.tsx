@@ -66,9 +66,19 @@ export function AdminBlogFormPage({ mode }: AdminBlogFormPageProps) {
           if (!active) return
           setBlog(item)
           form.setFieldsValue({
-            ...item,
-            tag_ids: item.tags.map((tag) => tag.id),
+            title: item.title,
+            slug: item.slug,
+            language: item.language,
             short_description: stripHtml(item.short_description),
+            content: item.content || '',
+            category_id: item.category_id,
+            tag_ids: item.tags.map((tag) => tag.id),
+            status: item.status,
+            image_url: item.image_url || null,
+            seo_title: item.seo_title,
+            seo_description: item.seo_description,
+            seo_keywords: item.seo_keywords,
+            published_at: item.published_at,
           })
         } else {
           form.setFieldsValue({
@@ -190,7 +200,7 @@ export function AdminBlogFormPage({ mode }: AdminBlogFormPageProps) {
           <Col xs={24} lg={8}>
             <div className="news-form-page__side">
               <Form.Item name="image_url" label="Cover image">
-                <MediaUploader kind="image" folder="blogs" label="" />
+                <MediaUploader kind="image" folder="news" label="" />
               </Form.Item>
 
               <Form.Item name="language" label="Content language" rules={[{ required: true }]}>

@@ -88,6 +88,12 @@ export function AdminLayout() {
         onClick: () => navigate('/admin/blogs/create'),
       },
       {
+        key: 'video',
+        icon: <i className="fa-solid fa-film" aria-hidden />,
+        label: t('admin.addVideo'),
+        onClick: () => navigate('/admin/videos/create'),
+      },
+      {
         key: 'user',
         icon: <i className="fa-solid fa-user-plus" aria-hidden />,
         label: t('admin.addUser'),
@@ -215,6 +221,11 @@ export function AdminLayout() {
       label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
     },
     {
+      key: '/admin/feedback',
+      icon: <i className="fa-solid fa-comment-dots" aria-hidden />,
+      label: <Link to="/admin/feedback">{t('admin.feedback')}</Link>,
+    },
+    {
       key: '/admin/media',
       icon: <i className="fa-solid fa-photo-film" aria-hidden />,
       label: <Link to="/admin/media">{t('admin.media')}</Link>,
@@ -302,7 +313,7 @@ export function AdminLayout() {
                 <i className="fa-solid fa-plus" aria-hidden /> {t('admin.quickAdd')}
               </AppButton>
             </Dropdown>
-            <AppButton type="default" onClick={() => navigate('/')}>
+            <AppButton type="default" href="/" target="_blank" rel="noopener noreferrer">
               <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden /> {t('admin.backToSite')}
             </AppButton>
             <AppButton type="primary" onClick={handleLogout}>
