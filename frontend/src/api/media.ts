@@ -97,7 +97,6 @@ async function uploadVideoMultipart(
           timeout: UPLOAD_TIMEOUT_MS.video,
           onUploadProgress: (event) => {
             const loadedInPart = event.loaded || 0
-            // Cap under chunk end until the part request finishes (S3 still running).
             const visible = Math.min(base + loadedInPart, base + chunkSize - 1)
             onProgress?.(visible, total)
           },

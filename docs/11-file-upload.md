@@ -68,7 +68,12 @@ Part size is **5MB** (S3 minimum for non-final parts). The UI shows **uploaded /
 
 ## Timeouts (large videos)
 
+Upload goes browser → API → S3. Default axios timeout (20s) is too short for video.
+
 | Layer | Limit |
 |-------|--------|
 | FE part / upload requests | image/thumbnail **2 min**; video **10 min** |
+| Vite dev proxy | **10 min** |
 | nginx `/api/` (QA/prod) | `proxy_send_timeout` / `proxy_read_timeout` **600s** |
+
+Video uploads show **uploaded / total** size while parts run.
