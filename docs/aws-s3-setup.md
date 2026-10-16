@@ -1,7 +1,22 @@
 # AWS S3 setup (Digital News)
 
-Bucket: `digitalnews-media`  
+**Production bucket:** `digitalnews-media-prod`  
+**Dev / QA bucket (if separate):** `digitalnews-media`  
 Region: `us-east-1`
+
+## Black news cards / browser shows `AllAccessDisabled`
+
+The site stores **direct S3 URLs** in `image_url`. The browser loads them **without** your AWS keys.
+
+If the bucket blocks anonymous read, images fail and cards look **solid black** (failed `background-image` / broken `<img>`).
+
+Opening a URL like  
+`https://digitalnews-media-prod.s3.us-east-1.amazonaws.com/news/….webp`  
+may show XML: **`AllAccessDisabled`** or **`AccessDenied`**.
+
+**Fix:** on bucket **`digitalnews-media-prod`** (not only the dev bucket), apply the steps in [Fix — public read](#fix-aws-console--public-read-for-media-objects) using `docs/aws-s3-public-read-policy.json` (ARNs use `-prod`).
+
+No re-upload needed after the policy is saved — hard-refresh the site.
 
 ## Upload works but image URL shows AccessDenied
 
@@ -13,8 +28,8 @@ This often happens for **logo / `brand/`** or **videos / `videos/`** when the bu
 
 ### Fix (AWS Console) — public read for media objects
 
-1. Open **S3 → Buckets → digitalnews-media → Permissions**  
-   (use your real bucket name if different, e.g. `digitalnews-media-prod`)
+1. Open **S3 → Buckets → `digitalnews-media-prod` → Permissions**  
+   (for local/dev only, use `digitalnews-media` if that is what `.env` points at)
 2. **Block public access** → Edit  
    - Turn **off** “Block all public access”  
    - Or at least allow public bucket policies  
@@ -31,11 +46,11 @@ This often happens for **logo / `brand/`** or **videos / `videos/`** when the bu
       "Principal": "*",
       "Action": "s3:GetObject",
       "Resource": [
-        "arn:aws:s3:::digitalnews-media/news/*",
-        "arn:aws:s3:::digitalnews-media/brand/*",
-        "arn:aws:s3:::digitalnews-media/videos/*",
-        "arn:aws:s3:::digitalnews-media/thumbnails/*",
-        "arn:aws:s3:::digitalnews-media/blogs/*"
+        "arn:aws:s3:::digitalnews-media-prod/news/*",
+        "arn:aws:s3:::digitalnews-media-prod/brand/*",
+        "arn:aws:s3:::digitalnews-media-prod/videos/*",
+        "arn:aws:s3:::digitalnews-media-prod/thumbnails/*",
+        "arn:aws:s3:::digitalnews-media-prod/blogs/*"
       ]
     }
   ]
@@ -67,8 +82,8 @@ If that policy already uses `arn:aws:s3:::YOUR-BUCKET/*`, uploads to `videos/` a
 ```env
 STORAGE_BACKEND=s3
 AWS_REGION=us-east-1
-AWS_S3_BUCKET=digitalnews-media
-AWS_S3_PUBLIC_BASE_URL=https://digitalnews-media.s3.us-east-1.amazonaws.com
+AWS_S3_BUCKET=digitalnews-media-prod
+AWS_S3_PUBLIC_BASE_URL=https://digitalnews-media-prod.s3.us-east-1.amazonaws.com
 ```
 
 Restart backend after env changes.
