@@ -87,6 +87,12 @@ PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
 
   Without these, API runs but image upload to S3 will fail.
 
+  Images on site look BLACK but upload works?
+    Browser opens S3 URL → XML AllAccessDisabled / AccessDenied
+    → bucket digitalnews-media-prod needs public read for news/* etc.
+    See docs/aws-s3-setup.md and paste docs/aws-s3-public-read-policy.json
+    on bucket Permissions (Block public access + bucket policy).
+
 
 ================================================================================
 0) START DATABASE (Docker) — every day / first time
