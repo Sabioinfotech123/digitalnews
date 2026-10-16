@@ -23,6 +23,7 @@
 | `AWS_REGION` | e.g. `us-east-1` |
 | `AWS_S3_BUCKET` | e.g. `digitalnews-media-prod` |
 | `AWS_S3_PUBLIC_BASE_URL` | Public object URL base |
+| `READ_ALOUD_POLLY_ENABLED` | `true` (default) — use Amazon Polly for “Listen to this article” when AWS keys are set |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional bootstrap (dev only) |
 | `NEWS_API_KEY` | Optional. If set, Local news uses NewsAPI.org; otherwise Google News RSS |
 | `LOCAL_NEWS_PLACEHOLDER_IMAGE` | Optional image URL when imported local news has no photo |

@@ -485,6 +485,19 @@ Admin list shows that number in the Views column.
 
 ---
 
+## Read aloud (Listen to article)
+
+Public text-to-speech for news/blog detail pages. Uses **Amazon Polly** when AWS keys are configured; otherwise the website falls back to the browser’s built-in speech.
+
+| Method | Path | Who | What |
+|--------|------|-----|------|
+| GET | `/read-aloud/capabilities` | Anyone | `{ "polly": true \| false, "polly_reason": null \| "invalid_aws_credentials" \| … }` — `polly` is true only when AWS keys work for Polly |
+| POST | `/read-aloud/synthesize` | Anyone | Body `{ "text": "…", "language": "en" \| "te" }` → **MP3** (`audio/mpeg`). Max **2500** characters per request. |
+
+**IAM:** the same AWS user as S3 uploads needs `polly:SynthesizeSpeech` (see `docs/aws-s3-iam-policy.json`).
+
+---
+
 ## Error cheat sheet
 
 | HTTP | Meaning |

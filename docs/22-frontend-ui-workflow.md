@@ -319,6 +319,11 @@ http://localhost:5173/feedback  Feedback form (footer link)
 http://localhost:5173/bookmarks Saved for later (login required)
 ```
 
+**Listen to this article (news & blog detail):**
+1. Open a published **news** or **blog** post
+2. Use **Listen to this article** (under author line) — play / pause / speed / skip
+3. With AWS Polly enabled on the API, playback uses cloud **HD voice**; otherwise the device browser voice is used
+
 **Bookmarks (read later):**
 1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)
 2. Guests are sent to **Login**; after sign-in they can save

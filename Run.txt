@@ -87,6 +87,12 @@ PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
 
   Without these, API runs but image upload to S3 will fail.
 
+  "Listen to this article" (Polly HD voice):
+    Same AWS keys + IAM polly:SynthesizeSpeech (docs/aws-s3-iam-policy.json)
+    READ_ALOUD_POLLY_ENABLED=true in backend\.env (default)
+    GET http://localhost:8000/api/v1/read-aloud/capabilities → {"polly":true,"polly_reason":null}
+    If polly:false and polly_reason:"invalid_aws_credentials" → fix keys in backend\.env (502 on synthesize)
+
   Images on site look BLACK but upload works?
     Browser opens S3 URL → XML AllAccessDisabled / AccessDenied
     → bucket digitalnews-media-prod needs public read for news/* etc.
