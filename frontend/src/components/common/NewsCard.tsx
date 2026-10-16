@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { CardActions } from '@/components/common/CardActions'
+import { MediaCover } from '@/components/common/MediaCover'
 import type { PublicNewsCardModel } from '@/utils/publicNews'
 import { cn } from '@/utils/cn'
 import './NewsCard.scss'
@@ -40,22 +41,18 @@ export function NewsCard({
         to={`/news/${article.slug}`}
         state={from ? { from } : undefined}
         className="news-card__link"
-      >        <div
+      >        <MediaCover
           className="news-card__media"
-          style={{
-            backgroundImage: article.imageUrl
-              ? `linear-gradient(180deg, rgba(17,17,17,0.05), rgba(17,17,17,0.45)), url(${article.imageUrl})`
-              : article.accent,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+          src={article.imageUrl}
+          fallbackBackground={article.accent}
+          overlay
         >
           {article.isBreaking ? (
             <span className="news-card__badge">
               <i className="fa-solid fa-bolt" aria-hidden /> {t('news.breakingNews')}
             </span>
           ) : null}
-        </div>
+        </MediaCover>
         <div className="news-card__body">
           <span className="news-card__category">{article.category}</span>
           <h3 className="news-card__title">{article.title}</h3>
