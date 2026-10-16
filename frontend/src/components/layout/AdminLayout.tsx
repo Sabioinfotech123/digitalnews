@@ -121,13 +121,34 @@ export function AdminLayout() {
   const selectedKey = pageMeta.menuKey
 
   const openKeysForRoute = useMemo(() => {
-    if (selectedKey.startsWith('/admin/news')) return ['news']
-    if (selectedKey.startsWith('/admin/local-news') || selectedKey.startsWith('/admin/verified-news')) {
+    const path = location.pathname
+    if (selectedKey.startsWith('/admin/news') || path.startsWith('/admin/news')) return ['news']
+    if (
+      selectedKey.startsWith('/admin/local-news') ||
+      selectedKey.startsWith('/admin/verified-news') ||
+      path.startsWith('/admin/local-news') ||
+      path.startsWith('/admin/verified-news')
+    ) {
       return ['local-feed']
     }
-    if (['/admin/categories', '/admin/tags'].includes(selectedKey)) return ['taxonomy']
+    if (
+      selectedKey.startsWith('/admin/videos') ||
+      selectedKey.startsWith('/admin/shorts') ||
+      path.startsWith('/admin/videos') ||
+      path.startsWith('/admin/shorts')
+    ) {
+      return ['videos-menu']
+    }
+    if (
+      selectedKey === '/admin/categories' ||
+      selectedKey === '/admin/tags' ||
+      path.startsWith('/admin/categories') ||
+      path.startsWith('/admin/tags')
+    ) {
+      return ['taxonomy']
+    }
     return []
-  }, [selectedKey])
+  }, [location.pathname, selectedKey])
 
   const [openKeys, setOpenKeys] = useState<string[]>(openKeysForRoute)
 
