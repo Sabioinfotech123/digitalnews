@@ -94,6 +94,12 @@ export function AdminLayout() {
         onClick: () => navigate('/admin/videos/create'),
       },
       {
+        key: 'short',
+        icon: <i className="fa-solid fa-mobile-screen" aria-hidden />,
+        label: t('videos.createShort'),
+        onClick: () => navigate('/admin/shorts/create'),
+      },
+      {
         key: 'user',
         icon: <i className="fa-solid fa-user-plus" aria-hidden />,
         label: t('admin.addUser'),
@@ -216,9 +222,19 @@ export function AdminLayout() {
       label: <Link to="/admin/blogs">{t('admin.blogs')}</Link>,
     },
     {
-      key: '/admin/videos',
+      key: 'videos-menu',
       icon: <i className="fa-solid fa-video" aria-hidden />,
-      label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
+      label: t('admin.videos'),
+      children: [
+        {
+          key: '/admin/videos',
+          label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
+        },
+        {
+          key: '/admin/shorts',
+          label: <Link to="/admin/shorts">{t('admin.shorts')}</Link>,
+        },
+      ],
     },
     {
       key: '/admin/feedback',

@@ -15,13 +15,17 @@ def list_public_videos(
     page_size: int = Query(default=10, ge=1, le=50),
     search: str | None = None,
     language: ContentLanguage | None = None,
+    is_short: bool | None = Query(default=None),
 ) -> PaginatedVideos:
+    # Default public /videos = long-form only; /shorts passes is_short=true
+    short_filter = is_short if is_short is not None else False
     return VideoService(db).list(
         page=page,
         page_size=page_size,
         search=search,
         language=language,
         published_only=True,
+        is_short=short_filter,
     )
 
 
@@ -46,6 +50,7 @@ def list_admin_videos(
     search: str | None = None,
     language: ContentLanguage | None = None,
     status: ContentStatus | None = None,
+    is_short: bool | None = None,
 ) -> PaginatedVideos:
     return VideoService(db).list(
         page=page,
@@ -54,6 +59,7 @@ def list_admin_videos(
         language=language,
         status=status,
         published_only=False,
+        is_short=is_short,
     )
 
 

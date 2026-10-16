@@ -34,7 +34,12 @@ function sourceLabel(row: VideoItem) {
   return '—'
 }
 
-export function AdminVideosPage() {
+type AdminVideosPageProps = {
+  /** When true, list only short-form (9:16) videos */
+  shortsOnly?: boolean
+}
+
+export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
   const { t } = useLanguage()
   const { message, modal } = App.useApp()
   const navigate = useNavigate()
@@ -57,6 +62,7 @@ export function AdminVideosPage() {
         search: search || undefined,
         language: language === 'all' ? undefined : language,
         status: status === 'all' ? undefined : status,
+        is_short: shortsOnly ? true : undefined,
       })
       setItems(data.items)
       setTotal(data.total)
@@ -65,7 +71,7 @@ export function AdminVideosPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, search, language, status, message])
+  }, [page, pageSize, search, language, status, shortsOnly, message])
 
   useEffect(() => {
     void load()
@@ -92,11 +98,12 @@ export function AdminVideosPage() {
   }
 
   const goToCreate = () => {
-    navigate('/admin/videos/create')
+    navigate(shortsOnly ? '/admin/shorts/create' : '/admin/videos/create')
   }
 
   const goToEdit = (row: VideoItem) => {
-    navigate(`/admin/videos/edit/${row.id}`)
+    const short = shortsOnly || row.is_short
+    navigate(short ? `/admin/shorts/edit/${row.id}` : `/admin/videos/edit/${row.id}`)
   }
 
   const handleDelete = async (id: string) => {
@@ -138,6 +145,21 @@ export function AdminVideosPage() {
         width: 140,
         render: (_, row) => sourceLabel(row),
       },
+      ...(!shortsOnly
+        ? [
+            {
+              title: 'Format',
+              key: 'format',
+              width: 90,
+              render: (_: unknown, row: VideoItem) =>
+                row.is_short ? (
+                  <span className="text-xs font-semibold text-primary">Short</span>
+                ) : (
+                  <span className="text-xs text-ink-muted">Long</span>
+                ),
+            } as const,
+          ]
+        : []),
       {
         title: 'Language',
         dataIndex: 'language',
@@ -196,7 +218,7 @@ export function AdminVideosPage() {
 
   return (
     <AppTable<VideoItem>
-      title={t('admin.videos')}
+      title={shortsOnly ? t('admin.shorts') : t('admin.videos')}
       loading={loading}
       dataSource={items}
       columns={columns}
@@ -237,7 +259,7 @@ export function AdminVideosPage() {
           icon={<i className="fa-solid fa-plus" aria-hidden />}
           onClick={goToCreate}
         >
-          Create video
+          {shortsOnly ? t('videos.createShort') : 'Create video'}
         </AppButton>
       }
       pagination={{

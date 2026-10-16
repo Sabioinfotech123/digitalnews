@@ -446,6 +446,8 @@ def _video_response(item: Video) -> VideoResponse:
         youtube_url=item.youtube_url,
         thumbnail_url=item.thumbnail_url,
         status=item.status,
+        is_short=bool(item.is_short),
+        duration_seconds=item.duration_seconds,
         sort_order=int(item.sort_order or 0),
         seo_title=item.seo_title,
         seo_description=item.seo_description,
@@ -472,6 +474,7 @@ class VideoService:
         language: ContentLanguage | None = None,
         status: ContentStatus | None = None,
         published_only: bool = False,
+        is_short: bool | None = None,
     ) -> PaginatedVideos:
         items, total = self.repo.list(
             page=page,
@@ -480,6 +483,7 @@ class VideoService:
             language=language,
             status=status,
             published_only=published_only,
+            is_short=is_short,
         )
         return PaginatedVideos(
             items=[_video_response(item) for item in items],
@@ -517,6 +521,8 @@ class VideoService:
             youtube_url=payload.youtube_url,
             thumbnail_url=payload.thumbnail_url,
             status=payload.status,
+            is_short=bool(payload.is_short),
+            duration_seconds=payload.duration_seconds,
             sort_order=max(0, int(payload.sort_order or 0)),
             seo_title=payload.seo_title,
             seo_description=payload.seo_description,

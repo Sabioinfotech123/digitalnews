@@ -13,6 +13,7 @@ export const admin = {
   localFeed: 'లోకల్ ఫీడ్',
   blogs: 'బ్లాగులు',
   videos: 'వీడియోలు',
+  shorts: 'షార్ట్స్',
   taxonomy: 'కేటలాగ్',
   categories: 'కేటగిరీలు',
   tags: 'ట్యాగులు',

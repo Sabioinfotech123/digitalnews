@@ -181,7 +181,7 @@ Blogs have no `news_type` / breaking flags.
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| GET | `/videos` | Anyone | List **published** videos |
+| GET | `/videos` | Anyone | List **published** videos. Query `is_short=true` → shorts only; default `is_short=false` → long videos only |
 | GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
 | GET | `/admin/videos` | Admin | List all |
 | POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |

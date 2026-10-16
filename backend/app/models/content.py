@@ -202,6 +202,8 @@ class Video(Base):
     status: Mapped[ContentStatus] = mapped_column(
         Enum(ContentStatus, native_enum=False), default=ContentStatus.draft, index=True
     )
+    is_short: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     seo_title: Mapped[str | None] = mapped_column(String(300), nullable=True)
     seo_description: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -239,6 +239,8 @@ class VideoCreate(BaseModel):
     youtube_url: str | None = Field(default=None, max_length=500)
     thumbnail_url: str | None = Field(default=None, max_length=500)
     status: ContentStatus = ContentStatus.draft
+    is_short: bool = False
+    duration_seconds: int | None = Field(default=None, ge=1, le=86400)
     sort_order: int = 0
     seo_title: str | None = None
     seo_description: str | None = None
@@ -258,6 +260,8 @@ class VideoUpdate(BaseModel):
     youtube_url: str | None = Field(default=None, max_length=500)
     thumbnail_url: str | None = Field(default=None, max_length=500)
     status: ContentStatus | None = None
+    is_short: bool | None = None
+    duration_seconds: int | None = Field(default=None, ge=1, le=86400)
     sort_order: int | None = Field(default=None, ge=0)
     seo_title: str | None = None
     seo_description: str | None = None
@@ -278,6 +282,8 @@ class VideoResponse(BaseModel):
     youtube_url: str | None
     thumbnail_url: str | None
     status: ContentStatus
+    is_short: bool = False
+    duration_seconds: int | None = None
     sort_order: int
     seo_title: str | None = None
     seo_description: str | None = None

@@ -18,13 +18,19 @@ function NativeVideoPlayer({
   src,
   poster,
   title,
+  vertical,
 }: {
   src: string
   poster?: string
   title: string
+  vertical?: boolean
 }) {
   return (
-    <div className="video-detail__player video-detail__player--native">
+    <div
+      className={`video-detail__player video-detail__player--native${
+        vertical ? ' video-detail__player--vertical' : ''
+      }`}
+    >
       <video
         key={src}
         src={src}
@@ -67,10 +73,13 @@ export function VideoDetailPage() {
     setNotFound(false)
     ;(async () => {
       try {
-        const [item, list] = await Promise.all([
-          fetchPublicVideoBySlug(slug, contentLanguage),
-          fetchPublicVideos({ page: 1, page_size: 4, language: contentLanguage }),
-        ])
+        const item = await fetchPublicVideoBySlug(slug, contentLanguage)
+        const list = await fetchPublicVideos({
+          page: 1,
+          page_size: 4,
+          language: contentLanguage,
+          is_short: item.is_short,
+        })
         if (!active) return
         setVideo(item)
         setRelated(
@@ -137,11 +146,24 @@ export function VideoDetailPage() {
           ← {t('videos.back')}
         </button>
 
-        <div className="video-detail__media">
+        <div
+          className={`video-detail__media${
+            video.is_short ? ' video-detail__media--short' : ''
+          }`}
+        >
           {file ? (
-            <NativeVideoPlayer src={file} poster={thumb} title={video.title} />
+            <NativeVideoPlayer
+              src={file}
+              poster={thumb}
+              title={video.title}
+              vertical={video.is_short}
+            />
           ) : ytId ? (
-            <div className="video-detail__player video-detail__player--embed">
+            <div
+              className={`video-detail__player video-detail__player--embed${
+                video.is_short ? ' video-detail__player--vertical' : ''
+              }`}
+            >
               <iframe
                 src={`https://www.youtube.com/embed/${ytId}`}
                 title={video.title}
@@ -187,7 +209,7 @@ export function VideoDetailPage() {
         </div>
         {excerpt ? <p className="video-detail__desc">{excerpt}</p> : null}
 
-        {video.content ? (
+        {!video.is_short && video.content ? (
           <div
             className="video-detail__body"
             dangerouslySetInnerHTML={{ __html: video.content }}

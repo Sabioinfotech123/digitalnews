@@ -94,6 +94,8 @@ export interface VideoItem {
   youtube_url: string | null
   thumbnail_url: string | null
   status: ContentStatus
+  is_short: boolean
+  duration_seconds: number | null
   sort_order: number
   seo_title: string | null
   seo_description: string | null
@@ -124,6 +126,8 @@ export interface VideoPayload {
   youtube_url?: string | null
   thumbnail_url?: string | null
   status?: ContentStatus
+  is_short?: boolean
+  duration_seconds?: number | null
   sort_order?: number
   seo_title?: string | null
   seo_description?: string | null

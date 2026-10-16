@@ -13,6 +13,7 @@ export const admin = {
   localFeed: 'Local feed',
   blogs: 'Blogs',
   videos: 'Videos',
+  shorts: 'Shorts',
   taxonomy: 'Catalog',
   categories: 'Categories',
   tags: 'Tags',

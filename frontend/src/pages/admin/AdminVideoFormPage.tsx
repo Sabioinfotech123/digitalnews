@@ -1,6 +1,6 @@
 import { App, Form, Input, InputNumber, Select, Typography } from 'antd'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useVideoUpload } from '@/app/providers/VideoUploadProvider'
 import {
   createAdminVideo,
@@ -19,6 +19,7 @@ import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
+import { useLanguage } from '@/app/providers/LanguageProvider'
 import { BRAND } from '@/config/brand'
 import './AdminNewsFormPage.scss'
 
@@ -26,6 +27,8 @@ const { Title } = Typography
 
 interface AdminVideoFormPageProps {
   mode: 'create' | 'edit'
+  /** Pre-check “Short (9:16)” — from /admin/shorts/create */
+  defaultShort?: boolean
 }
 
 function hasVideoSource(values: Partial<VideoPayload>) {
@@ -36,9 +39,12 @@ function hasUploadedVideo(values: Partial<VideoPayload>) {
   return Boolean(values.video_url?.trim())
 }
 
-export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
+export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFormPageProps) {
   const { id } = useParams()
+  const location = useLocation()
   const navigate = useNavigate()
+  const isShortRoute = defaultShort || location.pathname.includes('/admin/shorts/')
+  const { t } = useLanguage()
   const { message } = App.useApp()
   const videoUpload = useVideoUpload()
   const getDraftSession = videoUpload?.getDraftSession
@@ -51,6 +57,7 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
   const [video, setVideo] = useState<VideoItem | null>(null)
   const draftKey = mode === 'create' ? 'video:create' : `video:edit:${id ?? ''}`
   const watchedVideoUrl = Form.useWatch('video_url', form)
+  const isShortForm = isShortRoute || Boolean(video?.is_short)
   const thumbnailRequired = Boolean(String(watchedVideoUrl || '').trim())
 
   useDocumentTitle(
@@ -101,12 +108,13 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
               slug: '',
               language: 'en',
               status: 'draft',
+              is_short: isShortRoute,
+              content: '',
               sort_order: 0,
               video_url: null,
               youtube_url: null,
               thumbnail_url: null,
               description: '',
-              content: '',
               tag_ids: [],
             }
             form.setFieldsValue(defaults)
@@ -129,7 +137,7 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
   }, [mode, id, form, message, navigate, getDraftSession, updateDraft, draftKey])
 
   const goBackToList = () => {
-    navigate('/admin/videos')
+    navigate(isShortForm ? '/admin/shorts' : '/admin/videos')
   }
 
   const handleTitleBlur = (value: string) => {
@@ -193,8 +201,10 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
         youtube_url: values.youtube_url?.trim() || null,
         thumbnail_url: values.thumbnail_url?.trim() || null,
         description: values.description?.trim() || null,
-        content: values.content || '',
+        content: isShortForm ? '' : values.content || '',
         sort_order: values.sort_order ?? 0,
+        is_short: isShortForm,
+        duration_seconds: null,
       }
       const existingDraftId = getDraftSession?.(draftKey)?.videoId
       if (mode === 'create' && !existingDraftId) {
@@ -202,7 +212,9 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
         updateDraft?.(draftKey, payload, created.id)
         updateDraft?.(`video:edit:${created.id}`, payload, created.id)
         message.success('Video created successfully')
-        navigate(`/admin/videos/edit/${created.id}`)
+        navigate(
+          isShortForm ? `/admin/shorts/edit/${created.id}` : `/admin/videos/edit/${created.id}`,
+        )
       } else if (existingDraftId || id) {
         const targetId = existingDraftId || id
         if (!targetId) return
@@ -226,7 +238,13 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
       <AppLoader fullscreen spinning={saving} tip={mode === 'create' ? 'Creating…' : 'Saving…'} />
       <div className="news-form-page__header">
         <Title level={3} className="news-form-page__title">
-          {mode === 'create' ? 'Create video' : 'Edit video'}
+          {mode === 'create'
+            ? isShortForm
+              ? t('videos.createShort')
+              : 'Create video'
+            : isShortForm
+              ? 'Edit short'
+              : 'Edit video'}
         </Title>
         <AppButton onClick={goBackToList}>Back to list</AppButton>
       </div>
@@ -269,21 +287,31 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
               />
             </Form.Item>
 
-            <Form.Item
-              name="content"
-              label="Content"
-              rules={[{ required: true, message: 'Content is required' }]}
-              className="w-full"
-            >
-              <AppEditor placeholder="Write the full video details…" minHeight={360} />
-            </Form.Item>
+            {!isShortForm ? (
+              <Form.Item
+                name="content"
+                label="Content"
+                rules={[{ required: true, message: 'Content is required' }]}
+                className="w-full"
+              >
+                <AppEditor placeholder="Write the full video details…" minHeight={360} />
+              </Form.Item>
+            ) : (
+              <Form.Item name="content" hidden>
+                <Input />
+              </Form.Item>
+            )}
           </div>
 
           <div className="news-form-page__side lg:col-span-4 lg:sticky lg:top-4">
             <Form.Item
               name="video_url"
               label="Video file"
-              extra="Upload MP4/WEBM, and/or add a YouTube URL below."
+              extra={
+                isShortForm
+                  ? 'Vertical short only — MP4/WEBM in 9:16.'
+                  : 'Upload MP4/WEBM (16:9), and/or add a YouTube URL below.'
+              }
               className="w-full"
             >
               <MediaUploader
@@ -291,6 +319,8 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
                 folder="videos"
                 label=""
                 uploadSessionKey={draftKey}
+                requireNineSixteen={isShortForm}
+                requireSixteenNine={!isShortForm}
               />
             </Form.Item>
 
@@ -329,6 +359,7 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
                 folder="videos"
                 label=""
                 required={thumbnailRequired}
+                allowVerticalThumbnail={isShortForm}
               />
             </Form.Item>
 
@@ -414,6 +445,10 @@ export function AdminVideoFormPage({ mode }: AdminVideoFormPageProps) {
 
 export function AdminVideoCreatePage() {
   return <AdminVideoFormPage mode="create" />
+}
+
+export function AdminShortCreatePage() {
+  return <AdminVideoFormPage mode="create" defaultShort />
 }
 
 export function AdminVideoEditPage() {

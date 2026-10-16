@@ -228,6 +228,8 @@ Admin → **Videos**. Each row needs at least one source: uploaded file and/or Y
 | `youtube_url` | YouTube link (optional if file set) |
 | `thumbnail_url` | Poster image — **required** if a video file is uploaded; optional for YouTube-only |
 | `status` | draft / published / … |
+| `is_short` | `true` = vertical short (9:16) shown on `/shorts`; `false` = long video on `/videos` |
+| `duration_seconds` | Reserved (optional in DB; not used in CMS UI) |
 | `sort_order` | Display order (lower first) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `view_count` | Views |
@@ -238,7 +240,8 @@ Also: `video_tags` links videos ↔ tags (same pattern as `news_tags` / `blog_ta
 
 Migration: `0009_news_and_videos_media.py`  
 `content` added in `0010_videos_content.py`  
-Category / SEO / tags in `0011_videos_catalog_fields.py`
+Category / SEO / tags in `0011_videos_catalog_fields.py`  
+Shorts flag + duration in `0014_videos_is_short.py`
 
 ---
 

@@ -27,7 +27,12 @@ import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
 import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
-import { AdminVideoCreatePage, AdminVideoEditPage } from '@/pages/admin/AdminVideoFormPage'
+import {
+  AdminShortCreatePage,
+  AdminVideoCreatePage,
+  AdminVideoEditPage,
+} from '@/pages/admin/AdminVideoFormPage'
+import { AdminShortsPage } from '@/pages/admin/AdminShortsPage'
 import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
 import { BookmarksPage } from '@/pages/public/BookmarksPage'
@@ -107,6 +112,9 @@ export function AppRouter() {
           <Route path="videos" element={<AdminVideosPage />} />
           <Route path="videos/create" element={<AdminVideoCreatePage />} />
           <Route path="videos/edit/:id" element={<AdminVideoEditPage />} />
+          <Route path="shorts" element={<AdminShortsPage />} />
+          <Route path="shorts/create" element={<AdminShortCreatePage />} />
+          <Route path="shorts/edit/:id" element={<AdminVideoEditPage />} />
           <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
           <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />

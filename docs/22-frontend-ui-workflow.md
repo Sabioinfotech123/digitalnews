@@ -45,7 +45,8 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Local feed → Local news** | Browse regional headlines → verify with AI or add to CMS |
 | **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
-| **Videos** | Upload video file and/or YouTube URL; list + create/edit |
+| **Videos** | Long-form (16:9) — upload and/or YouTube |
+| **Shorts** | Vertical 9:16 shorts — same video form with **Short** enabled |
 | **Feedback** | Messages sent from the website footer (guests + logged-in users); set status, add note, delete |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
@@ -248,7 +249,15 @@ Same pattern as news: pencil / trash on the blog table.
 
 **Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
 
-**Public site:** published videos show on Home → Latest Videos, `/videos` list, and `/videos/:slug` detail (uploaded file plays; if YouTube is also set, a YouTube link card shows below).
+**Public site:** long videos → Home **Latest Videos**, `/videos`, `/videos/:slug`.  
+**Shorts:** Admin → **Shorts** (or **Add → Create short**) → turn on **Short (9:16)**, upload vertical MP4 + thumbnail, optional **Duration (seconds)** → publish. Public: Home **Short Videos** row, `/shorts` grid, same detail URL `/videos/:slug` (vertical player when `is_short`).
+
+## Step 4.6 — Shorts workflow
+
+1. Sidebar → **Videos → Shorts** (or **Add → Create short**)
+2. Fill title, slug, and short description (no long **Content** field)
+3. Upload **9:16 vertical** MP4/WEBM + thumbnail (YouTube URL optional)
+4. Publish → appears on `/shorts` and home short row (not on `/videos` list)
 
 ---
 

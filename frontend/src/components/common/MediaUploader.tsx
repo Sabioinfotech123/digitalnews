@@ -19,6 +19,10 @@ interface MediaUploaderProps {
   accept?: string
   /** When true, reject files that are not ~16:9 */
   requireSixteenNine?: boolean
+  /** When true, reject video files that are not ~9:16 (shorts) */
+  requireNineSixteen?: boolean
+  /** Allow 9:16 vertical thumbnails (shorts) */
+  allowVerticalThumbnail?: boolean
   uploadSessionKey?: string
 }
 
@@ -83,6 +87,13 @@ async function assertVideoSixteenByNine(file: File): Promise<void> {
   }
 }
 
+async function assertVideoNineBySixteen(file: File): Promise<void> {
+  const dims = await readVideoAspect(file)
+  if (!isNineBySixteen(dims.width, dims.height)) {
+    throw new Error('Only 9:16 vertical videos are allowed for shorts.')
+  }
+}
+
 /** Thumbnails: any size except vertical 9:16. */
 async function assertThumbnailNotNineBySixteen(file: File): Promise<void> {
   const dims = await readImageAspect(file)
@@ -123,6 +134,8 @@ export function MediaUploader({
   required = false,
   accept,
   requireSixteenNine = false,
+  requireNineSixteen = false,
+  allowVerticalThumbnail = false,
   uploadSessionKey,
 }: MediaUploaderProps) {
   const { message } = App.useApp()
@@ -135,13 +148,18 @@ export function MediaUploader({
   const isGlobalVideoBusy =
     isVideo && (videoUpload?.upload.status === 'uploading' || videoUpload?.upload.status === 'saving')
   const isUploadBusy = uploading || isGlobalVideoBusy
-  const enforceVideoSixteenNine = requireSixteenNine || isVideo
+  const enforceVideoSixteenNine = (requireSixteenNine || isVideo) && !requireNineSixteen
+  const enforceVideoNineSixteen = requireNineSixteen && isVideo
   const resolvedAccept = accept ?? (isVideo ? VIDEO_ACCEPT : IMAGE_ACCEPT)
 
   const beforeUpload: UploadProps['beforeUpload'] = async (file) => {
     if (isVideo && videoUpload && uploadSessionKey) {
       try {
-        await assertVideoSixteenByNine(file as File)
+        if (enforceVideoNineSixteen) {
+          await assertVideoNineBySixteen(file as File)
+        } else {
+          await assertVideoSixteenByNine(file as File)
+        }
         const result = await videoUpload.startUpload(uploadSessionKey, file as File)
         onChange?.(result.url)
       } catch (err) {
@@ -166,9 +184,11 @@ export function MediaUploader({
     }, 200)
 
     try {
-      if (enforceVideoSixteenNine) {
+      if (enforceVideoNineSixteen) {
+        await assertVideoNineBySixteen(file as File)
+      } else if (enforceVideoSixteenNine) {
         await assertVideoSixteenByNine(file as File)
-      } else if (isThumbnail) {
+      } else if (isThumbnail && !allowVerticalThumbnail) {
         await assertThumbnailNotNineBySixteen(file as File)
       }
       const result = await uploadMediaFile(file as File, {
@@ -300,7 +320,9 @@ export function MediaUploader({
             </p>
             <p className="media-uploader__sub">
               {isVideo
-                ? 'MP4, WEBM · 16:9 only · max 100MB'
+                ? enforceVideoNineSixteen
+                  ? 'MP4, WEBM · 9:16 vertical · max 100MB'
+                  : 'MP4, WEBM · 16:9 only · max 100MB'
                 : isThumbnail
                   ? 'JPG, PNG, WEBP · any size except 9:16 · max 5MB'
                   : 'JPG, PNG, WEBP, GIF, ICO · max 5MB'}

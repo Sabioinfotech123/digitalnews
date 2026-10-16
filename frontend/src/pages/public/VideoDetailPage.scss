@@ -30,6 +30,10 @@
     flex-direction: column;
     gap: 0.85rem;
     margin-bottom: 1.25rem;
+
+    &--short {
+      align-items: center;
+    }
   }
 
   &__player {
@@ -52,8 +56,18 @@
       }
     }
 
+    &--vertical {
+      max-width: 420px;
+      margin-inline: auto;
+      aspect-ratio: 9 / 16;
+    }
+
     &--embed {
       aspect-ratio: 16 / 9;
+
+      &.video-detail__player--vertical {
+        aspect-ratio: 9 / 16;
+      }
 
       iframe {
         position: absolute;
