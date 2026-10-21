@@ -22,6 +22,8 @@ export const admin = {
   users: 'వినియోగదారులు',
   settings: 'సెట్టింగులు',
   profile: 'ప్రొఫైల్',
+  headerActionsToggle: 'చర్యలు చూపు',
+  headerActionsHide: 'చర్యలు దాచు',
   loginTitle: 'అడ్మిన్ లాగిన్',
   loginSubtitle: 'కంటెంట్ నిర్వహణకు సైన్ ఇన్ చేయండి',
   welcome: 'మళ్లీ స్వాగతం',

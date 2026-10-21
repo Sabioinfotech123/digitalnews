@@ -22,6 +22,8 @@ export const admin = {
   users: 'Users',
   settings: 'Settings',
   profile: 'Profile',
+  headerActionsToggle: 'Show admin actions',
+  headerActionsHide: 'Hide admin actions',
   loginTitle: 'Admin Login',
   loginSubtitle: 'Sign in to manage content',
   welcome: 'Welcome back',
