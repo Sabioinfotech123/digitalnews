@@ -94,11 +94,18 @@ export interface VideoItem {
   youtube_url: string | null
   thumbnail_url: string | null
   status: ContentStatus
+  is_short: boolean
+  short_allow_likes: boolean
+  short_allow_comments: boolean
+  short_allow_share: boolean
+  duration_seconds: number | null
   sort_order: number
   seo_title: string | null
   seo_description: string | null
   seo_keywords: string | null
   view_count: number
+  like_count: number
+  comment_count: number
   published_at: string | null
   created_at: string
   updated_at: string
@@ -124,6 +131,11 @@ export interface VideoPayload {
   youtube_url?: string | null
   thumbnail_url?: string | null
   status?: ContentStatus
+  is_short?: boolean
+  short_allow_likes?: boolean
+  short_allow_comments?: boolean
+  short_allow_share?: boolean
+  duration_seconds?: number | null
   sort_order?: number
   seo_title?: string | null
   seo_description?: string | null

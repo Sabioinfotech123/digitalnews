@@ -11,6 +11,7 @@ from app.api.v1 import (
     local_news,
     media,
     news,
+    read_aloud,
     site_settings,
     taxonomy,
     verified_news,
@@ -23,6 +24,7 @@ api_router.include_router(auth.router)
 api_router.include_router(bookmarks.router)
 api_router.include_router(admin.router)
 api_router.include_router(news.router)
+api_router.include_router(read_aloud.router)
 api_router.include_router(blogs.router)
 api_router.include_router(breaking_news.router)
 api_router.include_router(local_news.router)

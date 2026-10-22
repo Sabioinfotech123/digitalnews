@@ -45,7 +45,8 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 | **Local feed → Local news** | Browse regional headlines → verify with AI or add to CMS |
 | **Local feed → Verified news** | AI credibility results (likely real / fake / uncertain) |
 | **Blogs** | Blog list + create/edit |
-| **Videos** | Upload video file and/or YouTube URL; list + create/edit |
+| **Videos** | Long-form (16:9) — upload and/or YouTube |
+| **Shorts** | Vertical 9:16 shorts — same video form with **Short** enabled |
 | **Feedback** | Messages sent from the website footer (guests + logged-in users); set status, add note, delete |
 | **Users** | Admin user accounts |
 | **Settings** | Website logo, favicon + primary color |
@@ -248,7 +249,18 @@ Same pattern as news: pencil / trash on the blog table.
 
 **Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
 
-**Public site:** published videos show on Home → Latest Videos, `/videos` list, and `/videos/:slug` detail (uploaded file plays; if YouTube is also set, a YouTube link card shows below).
+**Public site:** long videos → Home **Latest Videos**, `/videos`, `/videos/:slug`.  
+**Shorts:** Admin → **Shorts** → upload **9:16** MP4 + thumbnail → set **Allow likes / comments / share** → publish. Public: `/shorts` grid → opens **Reels viewer** at `/shorts/watch/:slug` (vertical scroll, like / comment / share). Old `/videos/:slug` for a short redirects to the reels URL.
+
+## Step 4.6 — Shorts workflow
+
+1. Sidebar → **Videos → Shorts** (or **Add → Create short**)
+2. Fill title, slug, and short description (no long **Content** field)
+3. Upload **9:16 vertical** MP4/WEBM + thumbnail (YouTube URL optional)
+4. Turn **Allow likes**, **Allow comments**, **Allow share** on or off for this short
+5. Publish → appears on `/shorts` and home short row (not on `/videos` list)
+6. **Admin → Shorts** table shows **Likes** and **Comments** (click count → popup to read/delete comments)
+7. On edit, remove visitor comments from the list under **Comments on this short** if needed
 
 ---
 
@@ -318,6 +330,11 @@ http://localhost:5173/search    Search
 http://localhost:5173/feedback  Feedback form (footer link)
 http://localhost:5173/bookmarks Saved for later (login required)
 ```
+
+**Listen to this article (news & blog detail):**
+1. Open a published **news** or **blog** post
+2. Use **Listen to this article** (under author line) — play / pause / speed / skip
+3. With AWS Polly enabled on the API, playback uses cloud **HD voice**; otherwise the device browser voice is used
 
 **Bookmarks (read later):**
 1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)

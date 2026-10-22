@@ -87,6 +87,12 @@ PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
 
   Without these, API runs but image upload to S3 will fail.
 
+  "Listen to this article" (Polly HD voice):
+    Same AWS keys + IAM polly:SynthesizeSpeech (docs/aws-s3-iam-policy.json)
+    READ_ALOUD_POLLY_ENABLED=true in backend\.env (default)
+    GET http://localhost:8000/api/v1/read-aloud/capabilities → {"polly":true,"polly_reason":null}
+    If polly:false and polly_reason:"invalid_aws_credentials" → fix keys in backend\.env (502 on synthesize)
+
   Images on site look BLACK but upload works?
     Browser opens S3 URL → XML AllAccessDisabled / AccessDenied
     → bucket digitalnews-media-prod needs public read for news/* etc.
@@ -243,6 +249,10 @@ ERROR: connection refused / could not connect to server
 
 ERROR: relation "users" does not exist / table missing
   → Run: alembic upgrade head
+
+ERROR: column videos.short_allow_likes does not exist (admin Videos/Shorts list fails)
+  → DB is behind code — cd backend && .\.venv\Scripts\activate && alembic upgrade head
+  → Needs revision 0015_video_short_engagement (short toggles + video_likes + video_comments)
 
 ERROR: ModuleNotFoundError / no module named app
   → cd backend && .\.venv\Scripts\activate

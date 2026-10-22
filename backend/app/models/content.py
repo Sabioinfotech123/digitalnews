@@ -202,6 +202,11 @@ class Video(Base):
     status: Mapped[ContentStatus] = mapped_column(
         Enum(ContentStatus, native_enum=False), default=ContentStatus.draft, index=True
     )
+    is_short: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    short_allow_likes: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    short_allow_comments: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    short_allow_share: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     seo_title: Mapped[str | None] = mapped_column(String(300), nullable=True)
     seo_description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -227,3 +232,29 @@ class VideoTag(Base):
 
     video_id: Mapped[str] = mapped_column(String(36), ForeignKey("videos.id"), primary_key=True)
     tag_id: Mapped[str] = mapped_column(String(36), ForeignKey("tags.id"), primary_key=True)
+
+
+class VideoLike(Base):
+    __tablename__ = "video_likes"
+    __table_args__ = (UniqueConstraint("video_id", "visitor_key", name="uq_video_likes_video_visitor"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    video_id: Mapped[str] = mapped_column(String(36), ForeignKey("videos.id", ondelete="CASCADE"), index=True)
+    visitor_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class VideoComment(Base):
+    __tablename__ = "video_comments"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    video_id: Mapped[str] = mapped_column(String(36), ForeignKey("videos.id", ondelete="CASCADE"), index=True)
+    visitor_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    author_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    is_visible: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
