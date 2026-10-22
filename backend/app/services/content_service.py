@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.content import Blog, ContentLanguage, ContentStatus, News, NewsType, Video
+from app.services.video_engagement_service import VideoEngagementService
 from app.repositories.content_repository import (
     BlogRepository,
     BreakingNewsRepository,
@@ -432,7 +433,12 @@ def _require_video_source(
         )
 
 
-def _video_response(item: Video) -> VideoResponse:
+def _video_response(
+    item: Video,
+    *,
+    like_count: int = 0,
+    comment_count: int = 0,
+) -> VideoResponse:
     return VideoResponse(
         id=item.id,
         title=item.title,
@@ -447,12 +453,17 @@ def _video_response(item: Video) -> VideoResponse:
         thumbnail_url=item.thumbnail_url,
         status=item.status,
         is_short=bool(item.is_short),
+        short_allow_likes=bool(item.short_allow_likes),
+        short_allow_comments=bool(item.short_allow_comments),
+        short_allow_share=bool(item.short_allow_share),
         duration_seconds=item.duration_seconds,
         sort_order=int(item.sort_order or 0),
         seo_title=item.seo_title,
         seo_description=item.seo_description,
         seo_keywords=item.seo_keywords,
         view_count=item.view_count,
+        like_count=like_count,
+        comment_count=comment_count,
         published_at=item.published_at,
         created_at=item.created_at,
         updated_at=item.updated_at,
@@ -460,10 +471,25 @@ def _video_response(item: Video) -> VideoResponse:
     )
 
 
+def _video_responses_with_engagement(db: Session, items: list[Video]) -> list[VideoResponse]:
+    if not items:
+        return []
+    counts = VideoEngagementService(db).bulk_counts([item.id for item in items])
+    return [
+        _video_response(
+            item,
+            like_count=counts.get(item.id, {}).get("like_count", 0),
+            comment_count=counts.get(item.id, {}).get("comment_count", 0),
+        )
+        for item in items
+    ]
+
+
 class VideoService:
     def __init__(self, db: Session) -> None:
         self.repo = VideoRepository(db)
         self.tags = TagRepository(db)
+        self.db = db
 
     def list(
         self,
@@ -486,7 +512,7 @@ class VideoService:
             is_short=is_short,
         )
         return PaginatedVideos(
-            items=[_video_response(item) for item in items],
+            items=_video_responses_with_engagement(self.db, items),
             total=total,
             page=page,
             page_size=page_size,
@@ -499,7 +525,13 @@ class VideoService:
         if increment_view:
             self.repo.increment_view(video_id)
             item = self.repo.get(video_id) or item
-        return _video_response(item)
+        counts = VideoEngagementService(self.db).bulk_counts([item.id])
+        c = counts.get(item.id, {})
+        return _video_response(
+            item,
+            like_count=c.get("like_count", 0),
+            comment_count=c.get("comment_count", 0),
+        )
 
     def create(self, payload: VideoCreate) -> VideoResponse:
         _require_video_source(
@@ -522,6 +554,9 @@ class VideoService:
             thumbnail_url=payload.thumbnail_url,
             status=payload.status,
             is_short=bool(payload.is_short),
+            short_allow_likes=bool(payload.short_allow_likes),
+            short_allow_comments=bool(payload.short_allow_comments),
+            short_allow_share=bool(payload.short_allow_share),
             duration_seconds=payload.duration_seconds,
             sort_order=max(0, int(payload.sort_order or 0)),
             seo_title=payload.seo_title,

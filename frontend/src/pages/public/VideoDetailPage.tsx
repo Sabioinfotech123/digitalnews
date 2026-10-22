@@ -10,6 +10,7 @@ import { VideoCard } from '@/components/common/VideoCard'
 import { BRAND } from '@/config/brand'
 import type { VideoItem } from '@/types/content'
 import { stripHtml } from '@/utils/publicNews'
+import { getSampleVideoBySlug, SAMPLE_SHORTS_FALLBACK } from '@/config/sampleShorts'
 import { mapApiVideoToCard, type PublicVideoCardModel } from '@/utils/publicVideo'
 import { extractYoutubeId, youtubeWatchUrl } from '@/utils/youtube'
 import './VideoDetailPage.scss'
@@ -74,6 +75,11 @@ export function VideoDetailPage() {
     ;(async () => {
       try {
         const item = await fetchPublicVideoBySlug(slug, contentLanguage)
+        if (item.is_short) {
+          if (!active) return
+          navigate(`/shorts/watch/${item.slug}`, { replace: true })
+          return
+        }
         const list = await fetchPublicVideos({
           page: 1,
           page_size: 4,
@@ -90,6 +96,13 @@ export function VideoDetailPage() {
         )
       } catch {
         if (!active) return
+        if (SAMPLE_SHORTS_FALLBACK) {
+          const sample = getSampleVideoBySlug(slug, contentLanguage)
+          if (sample?.is_short) {
+            navigate(`/shorts/watch/${sample.slug}`, { replace: true })
+            return
+          }
+        }
         setVideo(null)
         setRelated([])
         setNotFound(true)
@@ -101,7 +114,7 @@ export function VideoDetailPage() {
     return () => {
       active = false
     }
-  }, [slug, contentLanguage])
+  }, [slug, contentLanguage, navigate])
 
   if (loading) {
     return (

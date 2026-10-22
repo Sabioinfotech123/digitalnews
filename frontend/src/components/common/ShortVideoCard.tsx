@@ -12,7 +12,7 @@ interface ShortVideoCardProps {
 export function ShortVideoCard({ video, className = '' }: ShortVideoCardProps) {
   return (
     <article className={cn('short-card', className)}>
-      <Link to={`/videos/${video.slug}`} className="short-card__link">
+      <Link to={`/shorts/watch/${video.slug}`} className="short-card__link">
         <MediaCover
           className="short-card__thumb"
           src={video.thumbnailUrl}

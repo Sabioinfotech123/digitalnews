@@ -16,9 +16,9 @@ import {
   mapSampleNewsToCard,
   type PublicNewsCardModel,
 } from '@/utils/publicNews'
+import { loadPublicShortCards } from '@/utils/loadPublicShorts'
 import {
   mapApiVideoToCard,
-  mapApiVideoToShortCard,
   type PublicShortCardModel,
   type PublicVideoCardModel,
 } from '@/utils/publicVideo'
@@ -73,9 +73,7 @@ export function HomePage() {
         fetchPublicVideos({ page: 1, page_size: 2, language: contentLanguage, is_short: false })
           .then((data) => data.items.map((item) => mapApiVideoToCard(item, contentLanguage)))
           .catch(() => [] as PublicVideoCardModel[]),
-        fetchPublicVideos({ page: 1, page_size: 6, language: contentLanguage, is_short: true })
-          .then((data) => data.items.map((item) => mapApiVideoToShortCard(item, contentLanguage)))
-          .catch(() => [] as PublicShortCardModel[]),
+        loadPublicShortCards(contentLanguage, { page: 1, page_size: 6 }).then((data) => data.items),
       ])
       if (!active) return
       setFeatured(featuredItems)

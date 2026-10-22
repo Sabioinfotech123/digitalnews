@@ -250,6 +250,10 @@ ERROR: connection refused / could not connect to server
 ERROR: relation "users" does not exist / table missing
   → Run: alembic upgrade head
 
+ERROR: column videos.short_allow_likes does not exist (admin Videos/Shorts list fails)
+  → DB is behind code — cd backend && .\.venv\Scripts\activate && alembic upgrade head
+  → Needs revision 0015_video_short_engagement (short toggles + video_likes + video_comments)
+
 ERROR: ModuleNotFoundError / no module named app
   → cd backend && .\.venv\Scripts\activate
 

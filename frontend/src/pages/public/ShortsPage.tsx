@@ -1,6 +1,5 @@
 import { Pagination } from 'antd'
 import { useEffect, useState } from 'react'
-import { fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { SectionHeader } from '@/components/common/SectionHeader'
@@ -8,7 +7,8 @@ import { ShortVideoCard } from '@/components/common/ShortVideoCard'
 import { YoutubeCta } from '@/components/common/YoutubeCta'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
 import { BRAND } from '@/config/brand'
-import { mapApiVideoToShortCard, type PublicShortCardModel } from '@/utils/publicVideo'
+import { loadPublicShortCards } from '@/utils/loadPublicShorts'
+import type { PublicShortCardModel } from '@/utils/publicVideo'
 import './ShortsPage.scss'
 
 const PAGE_SIZE = 12
@@ -30,23 +30,15 @@ export function ShortsPage() {
     let active = true
     setLoading(true)
     ;(async () => {
-      try {
-        const data = await fetchPublicVideos({
-          page,
-          page_size: PAGE_SIZE,
-          language: contentLanguage,
-          is_short: true,
-        })
-        if (!active) return
-        setItems(data.items.map((row) => mapApiVideoToShortCard(row, contentLanguage)))
-        setTotal(data.total)
-      } catch {
-        if (!active) return
-        setItems([])
-        setTotal(0)
-      } finally {
-        if (active) setLoading(false)
-      }
+      const data = await loadPublicShortCards(contentLanguage, {
+        page,
+        page_size: PAGE_SIZE,
+        allowSampleFallback: page === 1,
+      })
+      if (!active) return
+      setItems(data.items)
+      setTotal(data.total)
+      setLoading(false)
     })()
     return () => {
       active = false

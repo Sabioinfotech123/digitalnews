@@ -183,6 +183,14 @@ Blogs have no `news_type` / breaking flags.
 |--------|------|-----|--------------|
 | GET | `/videos` | Anyone | List **published** videos. Query `is_short=true` → shorts only; default `is_short=false` → long videos only |
 | GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/videos/{slug}/engagement` | Anyone | Like/comment counts + allow toggles; query `visitor_key` (optional) |
+| POST | `/videos/{slug}/like` | Anyone | Toggle like — body `{ "visitor_key": "…" }` |
+| GET | `/videos/{slug}/comments` | Anyone | Visible comments for a short |
+| POST | `/videos/{slug}/comments` | Anyone | Add comment — `{ "visitor_key", "author_name", "body" }` |
+| GET | `/admin/videos/{id}/comments` | Admin | All comments on a video |
+| DELETE | `/admin/video-comments/{comment_id}` | Admin | Remove a comment |
+
+Video list/detail responses include **`like_count`** and **`comment_count`** (aggregated from `video_likes` / `video_comments`).
 | GET | `/admin/videos` | Admin | List all |
 | POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
 | GET | `/admin/videos/{id}` | Admin | Get one |

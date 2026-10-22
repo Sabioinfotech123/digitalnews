@@ -45,6 +45,7 @@ import { NewsDetailPage } from '@/pages/public/NewsDetailPage'
 import { NewsPage } from '@/pages/public/NewsPage'
 import { RegisterPage } from '@/pages/public/RegisterPage'
 import { SearchPage } from '@/pages/public/SearchPage'
+import { ShortReelsPage } from '@/pages/public/ShortReelsPage'
 import { ShortsPage } from '@/pages/public/ShortsPage'
 import { VideoDetailPage } from '@/pages/public/VideoDetailPage'
 import { VideosPage } from '@/pages/public/VideosPage'
@@ -78,6 +79,7 @@ export function AppRouter() {
       <Route path="/videos" element={<PublicPage><VideosPage /></PublicPage>} />
       <Route path="/videos/:slug" element={<PublicPage><VideoDetailPage /></PublicPage>} />
       <Route path="/shorts" element={<PublicPage><ShortsPage /></PublicPage>} />
+      <Route path="/shorts/watch/:slug" element={<ShortReelsPage />} />
       <Route path="/today-news" element={<PublicPage><Placeholder title="Today News" /></PublicPage>} />
       <Route path="/news" element={<PublicPage><NewsPage /></PublicPage>} />
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />

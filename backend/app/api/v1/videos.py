@@ -3,7 +3,15 @@ from fastapi import APIRouter, HTTPException, Query, status
 from app.core.dependencies import AdminUser, DbSession
 from app.models.content import ContentLanguage, ContentStatus
 from app.schemas.content import PaginatedVideos, VideoCreate, VideoResponse, VideoUpdate
+from app.schemas.video_engagement import (
+    VideoCommentCreate,
+    VideoCommentListResponse,
+    VideoCommentResponse,
+    VideoEngagementResponse,
+    VideoLikePayload,
+)
 from app.services.content_service import VideoService
+from app.services.video_engagement_service import VideoEngagementService
 
 router = APIRouter(tags=["videos"])
 
@@ -27,6 +35,46 @@ def list_public_videos(
         published_only=True,
         is_short=short_filter,
     )
+
+
+@router.get("/videos/{slug}/engagement", response_model=VideoEngagementResponse)
+def get_video_engagement(
+    slug: str,
+    db: DbSession,
+    language: ContentLanguage | None = None,
+    visitor_key: str | None = Query(default=None, max_length=64),
+) -> VideoEngagementResponse:
+    return VideoEngagementService(db).engagement(slug, visitor_key=visitor_key, language=language)
+
+
+@router.post("/videos/{slug}/like", response_model=VideoEngagementResponse)
+def toggle_video_like(
+    slug: str,
+    payload: VideoLikePayload,
+    db: DbSession,
+    language: ContentLanguage | None = None,
+) -> VideoEngagementResponse:
+    return VideoEngagementService(db).toggle_like(slug, payload.visitor_key, language)
+
+
+@router.get("/videos/{slug}/comments", response_model=VideoCommentListResponse)
+def list_video_comments(
+    slug: str,
+    db: DbSession,
+    language: ContentLanguage | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+) -> VideoCommentListResponse:
+    return VideoEngagementService(db).list_comments(slug, language=language, limit=limit)
+
+
+@router.post("/videos/{slug}/comments", response_model=VideoCommentResponse, status_code=status.HTTP_201_CREATED)
+def create_video_comment(
+    slug: str,
+    payload: VideoCommentCreate,
+    db: DbSession,
+    language: ContentLanguage | None = None,
+) -> VideoCommentResponse:
+    return VideoEngagementService(db).add_comment(slug, payload, language)
 
 
 @router.get("/videos/{slug}", response_model=VideoResponse)
@@ -81,3 +129,13 @@ def update_video(video_id: str, payload: VideoUpdate, _admin: AdminUser, db: DbS
 @router.delete("/admin/videos/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_video(video_id: str, _admin: AdminUser, db: DbSession) -> None:
     VideoService(db).delete(video_id)
+
+
+@router.get("/admin/videos/{video_id}/comments", response_model=VideoCommentListResponse)
+def admin_list_video_comments(video_id: str, _admin: AdminUser, db: DbSession) -> VideoCommentListResponse:
+    return VideoEngagementService(db).admin_list_comments(video_id)
+
+
+@router.delete("/admin/video-comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def admin_delete_video_comment(comment_id: str, _admin: AdminUser, db: DbSession) -> None:
+    VideoEngagementService(db).admin_delete_comment(comment_id)

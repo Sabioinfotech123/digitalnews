@@ -1,4 +1,4 @@
-import { App, Form, Input, InputNumber, Select, Typography } from 'antd'
+import { App, Form, Input, InputNumber, Select, Switch, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useVideoUpload } from '@/app/providers/VideoUploadProvider'
@@ -19,6 +19,7 @@ import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
+import { deleteAdminVideoComment, fetchAdminVideoComments, type VideoCommentItem } from '@/api/videoEngagement'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { BRAND } from '@/config/brand'
 import './AdminNewsFormPage.scss'
@@ -55,6 +56,7 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
   const [video, setVideo] = useState<VideoItem | null>(null)
+  const [shortComments, setShortComments] = useState<VideoCommentItem[]>([])
   const draftKey = mode === 'create' ? 'video:create' : `video:edit:${id ?? ''}`
   const watchedVideoUrl = Form.useWatch('video_url', form)
   const isShortForm = isShortRoute || Boolean(video?.is_short)
@@ -109,6 +111,9 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
               language: 'en',
               status: 'draft',
               is_short: isShortRoute,
+              short_allow_likes: true,
+              short_allow_comments: true,
+              short_allow_share: true,
               content: '',
               sort_order: 0,
               video_url: null,
@@ -134,7 +139,25 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
     return () => {
       active = false
     }
-  }, [mode, id, form, message, navigate, getDraftSession, updateDraft, draftKey])
+  }, [mode, id, form, message, navigate, getDraftSession, updateDraft, draftKey, isShortRoute])
+
+  useEffect(() => {
+    if (!isShortForm || mode !== 'edit' || !id) {
+      setShortComments([])
+      return
+    }
+    let active = true
+    void fetchAdminVideoComments(id)
+      .then((rows) => {
+        if (active) setShortComments(rows)
+      })
+      .catch(() => {
+        if (active) setShortComments([])
+      })
+    return () => {
+      active = false
+    }
+  }, [isShortForm, mode, id])
 
   const goBackToList = () => {
     navigate(isShortForm ? '/admin/shorts' : '/admin/videos')
@@ -419,6 +442,21 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
               />
             </Form.Item>
 
+            {isShortForm ? (
+              <div className="news-form-page__panel">
+                <p className="news-form-page__panel-title">{t('shorts.engagementTitle')}</p>
+                <Form.Item name="short_allow_likes" label={t('shorts.allowLikes')} valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+                <Form.Item name="short_allow_comments" label={t('shorts.allowComments')} valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+                <Form.Item name="short_allow_share" label={t('shorts.allowShare')} valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+              </div>
+            ) : null}
+
             <Form.Item name="seo_title" label="SEO title" className="w-full">
               <Input className="w-full" />
             </Form.Item>
@@ -431,6 +469,32 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
 
             {video ? (
               <p className="news-form-page__meta">Views: {video.view_count}</p>
+            ) : null}
+
+            {isShortForm && mode === 'edit' && shortComments.length > 0 ? (
+              <div className="news-form-page__panel">
+                <p className="news-form-page__panel-title">{t('shorts.adminComments')}</p>
+                <ul className="news-form-page__comment-list">
+                  {shortComments.map((row) => (
+                    <li key={row.id}>
+                      <strong>{row.author_name}</strong>
+                      <p>{row.body}</p>
+                      <AppButton
+                        size="small"
+                        danger
+                        onClick={() => {
+                          void deleteAdminVideoComment(row.id).then(() => {
+                            setShortComments((prev) => prev.filter((c) => c.id !== row.id))
+                            message.success('Comment removed')
+                          })
+                        }}
+                      >
+                        {t('shorts.deleteComment')}
+                      </AppButton>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
 
             <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary w-full">

@@ -1,7 +1,12 @@
-import { App, Select, Space, Tooltip, type TableColumnsType } from 'antd'
+import { App, Modal, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteAdminVideo, fetchAdminVideos } from '@/api/content'
+import {
+  deleteAdminVideoComment,
+  fetchAdminVideoComments,
+  type VideoCommentItem,
+} from '@/api/videoEngagement'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
@@ -52,6 +57,10 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
   const [language, setLanguage] = useState<ContentLanguage | 'all'>('all')
   const [status, setStatus] = useState<ContentStatus | 'all'>('all')
   const [loading, setLoading] = useState(false)
+  const [commentsOpen, setCommentsOpen] = useState(false)
+  const [commentsVideo, setCommentsVideo] = useState<VideoItem | null>(null)
+  const [comments, setComments] = useState<VideoCommentItem[]>([])
+  const [commentsLoading, setCommentsLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -116,6 +125,40 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
     }
   }
 
+  const openCommentsModal = async (row: VideoItem) => {
+    setCommentsVideo(row)
+    setCommentsOpen(true)
+    setCommentsLoading(true)
+    try {
+      const list = await fetchAdminVideoComments(row.id)
+      setComments(list)
+    } catch {
+      message.error('Could not load comments')
+      setComments([])
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!commentsVideo) return
+    try {
+      await deleteAdminVideoComment(commentId)
+      message.success('Comment removed')
+      const list = await fetchAdminVideoComments(commentsVideo.id)
+      setComments(list)
+      setItems((prev) =>
+        prev.map((row) =>
+          row.id === commentsVideo.id
+            ? { ...row, comment_count: Math.max(0, list.length) }
+            : row,
+        ),
+      )
+    } catch {
+      message.error('Could not delete comment')
+    }
+  }
+
   const askDelete = (row: VideoItem) => {
     confirmDelete({
       modal,
@@ -174,6 +217,36 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
         sorter: (a, b) => compareText(a.status, b.status),
         render: (value: string) => <StatusBadge status={value} />,
       },
+      ...(shortsOnly
+        ? [
+            {
+              title: 'Likes',
+              dataIndex: 'like_count',
+              width: 80,
+              align: 'center' as const,
+              sorter: (a: VideoItem, b: VideoItem) => a.like_count - b.like_count,
+              render: (value: number) => (
+                <span className="font-ui tabular-nums text-ink">{value ?? 0}</span>
+              ),
+            },
+            {
+              title: 'Comments',
+              key: 'comments',
+              width: 100,
+              align: 'center' as const,
+              sorter: (a: VideoItem, b: VideoItem) => a.comment_count - b.comment_count,
+              render: (_: unknown, row: VideoItem) => (
+                <AppButton
+                  type="link"
+                  className="!px-1 tabular-nums"
+                  onClick={() => void openCommentsModal(row)}
+                >
+                  {row.comment_count ?? 0}
+                </AppButton>
+              ),
+            },
+          ]
+        : []),
       {
         title: 'Updated',
         dataIndex: 'updated_at',
@@ -213,10 +286,11 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [load, message, modal, navigate],
+    [load, message, modal, navigate, shortsOnly],
   )
 
   return (
+    <>
     <AppTable<VideoItem>
       title={shortsOnly ? t('admin.shorts') : t('admin.videos')}
       loading={loading}
@@ -269,5 +343,47 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
         onChange: handlePageChange,
       }}
     />
+
+    <Modal
+      title={commentsVideo ? `Comments — ${commentsVideo.title}` : 'Comments'}
+      open={commentsOpen}
+      onCancel={() => setCommentsOpen(false)}
+      footer={null}
+      width={520}
+      destroyOnClose
+    >
+      {commentsLoading ? (
+        <p className="text-ink-muted">Loading…</p>
+      ) : comments.length === 0 ? (
+        <p className="text-ink-muted">No comments on this short yet.</p>
+      ) : (
+        <ul className="m-0 max-h-[360px] list-none overflow-y-auto p-0">
+          {comments.map((c) => (
+            <li
+              key={c.id}
+              className="mb-3 border-b border-border pb-3 last:mb-0 last:border-0 last:pb-0"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <strong className="font-ui text-sm text-ink">{c.author_name}</strong>
+                  <p className="m-0 mt-1 text-sm text-ink-muted">{c.body}</p>
+                  <time className="mt-1 block text-xs text-ink-muted">
+                    {formatUpdatedAt(c.created_at)}
+                  </time>
+                </div>
+                <AppButton
+                  size="small"
+                  danger
+                  onClick={() => void handleDeleteComment(c.id)}
+                >
+                  Delete
+                </AppButton>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
+    </>
   )
 }
