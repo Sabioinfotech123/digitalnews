@@ -4,8 +4,16 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.content import ContentLanguage, ContentStatus, Video, VideoComment, VideoLike
+from app.models.content import (
+    ContentLanguage,
+    ContentStatus,
+    Video,
+    VideoComment,
+    VideoCommentReaction,
+    VideoLike,
+)
 from app.schemas.video_engagement import (
+    CommentReactionKind,
     VideoCommentCreate,
     VideoCommentListResponse,
     VideoCommentResponse,
@@ -98,8 +106,72 @@ class VideoEngagementService:
         self.db.commit()
         return self.engagement(slug, visitor_key=visitor_key, language=language)
 
+    def _comment_stats(
+        self, comment_ids: list[str], visitor_key: str | None
+    ) -> dict[str, dict[str, int | str | None]]:
+        if not comment_ids:
+            return {}
+        like_rows = self.db.execute(
+            select(VideoCommentReaction.comment_id, func.count())
+            .where(
+                VideoCommentReaction.comment_id.in_(comment_ids),
+                VideoCommentReaction.reaction == "like",
+            )
+            .group_by(VideoCommentReaction.comment_id)
+        ).all()
+        dislike_rows = self.db.execute(
+            select(VideoCommentReaction.comment_id, func.count())
+            .where(
+                VideoCommentReaction.comment_id.in_(comment_ids),
+                VideoCommentReaction.reaction == "dislike",
+            )
+            .group_by(VideoCommentReaction.comment_id)
+        ).all()
+        viewer: dict[str, str] = {}
+        if visitor_key:
+            viewer_rows = self.db.scalars(
+                select(VideoCommentReaction).where(
+                    VideoCommentReaction.comment_id.in_(comment_ids),
+                    VideoCommentReaction.visitor_key == visitor_key,
+                )
+            ).all()
+            viewer = {row.comment_id: row.reaction for row in viewer_rows}
+        out: dict[str, dict[str, int | str | None]] = {
+            cid: {"like_count": 0, "dislike_count": 0, "viewer_reaction": None} for cid in comment_ids
+        }
+        for cid, cnt in like_rows:
+            if cid in out:
+                out[cid]["like_count"] = int(cnt)
+        for cid, cnt in dislike_rows:
+            if cid in out:
+                out[cid]["dislike_count"] = int(cnt)
+        for cid, reaction in viewer.items():
+            if cid in out:
+                out[cid]["viewer_reaction"] = reaction
+        return out
+
+    def _serialize_comment(
+        self, row: VideoComment, stats: dict[str, dict[str, int | str | None]]
+    ) -> VideoCommentResponse:
+        s = stats.get(row.id, {})
+        reaction = s.get("viewer_reaction")
+        return VideoCommentResponse(
+            id=row.id,
+            author_name=row.author_name,
+            body=row.body,
+            created_at=row.created_at,
+            like_count=int(s.get("like_count") or 0),
+            dislike_count=int(s.get("dislike_count") or 0),
+            viewer_reaction=reaction if reaction in ("like", "dislike") else None,
+        )
+
     def list_comments(
-        self, slug: str, *, language: ContentLanguage | None, limit: int = 50
+        self,
+        slug: str,
+        *,
+        language: ContentLanguage | None,
+        limit: int = 50,
+        visitor_key: str | None = None,
     ) -> VideoCommentListResponse:
         video = self._published_video(slug, language)
         rows = self.db.scalars(
@@ -108,7 +180,8 @@ class VideoEngagementService:
             .order_by(VideoComment.created_at.desc())
             .limit(limit)
         ).all()
-        items = [VideoCommentResponse.model_validate(row) for row in rows]
+        stats = self._comment_stats([row.id for row in rows], visitor_key)
+        items = [self._serialize_comment(row, stats) for row in rows]
         return VideoCommentListResponse(items=items, total=len(items))
 
     def add_comment(
@@ -128,7 +201,43 @@ class VideoEngagementService:
         self.db.add(row)
         self.db.commit()
         self.db.refresh(row)
-        return VideoCommentResponse.model_validate(row)
+        stats = self._comment_stats([row.id], payload.visitor_key)
+        return self._serialize_comment(row, stats)
+
+    def react_to_comment(
+        self, comment_id: str, visitor_key: str, reaction: CommentReactionKind
+    ) -> VideoCommentResponse:
+        row = self.db.get(VideoComment, comment_id)
+        if not row or not row.is_visible:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+        video = self.db.get(Video, row.video_id)
+        if not video or video.deleted_at is not None or video.status != ContentStatus.published:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+        if not video.short_allow_comments:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Comments disabled for this short")
+        existing = self.db.scalars(
+            select(VideoCommentReaction).where(
+                VideoCommentReaction.comment_id == comment_id,
+                VideoCommentReaction.visitor_key == visitor_key,
+            )
+        ).first()
+        if existing:
+            if existing.reaction == reaction:
+                self.db.delete(existing)
+            else:
+                existing.reaction = reaction
+        else:
+            self.db.add(
+                VideoCommentReaction(
+                    id=str(uuid.uuid4()),
+                    comment_id=comment_id,
+                    visitor_key=visitor_key,
+                    reaction=reaction,
+                )
+            )
+        self.db.commit()
+        stats = self._comment_stats([comment_id], visitor_key)
+        return self._serialize_comment(row, stats)
 
     def admin_list_comments(self, video_id: str) -> VideoCommentListResponse:
         rows = self.db.scalars(
@@ -136,7 +245,8 @@ class VideoEngagementService:
             .where(VideoComment.video_id == video_id)
             .order_by(VideoComment.created_at.desc())
         ).all()
-        items = [VideoCommentResponse.model_validate(row) for row in rows]
+        stats = self._comment_stats([row.id for row in rows], None)
+        items = [self._serialize_comment(row, stats) for row in rows]
         return VideoCommentListResponse(items=items, total=len(items))
 
     def admin_delete_comment(self, comment_id: str) -> None:

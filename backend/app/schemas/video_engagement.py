@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
+
+CommentReactionKind = Literal["like", "dislike"]
 
 
 class VideoEngagementResponse(BaseModel):
@@ -27,8 +30,14 @@ class VideoCommentResponse(BaseModel):
     author_name: str
     body: str
     created_at: datetime
+    like_count: int = 0
+    dislike_count: int = 0
+    viewer_reaction: CommentReactionKind | None = None
 
-    model_config = {"from_attributes": True}
+
+class VideoCommentReactionPayload(BaseModel):
+    visitor_key: str = Field(min_length=8, max_length=64)
+    reaction: CommentReactionKind
 
 
 class VideoCommentListResponse(BaseModel):

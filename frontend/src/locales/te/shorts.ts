@@ -12,6 +12,9 @@ export const shorts = {
   commentRequiredName: 'మీ పేరు రాయండి (లేదా లాగిన్ అవ్వండి)',
   commentingAs: 'వ్యాఖ్యిస్తున్నది',
   likeFailed: 'లైక్ అప్‌డేట్ కాలేదు',
+  commentLike: 'వ్యాఖ్యకు లైక్',
+  commentDislike: 'వ్యాఖ్యకు డిస్‌లైక్',
+  commentReactFailed: 'రియాక్షన్ అప్‌డేట్ కాలేదు',
   engagementTitle: 'షార్ట్ వీక్షణ ఫీచర్లు',
   allowLikes: 'లైక్‌లు అనుమతించు',
   allowComments: 'వ్యాఖ్యలు అనుమతించు',
@@ -20,4 +23,6 @@ export const shorts = {
   deleteComment: 'తొలగించు',
   previousShort: 'మునుపటి షార్ట్',
   nextShort: 'తదుపరి షార్ట్',
+  mute: 'ధ్వని మ్యూట్',
+  unmute: 'ధ్వని ఆన్',
 } as const

@@ -5,22 +5,51 @@ import {
   fetchVideoComments,
   fetchVideoEngagement,
   postVideoComment,
+  reactVideoComment,
   toggleVideoLike,
+  type CommentReaction,
   type VideoCommentItem,
   type VideoEngagement,
 } from '@/api/videoEngagement'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
 import { ShareModal } from '@/components/common/ShareModal'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
 import { loadPublicShortVideos } from '@/utils/loadPublicShorts'
+import type { SupportedLanguage } from '@/config/app'
 import { BRAND } from '@/config/brand'
 import type { VideoItem } from '@/types/content'
 import { stripHtml } from '@/utils/publicNews'
 import './ShortReelsPage.scss'
 
 const SWIPE_MIN_PX = 48
+
+function commentInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase()
+  }
+  return name.trim().slice(0, 2).toUpperCase() || '?'
+}
+
+function formatCommentTime(iso: string, language: SupportedLanguage): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const diffMs = Date.now() - date.getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return language === 'te' ? 'ఇప్పుడే' : 'Just now'
+  if (mins < 60) return language === 'te' ? `${mins} నిమిషాల క్రితం` : `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return language === 'te' ? `${hours} గంటల క్రితం` : `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return language === 'te' ? `${days} రోజుల క్రితం` : `${days}d ago`
+  return date.toLocaleDateString(language === 'te' ? 'te-IN' : 'en-IN', {
+    day: 'numeric',
+    month: 'short',
+  })
+}
 
 function formatCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
@@ -44,6 +73,7 @@ function engagementForVideo(video: VideoItem, engagement: VideoEngagement | null
 type SlideProps = {
   video: VideoItem
   active: boolean
+  muted: boolean
   engagement: VideoEngagement | null
   onLike: () => void
   onComment: () => void
@@ -51,13 +81,44 @@ type SlideProps = {
   likeBusy: boolean
 }
 
-function ReelSlide({ video, active, engagement, onLike, onComment, onShare, likeBusy }: SlideProps) {
+function ReelSlide({
+  video,
+  active,
+  muted,
+  engagement,
+  onLike,
+  onComment,
+  onShare,
+  likeBusy,
+}: SlideProps) {
   const { t } = useLanguage()
   const stats = engagementForVideo(video, engagement)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const playbackHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [videoPaused, setVideoPaused] = useState(true)
+  const [playbackHint, setPlaybackHint] = useState<'pause' | null>(null)
   const src = video.video_url?.trim() || ''
   const poster = video.thumbnail_url?.trim() || undefined
   const excerpt = stripHtml(video.description)
+
+  const flashPauseHint = useCallback(() => {
+    if (playbackHintTimer.current) clearTimeout(playbackHintTimer.current)
+    setPlaybackHint('pause')
+    playbackHintTimer.current = setTimeout(() => setPlaybackHint(null), 480)
+  }, [])
+
+  useEffect(
+    () => () => {
+      if (playbackHintTimer.current) clearTimeout(playbackHintTimer.current)
+    },
+    [],
+  )
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+    el.muted = muted
+  }, [muted])
 
   useEffect(() => {
     const el = videoRef.current
@@ -67,8 +128,20 @@ function ReelSlide({ video, active, engagement, onLike, onComment, onShare, like
     } else {
       el.pause()
       el.currentTime = 0
+      setVideoPaused(true)
+      setPlaybackHint(null)
     }
   }, [active])
+
+  const showCenterPlay = videoPaused && active
+  const showCenterPause = playbackHint === 'pause' && active
+
+  const togglePlayback = () => {
+    const el = videoRef.current
+    if (!el) return
+    if (el.paused) void el.play().catch(() => undefined)
+    else el.pause()
+  }
 
   return (
     <section className="short-reels__slide" aria-hidden={!active}>
@@ -80,20 +153,38 @@ function ReelSlide({ video, active, engagement, onLike, onComment, onShare, like
             poster={poster}
             playsInline
             loop
-            muted={false}
+            muted={muted}
             preload="metadata"
             controls={false}
             aria-label={video.title}
-            onClick={() => {
-              const el = videoRef.current
-              if (!el) return
-              if (el.paused) void el.play().catch(() => undefined)
-              else el.pause()
+            onClick={togglePlayback}
+            onPlay={() => {
+              setVideoPaused(false)
+              flashPauseHint()
+            }}
+            onPause={() => {
+              setVideoPaused(true)
+              setPlaybackHint(null)
             }}
           />
         ) : (
           <div className="short-reels__placeholder">{t('videos.noShortsYet')}</div>
         )}
+        {src && (showCenterPlay || showCenterPause) ? (
+          <div
+            className={`short-reels__playback${
+              showCenterPause ? ' short-reels__playback--pause-flash' : ''
+            }${showCenterPlay ? ' short-reels__playback--play' : ''}`}
+            aria-hidden
+          >
+            <span className="short-reels__playback-icon">
+              <i
+                className={`fa-solid ${showCenterPlay ? 'fa-play' : 'fa-pause'}`}
+                aria-hidden
+              />
+            </span>
+          </div>
+        ) : null}
         <div className="short-reels__gradient" aria-hidden />
         <div className="short-reels__caption">
           {video.category_name ? (
@@ -151,8 +242,10 @@ export function ShortReelsPage() {
   const [commentName, setCommentName] = useState('')
   const [commentBody, setCommentBody] = useState('')
   const [commentSubmitting, setCommentSubmitting] = useState(false)
+  const [commentReactBusy, setCommentReactBusy] = useState<string | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareTitle, setShareTitle] = useState('')
+  const [soundMuted, setSoundMuted] = useState(false)
   const touchStartY = useRef<number | null>(null)
 
   const activeVideo = items[activeIndex] ?? null
@@ -312,6 +405,19 @@ export function ShortReelsPage() {
     }
   }
 
+  const handleCommentReact = async (commentId: string, reaction: CommentReaction) => {
+    if (!commentsSlug) return
+    setCommentReactBusy(commentId)
+    try {
+      const updated = await reactVideoComment(commentsSlug, commentId, reaction)
+      setComments((prev) => prev.map((c) => (c.id === commentId ? updated : c)))
+    } catch {
+      message.error(t('shorts.commentReactFailed'))
+    } finally {
+      setCommentReactBusy(null)
+    }
+  }
+
   const openShare = (video: VideoItem) => {
     setShareTitle(video.title)
     setShareOpen(true)
@@ -359,6 +465,18 @@ export function ShortReelsPage() {
                 <i className="fa-solid fa-xmark" aria-hidden />
               </Link>
               <span className="short-reels__brand">{t('navigation.shorts')}</span>
+              <button
+                type="button"
+                className="short-reels__close short-reels__volume"
+                aria-label={soundMuted ? t('shorts.unmute') : t('shorts.mute')}
+                aria-pressed={soundMuted}
+                onClick={() => setSoundMuted((m) => !m)}
+              >
+                <i
+                  className={`fa-solid ${soundMuted ? 'fa-volume-xmark' : 'fa-volume-high'}`}
+                  aria-hidden
+                />
+              </button>
             </div>
             <div
               className="short-reels__track"
@@ -369,6 +487,7 @@ export function ShortReelsPage() {
                 <ReelSlide
                   video={video}
                   active={index === activeIndex}
+                  muted={soundMuted}
                   engagement={engagementBySlug[video.slug] ?? null}
                   onLike={() => void handleLike(video.slug)}
                   onComment={() => void openComments(video.slug)}
@@ -404,53 +523,144 @@ export function ShortReelsPage() {
       </div>
 
       <Drawer
-        title={t('shorts.comments')}
+        title={null}
         placement="bottom"
-        height="min(520px, 78vh)"
+        height="min(560px, 82vh)"
         open={commentsOpen}
         onClose={() => setCommentsOpen(false)}
-        className="short-reels__drawer"
+        className="short-reels-comments-drawer"
+        closable={false}
+        destroyOnClose
       >
-        <ul className="short-reels__comment-list">
-          {comments.length === 0 ? (
-            <li className="short-reels__comment-empty">{t('shorts.noComments')}</li>
-          ) : (
-            comments.map((c) => (
-              <li key={c.id} className="short-reels__comment">
-                <strong>{c.author_name}</strong>
-                <p>{c.body}</p>
-              </li>
-            ))
-          )}
-        </ul>
-        <div className="short-reels__comment-form">
-          {isAuthenticated && user ? (
-            <p className="short-reels__comment-as">
-              {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
-            </p>
-          ) : (
-            <Input
-              placeholder={t('shorts.yourName')}
-              value={commentName}
-              onChange={(e) => setCommentName(e.target.value)}
-              maxLength={120}
-            />
-          )}
-          <Input.TextArea
-            placeholder={t('shorts.addComment')}
-            value={commentBody}
-            onChange={(e) => setCommentBody(e.target.value)}
-            rows={3}
-            maxLength={2000}
-          />
-          <button
-            type="button"
-            className="short-reels__comment-submit"
-            disabled={commentSubmitting}
-            onClick={() => void submitComment()}
-          >
-            {t('shorts.postComment')}
-          </button>
+        <div className="short-reels__comments-panel">
+          <div className="short-reels__comments-handle" aria-hidden />
+          <header className="short-reels__comments-head">
+            <h2 className="short-reels__comments-title">{t('shorts.comments')}</h2>
+            <button
+              type="button"
+              className="short-reels__comments-close"
+              aria-label={t('videos.back')}
+              onClick={() => setCommentsOpen(false)}
+            >
+              <i className="fa-solid fa-xmark" aria-hidden />
+            </button>
+          </header>
+
+          <div className="short-reels__comments-scroll">
+            {comments.length === 0 ? (
+              <div className="short-reels__comments-empty">
+                <i className="fa-regular fa-comment-dots" aria-hidden />
+                <p>{t('shorts.noComments')}</p>
+              </div>
+            ) : (
+              <ul className="short-reels__comment-list">
+                {comments.map((c) => (
+                  <li key={c.id} className="short-reels__comment">
+                    <span className="short-reels__comment-avatar" aria-hidden>
+                      {commentInitials(c.author_name)}
+                    </span>
+                    <div className="short-reels__comment-body">
+                      <div className="short-reels__comment-meta">
+                        <strong>{c.author_name}</strong>
+                        <time dateTime={c.created_at}>
+                          {formatCommentTime(c.created_at, contentLanguage)}
+                        </time>
+                      </div>
+                      <p>{c.body}</p>
+                      <div className="short-reels__comment-reactions">
+                        <button
+                          type="button"
+                          className={`short-reels__comment-react${
+                            c.viewer_reaction === 'like' ? ' short-reels__comment-react--active' : ''
+                          }`}
+                          aria-label={t('shorts.commentLike')}
+                          aria-pressed={c.viewer_reaction === 'like'}
+                          disabled={commentReactBusy === c.id}
+                          onClick={() => void handleCommentReact(c.id, 'like')}
+                        >
+                          <i
+                            className={
+                              c.viewer_reaction === 'like'
+                                ? 'fa-solid fa-thumbs-up'
+                                : 'fa-regular fa-thumbs-up'
+                            }
+                            aria-hidden
+                          />
+                          {(c.like_count ?? 0) > 0 ? (
+                            <span>{c.like_count}</span>
+                          ) : null}
+                        </button>
+                        <button
+                          type="button"
+                          className={`short-reels__comment-react short-reels__comment-react--dislike${
+                            c.viewer_reaction === 'dislike' ? ' short-reels__comment-react--active' : ''
+                          }`}
+                          aria-label={t('shorts.commentDislike')}
+                          aria-pressed={c.viewer_reaction === 'dislike'}
+                          disabled={commentReactBusy === c.id}
+                          onClick={() => void handleCommentReact(c.id, 'dislike')}
+                        >
+                          <i
+                            className={
+                              c.viewer_reaction === 'dislike'
+                                ? 'fa-solid fa-thumbs-down'
+                                : 'fa-regular fa-thumbs-down'
+                            }
+                            aria-hidden
+                          />
+                          {(c.dislike_count ?? 0) > 0 ? (
+                            <span>{c.dislike_count}</span>
+                          ) : null}
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <footer className="short-reels__comments-composer">
+            {!isAuthenticated ? (
+              <Input
+                className="short-reels__comments-name"
+                placeholder={t('shorts.yourName')}
+                value={commentName}
+                onChange={(e) => setCommentName(e.target.value)}
+                maxLength={120}
+                prefix={<i className="fa-solid fa-user text-ink-muted" aria-hidden />}
+              />
+            ) : null}
+            <div className="short-reels__comments-input-row">
+              {isAuthenticated && user ? (
+                <span className="short-reels__comment-avatar short-reels__comment-avatar--sm" aria-hidden>
+                  {commentInitials(user.full_name)}
+                </span>
+              ) : null}
+              <Input.TextArea
+                className="short-reels__comments-text"
+                placeholder={t('shorts.addComment')}
+                value={commentBody}
+                onChange={(e) => setCommentBody(e.target.value)}
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                maxLength={2000}
+              />
+            </div>
+            {isAuthenticated && user ? (
+              <p className="short-reels__comment-as">
+                {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
+              </p>
+            ) : null}
+            <AppButton
+              type="primary"
+              block
+              className="short-reels__comment-submit btn-soft-primary"
+              loading={commentSubmitting}
+              onClick={() => void submitComment()}
+            >
+              {t('shorts.postComment')}
+            </AppButton>
+          </footer>
         </div>
       </Drawer>
 

@@ -254,6 +254,10 @@ ERROR: column videos.short_allow_likes does not exist (admin Videos/Shorts list 
   → DB is behind code — cd backend && .\.venv\Scripts\activate && alembic upgrade head
   → Needs revision 0015_video_short_engagement (short toggles + video_likes + video_comments)
 
+ERROR: relation "video_comment_reactions" does not exist (comment like/dislike fails)
+  → cd backend && .\.venv\Scripts\activate && alembic upgrade head
+  → Needs revision 0016_video_comment_reactions
+
 ERROR: ModuleNotFoundError / no module named app
   → cd backend && .\.venv\Scripts\activate
 

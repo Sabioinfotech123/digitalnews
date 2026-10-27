@@ -243,7 +243,8 @@ Migration: `0009_news_and_videos_media.py`
 `content` added in `0010_videos_content.py`  
 Category / SEO / tags in `0011_videos_catalog_fields.py`  
 Shorts flag + duration in `0014_videos_is_short.py`  
-Short engagement toggles + likes/comments in `0015_video_short_engagement.py`
+Short engagement toggles + likes/comments in `0015_video_short_engagement.py`  
+Comment like/dislike in `0016_video_comment_reactions.py`
 
 ### 10b) `video_likes` / `video_comments`
 
@@ -253,6 +254,7 @@ Public reels viewer: one like per visitor key per video; comments store name + t
 |-------|---------|
 | `video_likes` | `video_id` + `visitor_key` (unique pair) |
 | `video_comments` | `video_id`, `visitor_key`, `author_name`, `body`, `is_visible` |
+| `video_comment_reactions` | `comment_id`, `visitor_key`, `reaction` (`like` or `dislike`) — one reaction per visitor per comment |
 
 ---
 

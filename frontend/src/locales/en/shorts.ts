@@ -12,6 +12,9 @@ export const shorts = {
   commentRequiredName: 'Enter your name (or sign in)',
   commentingAs: 'Commenting as',
   likeFailed: 'Could not update like',
+  commentLike: 'Like comment',
+  commentDislike: 'Dislike comment',
+  commentReactFailed: 'Could not update reaction',
   engagementTitle: 'Short viewer features',
   allowLikes: 'Allow likes',
   allowComments: 'Allow comments',
@@ -20,4 +23,6 @@ export const shorts = {
   deleteComment: 'Delete',
   previousShort: 'Previous short',
   nextShort: 'Next short',
+  mute: 'Mute sound',
+  unmute: 'Unmute sound',
 } as const
