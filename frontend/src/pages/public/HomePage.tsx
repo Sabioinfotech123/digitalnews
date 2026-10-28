@@ -7,6 +7,7 @@ import { LatestNewsSection } from '@/components/news/LatestNewsSection'
 import { MoreNewsSection } from '@/components/news/MoreNewsSection'
 import { TrendingNewsSection } from '@/components/news/TrendingNewsSection'
 import { SectionHeader } from '@/components/common/SectionHeader'
+import { ShortVideoCard } from '@/components/common/ShortVideoCard'
 import { VideoCard } from '@/components/common/VideoCard'
 import { sampleNewsByType } from '@/constants/sampleNews'
 import type { NewsType } from '@/types/content'
@@ -15,7 +16,12 @@ import {
   mapSampleNewsToCard,
   type PublicNewsCardModel,
 } from '@/utils/publicNews'
-import { mapApiVideoToCard, type PublicVideoCardModel } from '@/utils/publicVideo'
+import { loadPublicShortCards } from '@/utils/loadPublicShorts'
+import {
+  mapApiVideoToCard,
+  type PublicShortCardModel,
+  type PublicVideoCardModel,
+} from '@/utils/publicVideo'
 import './HomePage.scss'
 
 const NEWS_TYPE_LIMITS: Record<NewsType, number> = {
@@ -51,20 +57,23 @@ export function HomePage() {
   const [trending, setTrending] = useState<PublicNewsCardModel[]>([])
   const [more, setMore] = useState<PublicNewsCardModel[]>([])
   const [videos, setVideos] = useState<PublicVideoCardModel[]>([])
+  const [shorts, setShorts] = useState<PublicShortCardModel[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
     setLoading(true)
     ;(async () => {
-      const [featuredItems, latestItems, trendingItems, moreItems, videoList] = await Promise.all([
+      const [featuredItems, latestItems, trendingItems, moreItems, videoList, shortList] =
+        await Promise.all([
         loadType('featured', contentLanguage),
         loadType('latest', contentLanguage),
         loadType('trending', contentLanguage),
         loadType('more', contentLanguage),
-        fetchPublicVideos({ page: 1, page_size: 2, language: contentLanguage })
+        fetchPublicVideos({ page: 1, page_size: 2, language: contentLanguage, is_short: false })
           .then((data) => data.items.map((item) => mapApiVideoToCard(item, contentLanguage)))
           .catch(() => [] as PublicVideoCardModel[]),
+        loadPublicShortCards(contentLanguage, { page: 1, page_size: 6 }).then((data) => data.items),
       ])
       if (!active) return
       setFeatured(featuredItems)
@@ -72,6 +81,7 @@ export function HomePage() {
       setTrending(trendingItems)
       setMore(moreItems)
       setVideos(videoList)
+      setShorts(shortList)
       setLoading(false)
     })()
     return () => {
@@ -95,6 +105,21 @@ export function HomePage() {
             </div>
           </>
         )}
+
+        {shorts.length > 0 ? (
+          <section className="home__section home__section--shorts">
+            <SectionHeader
+              title={t('videos.shortVideos')}
+              moreLabel={t('navigation.shorts')}
+              moreTo="/shorts"
+            />
+            <div className="home__shorts">
+              {shorts.slice(0, 6).map((video) => (
+                <ShortVideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {videos.length > 0 ? (
           <section className="home__section">

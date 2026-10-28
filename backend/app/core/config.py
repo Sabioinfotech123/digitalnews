@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     aws_s3_bucket: str = "digitalnews-media-prod"
     aws_s3_public_base_url: str = "https://digitalnews-media-prod.s3.us-east-1.amazonaws.com"
 
+    # Listen / read-aloud — uses Polly when True and AWS keys are set
+    read_aloud_polly_enabled: bool = True
+
     admin_email: str = "admin@example.com"
     admin_password: str = "Admin@12345"
     admin_full_name: str = "Site Admin"

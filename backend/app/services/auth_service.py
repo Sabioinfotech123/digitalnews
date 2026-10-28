@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -57,6 +58,15 @@ class AuthService:
     def ensure_admin(self, email: str, password: str, full_name: str) -> User:
         existing = self.users.get_by_email(email)
         if existing:
+            # Local dev: .env ADMIN_* keeps working after you change the password there.
+            # Production should leave DEBUG=false so the DB password is not overwritten on boot.
+            settings = get_settings()
+            if settings.debug and existing.email == email.lower():
+                existing.password_hash = hash_password(password)
+                existing.full_name = full_name
+                existing.role = UserRole.ADMIN
+                existing.is_active = True
+                return self.users.update(existing)
             return existing
         return self.users.create(
             email=email,

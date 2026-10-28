@@ -6,6 +6,7 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { useBookmarks } from '@/app/providers/BookmarksProvider'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
+import { MediaCover } from '@/components/common/MediaCover'
 import { AppLoader } from '@/components/common/AppLoader'
 import type { BookmarkContentType, BookmarkItem } from '@/types/bookmark'
 import { getApiErrorMessage } from '@/utils/apiError'
@@ -140,18 +141,14 @@ export function BookmarksPage() {
                 <li key={item.id} className="bookmarks-page__card">
                   {item.is_available ? (
                     <Link to={detailPath(item)} className="bookmarks-page__link">
-                      <div
+                      <MediaCover
                         className="bookmarks-page__media"
-                        style={
-                          item.image_url
-                            ? {
-                                backgroundImage: `linear-gradient(180deg, rgba(17,17,17,0.05), rgba(17,17,17,0.5)), url(${item.image_url})`,
-                              }
-                            : undefined
-                        }
+                        src={item.image_url}
+                        fallbackBackground="linear-gradient(135deg, #1a1a1a 0%, #D71920 100%)"
+                        overlay
                       >
                         <span className="bookmarks-page__type">{TYPE_LABEL[item.content_type]}</span>
-                      </div>
+                      </MediaCover>
                       <div className="bookmarks-page__body">
                         <h2>{item.title}</h2>
                         {item.category_name ? (

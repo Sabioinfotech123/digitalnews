@@ -216,6 +216,7 @@ export async function fetchAdminVideos(params: {
   search?: string
   language?: string
   status?: string
+  is_short?: boolean
 }): Promise<PaginatedVideos> {
   const { data } = await apiClient.get<PaginatedVideos>('/admin/videos', { params })
   return data
@@ -248,6 +249,8 @@ export async function fetchPublicVideos(params: {
   page_size?: number
   search?: string
   language?: string
+  /** true = shorts only; false = long videos only (API default) */
+  is_short?: boolean
 }): Promise<PaginatedVideos> {
   const { data } = await apiClient.get<PaginatedVideos>('/videos', { params })
   return data

@@ -181,8 +181,19 @@ Blogs have no `news_type` / breaking flags.
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| GET | `/videos` | Anyone | List **published** videos |
+| GET | `/videos` | Anyone | List **published** videos. Query `is_short=true` → shorts only; default `is_short=false` → long videos only |
 | GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/videos/{slug}/engagement` | Anyone | Like/comment counts + allow toggles; query `visitor_key` (optional) |
+| POST | `/videos/{slug}/like` | Anyone | Toggle like — body `{ "visitor_key": "…" }` |
+| GET | `/videos/{slug}/comments` | Anyone | Visible comments; optional query `visitor_key` returns counts + your reaction |
+| POST | `/videos/{slug}/comments` | Anyone | Add comment — `{ "visitor_key", "author_name", "body" }` |
+| POST | `/video-comments/{comment_id}/react` | Anyone | Toggle/switch like or dislike — `{ "visitor_key", "reaction": "like" \| "dislike" }` |
+| GET | `/admin/videos/{id}/comments` | Admin | All comments on a video (includes like/dislike counts) |
+| DELETE | `/admin/video-comments/{comment_id}` | Admin | Remove a comment |
+
+Each comment in list/create/react responses includes **`like_count`**, **`dislike_count`**, and **`viewer_reaction`** (`like`, `dislike`, or null).
+
+Video list/detail responses include **`like_count`** and **`comment_count`** (aggregated from `video_likes` / `video_comments`).
 | GET | `/admin/videos` | Admin | List all |
 | POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
 | GET | `/admin/videos/{id}` | Admin | Get one |
@@ -482,6 +493,19 @@ Admin list shows that number in the Views column.
 1. Visitor clicks **Feedback** in the footer → fills the form → `POST /feedback` (token sent automatically if logged in)
 2. Admin opens **Feedback** → `GET /admin/feedback?status=new`
 3. Admin reads it, sets status / note → `PATCH /admin/feedback/{id}`
+
+---
+
+## Read aloud (Listen to article)
+
+Public text-to-speech for news/blog detail pages. Uses **Amazon Polly** when AWS keys are configured; otherwise the website falls back to the browser’s built-in speech.
+
+| Method | Path | Who | What |
+|--------|------|-----|------|
+| GET | `/read-aloud/capabilities` | Anyone | `{ "polly": true \| false, "polly_reason": null \| "invalid_aws_credentials" \| … }` — `polly` is true only when AWS keys work for Polly |
+| POST | `/read-aloud/synthesize` | Anyone | Body `{ "text": "…", "language": "en" \| "te" }` → **MP3** (`audio/mpeg`). Max **2500** characters per request. |
+
+**IAM:** the same AWS user as S3 uploads needs `polly:SynthesizeSpeech` (see `docs/aws-s3-iam-policy.json`).
 
 ---
 

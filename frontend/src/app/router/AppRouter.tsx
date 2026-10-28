@@ -27,11 +27,17 @@ import { AdminSectionPage } from '@/pages/admin/AdminSectionPage'
 import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
 import { AdminTagsPage } from '@/pages/admin/AdminTagsPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
-import { AdminVideoCreatePage, AdminVideoEditPage } from '@/pages/admin/AdminVideoFormPage'
+import {
+  AdminShortCreatePage,
+  AdminVideoCreatePage,
+  AdminVideoEditPage,
+} from '@/pages/admin/AdminVideoFormPage'
+import { AdminShortsPage } from '@/pages/admin/AdminShortsPage'
 import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
 import { BookmarksPage } from '@/pages/public/BookmarksPage'
 import { BlogsPage } from '@/pages/public/BlogsPage'
+import { CategoryPage } from '@/pages/public/CategoryPage'
 import { FeedbackPage } from '@/pages/public/FeedbackPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { LivePage } from '@/pages/public/LivePage'
@@ -40,6 +46,7 @@ import { NewsDetailPage } from '@/pages/public/NewsDetailPage'
 import { NewsPage } from '@/pages/public/NewsPage'
 import { RegisterPage } from '@/pages/public/RegisterPage'
 import { SearchPage } from '@/pages/public/SearchPage'
+import { ShortReelsPage } from '@/pages/public/ShortReelsPage'
 import { ShortsPage } from '@/pages/public/ShortsPage'
 import { VideoDetailPage } from '@/pages/public/VideoDetailPage'
 import { VideosPage } from '@/pages/public/VideosPage'
@@ -73,7 +80,9 @@ export function AppRouter() {
       <Route path="/videos" element={<PublicPage><VideosPage /></PublicPage>} />
       <Route path="/videos/:slug" element={<PublicPage><VideoDetailPage /></PublicPage>} />
       <Route path="/shorts" element={<PublicPage><ShortsPage /></PublicPage>} />
+      <Route path="/shorts/watch/:slug" element={<ShortReelsPage />} />
       <Route path="/today-news" element={<PublicPage><Placeholder title="Today News" /></PublicPage>} />
+      <Route path="/category/:slug" element={<PublicPage><CategoryPage /></PublicPage>} />
       <Route path="/news" element={<PublicPage><NewsPage /></PublicPage>} />
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />
       <Route path="/blogs" element={<PublicPage><BlogsPage /></PublicPage>} />
@@ -107,6 +116,9 @@ export function AppRouter() {
           <Route path="videos" element={<AdminVideosPage />} />
           <Route path="videos/create" element={<AdminVideoCreatePage />} />
           <Route path="videos/edit/:id" element={<AdminVideoEditPage />} />
+          <Route path="shorts" element={<AdminShortsPage />} />
+          <Route path="shorts/create" element={<AdminShortCreatePage />} />
+          <Route path="shorts/edit/:id" element={<AdminVideoEditPage />} />
           <Route path="breaking-news" element={<AdminBreakingNewsPage />} />
           <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />

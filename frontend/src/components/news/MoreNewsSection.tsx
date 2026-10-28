@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { MediaCover } from '@/components/common/MediaCover'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import type { PublicNewsCardModel } from '@/utils/publicNews'
@@ -19,15 +20,10 @@ export function MoreNewsSection({ articles }: MoreNewsSectionProps) {
         {articles.map((article) => (
           <article key={article.id} className="more-news__item">
             <Link to={`/news/${article.slug}`} className="more-news__link">
-              <div
+              <MediaCover
                 className="more-news__thumb"
-                style={{
-                  backgroundImage: article.imageUrl
-                    ? `url(${article.imageUrl})`
-                    : article.accent,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
+                src={article.imageUrl}
+                fallbackBackground={article.accent}
               />
               <div className="more-news__body">
                 <span className="more-news__category">{article.category}</span>
