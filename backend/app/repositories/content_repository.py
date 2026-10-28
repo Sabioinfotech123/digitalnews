@@ -322,6 +322,7 @@ class VideoRepository:
         language: ContentLanguage | None = None,
         status: ContentStatus | None = None,
         published_only: bool = False,
+        is_short: bool | None = None,
     ) -> tuple[list[Video], int]:
         page = max(1, page)
         page_size = min(max(1, page_size), 50)
@@ -333,6 +334,9 @@ class VideoRepository:
         if status:
             stmt = stmt.where(Video.status == status)
             count_stmt = count_stmt.where(Video.status == status)
+        if is_short is not None:
+            stmt = stmt.where(Video.is_short.is_(is_short))
+            count_stmt = count_stmt.where(Video.is_short.is_(is_short))
         if published_only:
             stmt = stmt.where(Video.status == ContentStatus.published)
             count_stmt = count_stmt.where(Video.status == ContentStatus.published)

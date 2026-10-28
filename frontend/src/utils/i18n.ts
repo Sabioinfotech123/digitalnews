@@ -3,21 +3,27 @@ import { admin as enAdmin } from '@/locales/en/admin'
 import { auth as enAuth } from '@/locales/en/auth'
 import { blogs as enBlogs } from '@/locales/en/blogs'
 import { bookmarks as enBookmarks } from '@/locales/en/bookmarks'
+import { category as enCategory } from '@/locales/en/category'
 import { common as enCommon } from '@/locales/en/common'
 import { feedback as enFeedback } from '@/locales/en/feedback'
 import { navigation as enNavigation } from '@/locales/en/navigation'
 import { news as enNews } from '@/locales/en/news'
 import { share as enShare } from '@/locales/en/share'
+import { speech as enSpeech } from '@/locales/en/speech'
+import { shorts as enShorts } from '@/locales/en/shorts'
 import { videos as enVideos } from '@/locales/en/videos'
 import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
 import { blogs as teBlogs } from '@/locales/te/blogs'
 import { bookmarks as teBookmarks } from '@/locales/te/bookmarks'
+import { category as teCategory } from '@/locales/te/category'
 import { common as teCommon } from '@/locales/te/common'
 import { feedback as teFeedback } from '@/locales/te/feedback'
 import { navigation as teNavigation } from '@/locales/te/navigation'
 import { news as teNews } from '@/locales/te/news'
 import { share as teShare } from '@/locales/te/share'
+import { speech as teSpeech } from '@/locales/te/speech'
+import { shorts as teShorts } from '@/locales/te/shorts'
 import { videos as teVideos } from '@/locales/te/videos'
 
 const catalogs = {
@@ -27,10 +33,13 @@ const catalogs = {
     auth: enAuth,
     news: enNews,
     videos: enVideos,
+    shorts: enShorts,
     blogs: enBlogs,
     bookmarks: enBookmarks,
+    category: enCategory,
     feedback: enFeedback,
     share: enShare,
+    speech: enSpeech,
     admin: enAdmin,
   },
   te: {
@@ -39,10 +48,13 @@ const catalogs = {
     auth: teAuth,
     news: teNews,
     videos: teVideos,
+    shorts: teShorts,
     blogs: teBlogs,
     bookmarks: teBookmarks,
+    category: teCategory,
     feedback: teFeedback,
     share: teShare,
+    speech: teSpeech,
     admin: teAdmin,
   },
 } as const

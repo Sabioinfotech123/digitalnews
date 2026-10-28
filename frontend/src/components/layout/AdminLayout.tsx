@@ -20,6 +20,7 @@ export function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
+  const [headerActionsOpen, setHeaderActionsOpen] = useState(false)
 
   const handleLogout = () => {
     confirmAction({
@@ -94,6 +95,12 @@ export function AdminLayout() {
         onClick: () => navigate('/admin/videos/create'),
       },
       {
+        key: 'short',
+        icon: <i className="fa-solid fa-mobile-screen" aria-hidden />,
+        label: t('videos.createShort'),
+        onClick: () => navigate('/admin/shorts/create'),
+      },
+      {
         key: 'user',
         icon: <i className="fa-solid fa-user-plus" aria-hidden />,
         label: t('admin.addUser'),
@@ -112,16 +119,41 @@ export function AdminLayout() {
     document.title = pageMeta.documentTitle
   }, [pageMeta.documentTitle])
 
+  useEffect(() => {
+    setHeaderActionsOpen(false)
+  }, [location.pathname])
+
   const selectedKey = pageMeta.menuKey
 
   const openKeysForRoute = useMemo(() => {
-    if (selectedKey.startsWith('/admin/news')) return ['news']
-    if (selectedKey.startsWith('/admin/local-news') || selectedKey.startsWith('/admin/verified-news')) {
+    const path = location.pathname
+    if (selectedKey.startsWith('/admin/news') || path.startsWith('/admin/news')) return ['news']
+    if (
+      selectedKey.startsWith('/admin/local-news') ||
+      selectedKey.startsWith('/admin/verified-news') ||
+      path.startsWith('/admin/local-news') ||
+      path.startsWith('/admin/verified-news')
+    ) {
       return ['local-feed']
     }
-    if (['/admin/categories', '/admin/tags'].includes(selectedKey)) return ['taxonomy']
+    if (
+      selectedKey.startsWith('/admin/videos') ||
+      selectedKey.startsWith('/admin/shorts') ||
+      path.startsWith('/admin/videos') ||
+      path.startsWith('/admin/shorts')
+    ) {
+      return ['videos-menu']
+    }
+    if (
+      selectedKey === '/admin/categories' ||
+      selectedKey === '/admin/tags' ||
+      path.startsWith('/admin/categories') ||
+      path.startsWith('/admin/tags')
+    ) {
+      return ['taxonomy']
+    }
     return []
-  }, [selectedKey])
+  }, [location.pathname, selectedKey])
 
   const [openKeys, setOpenKeys] = useState<string[]>(openKeysForRoute)
 
@@ -216,9 +248,19 @@ export function AdminLayout() {
       label: <Link to="/admin/blogs">{t('admin.blogs')}</Link>,
     },
     {
-      key: '/admin/videos',
+      key: 'videos-menu',
       icon: <i className="fa-solid fa-video" aria-hidden />,
-      label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
+      label: t('admin.videos'),
+      children: [
+        {
+          key: '/admin/videos',
+          label: <Link to="/admin/videos">{t('admin.videos')}</Link>,
+        },
+        {
+          key: '/admin/shorts',
+          label: <Link to="/admin/shorts">{t('admin.shorts')}</Link>,
+        },
+      ],
     },
     {
       key: '/admin/feedback',
@@ -240,12 +282,9 @@ export function AdminLayout() {
       icon: <i className="fa-solid fa-gear" aria-hidden />,
       label: <Link to="/admin/settings">{t('admin.settings')}</Link>,
     },
-    {
-      key: '/admin/profile',
-      icon: <i className="fa-solid fa-user" aria-hidden />,
-      label: <Link to="/admin/profile">{t('admin.profile')}</Link>,
-    },
   ]
+
+  const onProfilePage = location.pathname.startsWith('/admin/profile')
 
   return (
     <Layout className="admin-layout">
@@ -307,7 +346,31 @@ export function AdminLayout() {
               })}
             />
           </div>
-          <div className="admin-layout__header-actions">
+          <button
+            type="button"
+            className={cn(
+              'admin-layout__header-actions-toggle',
+              headerActionsOpen && 'admin-layout__header-actions-toggle--open',
+            )}
+            aria-expanded={headerActionsOpen}
+            aria-controls="admin-header-actions"
+            aria-label={
+              headerActionsOpen ? t('admin.headerActionsHide') : t('admin.headerActionsToggle')
+            }
+            onClick={() => setHeaderActionsOpen((open) => !open)}
+          >
+            <i
+              className={cn('fa-solid', headerActionsOpen ? 'fa-chevron-up' : 'fa-chevron-down')}
+              aria-hidden
+            />
+          </button>
+          <div
+            id="admin-header-actions"
+            className={cn(
+              'admin-layout__header-actions',
+              headerActionsOpen && 'admin-layout__header-actions--open',
+            )}
+          >
             <Dropdown menu={{ items: quickAddItems }} placement="bottomRight" trigger={['click']}>
               <AppButton type="default" className="admin-layout__add-btn">
                 <i className="fa-solid fa-plus" aria-hidden /> {t('admin.quickAdd')}
@@ -315,6 +378,13 @@ export function AdminLayout() {
             </Dropdown>
             <AppButton type="default" href="/" target="_blank" rel="noopener noreferrer">
               <i className="fa-solid fa-arrow-up-right-from-square" aria-hidden /> {t('admin.backToSite')}
+            </AppButton>
+            <AppButton
+              type="default"
+              className={cn('admin-layout__profile-btn', onProfilePage && 'admin-layout__profile-btn--active')}
+              onClick={() => navigate('/admin/profile')}
+            >
+              <i className="fa-solid fa-user" aria-hidden /> {t('admin.profile')}
             </AppButton>
             <AppButton type="primary" onClick={handleLogout}>
               <i className="fa-solid fa-right-from-bracket" aria-hidden /> {t('admin.logout')}

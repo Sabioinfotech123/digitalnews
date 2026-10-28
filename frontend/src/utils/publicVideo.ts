@@ -16,6 +16,20 @@ export interface PublicVideoCardModel {
   thumbnailUrl?: string
   videoUrl?: string
   youtubeUrl?: string
+  isShort?: boolean
+  durationLabel?: string
+}
+
+export function formatDuration(seconds: number | null | undefined): string | undefined {
+  if (!seconds || seconds < 1) return undefined
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return `${h}:${String(m).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+  return `${mins}:${String(secs).padStart(2, '0')}`
 }
 
 const ACCENTS = [
@@ -77,5 +91,26 @@ export function mapApiVideoToCard(item: VideoItem, language: SupportedLanguage):
     thumbnailUrl: item.thumbnail_url || undefined,
     videoUrl: item.video_url?.trim() || undefined,
     youtubeUrl: item.youtube_url?.trim() || undefined,
+    isShort: item.is_short,
+    durationLabel: formatDuration(item.duration_seconds),
+  }
+}
+
+export type PublicShortCardModel = Pick<
+  PublicVideoCardModel,
+  'id' | 'slug' | 'title' | 'accent' | 'thumbnailUrl'
+>
+
+export function mapApiVideoToShortCard(
+  item: VideoItem,
+  language: SupportedLanguage,
+): PublicShortCardModel {
+  const card = mapApiVideoToCard(item, language)
+  return {
+    id: card.id,
+    slug: card.slug,
+    title: card.title,
+    accent: card.accent,
+    thumbnailUrl: card.thumbnailUrl,
   }
 }

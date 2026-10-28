@@ -7,11 +7,11 @@
       "Principal": "*",
       "Action": "s3:GetObject",
       "Resource": [
-        "arn:aws:s3:::digitalnews-media/news/*",
-        "arn:aws:s3:::digitalnews-media/brand/*",
-        "arn:aws:s3:::digitalnews-media/videos/*",
-        "arn:aws:s3:::digitalnews-media/thumbnails/*",
-        "arn:aws:s3:::digitalnews-media/blogs/*"
+        "arn:aws:s3:::digitalnews-media-prod/news/*",
+        "arn:aws:s3:::digitalnews-media-prod/brand/*",
+        "arn:aws:s3:::digitalnews-media-prod/videos/*",
+        "arn:aws:s3:::digitalnews-media-prod/thumbnails/*",
+        "arn:aws:s3:::digitalnews-media-prod/blogs/*"
       ]
     }
   ]
