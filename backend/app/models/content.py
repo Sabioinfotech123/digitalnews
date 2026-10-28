@@ -258,3 +258,20 @@ class VideoComment(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+class VideoCommentReaction(Base):
+    __tablename__ = "video_comment_reactions"
+    __table_args__ = (
+        UniqueConstraint("comment_id", "visitor_key", name="uq_video_comment_reactions_comment_visitor"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    comment_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("video_comments.id", ondelete="CASCADE"), index=True
+    )
+    visitor_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    reaction: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )

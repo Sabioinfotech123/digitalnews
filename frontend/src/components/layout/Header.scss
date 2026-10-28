@@ -1,9 +1,6 @@
 @use '../../styles/variables.scss';
 
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
   background: var(--color-black);
   color: var(--color-white);
   box-shadow: var(--shadow-md);

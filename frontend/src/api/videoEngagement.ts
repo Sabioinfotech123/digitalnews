@@ -4,6 +4,7 @@ import {
   sampleAddComment,
   sampleEngagement,
   sampleListComments,
+  sampleReactComment,
   sampleToggleLike,
 } from '@/utils/sampleShortEngagement'
 import { getVisitorKey } from '@/utils/visitorKey'
@@ -17,11 +18,16 @@ export interface VideoEngagement {
   allow_share: boolean
 }
 
+export type CommentReaction = 'like' | 'dislike'
+
 export interface VideoCommentItem {
   id: string
   author_name: string
   body: string
   created_at: string
+  like_count?: number
+  dislike_count?: number
+  viewer_reaction?: CommentReaction | null
 }
 
 export async function fetchVideoEngagement(
@@ -53,11 +59,12 @@ export async function fetchVideoComments(
   slug: string,
   language?: string,
 ): Promise<VideoCommentItem[]> {
+  const visitorKey = getVisitorKey()
   if (isSampleShortSlug(slug)) {
-    return sampleListComments(slug)
+    return sampleListComments(slug, visitorKey)
   }
   const { data } = await apiClient.get<{ items: VideoCommentItem[] }>(`/videos/${slug}/comments`, {
-    params: language ? { language } : undefined,
+    params: { ...(language ? { language } : {}), visitor_key: visitorKey },
   })
   return data.items
 }
@@ -93,4 +100,20 @@ export async function fetchAdminVideoComments(videoId: string): Promise<VideoCom
 
 export async function deleteAdminVideoComment(commentId: string): Promise<void> {
   await apiClient.delete(`/admin/video-comments/${commentId}`)
+}
+
+export async function reactVideoComment(
+  slug: string,
+  commentId: string,
+  reaction: CommentReaction,
+): Promise<VideoCommentItem> {
+  const visitorKey = getVisitorKey()
+  if (isSampleShortSlug(slug)) {
+    return sampleReactComment(slug, commentId, visitorKey, reaction)
+  }
+  const { data } = await apiClient.post<VideoCommentItem>(`/video-comments/${commentId}/react`, {
+    visitor_key: visitorKey,
+    reaction,
+  })
+  return data
 }

@@ -37,6 +37,7 @@ import { AdminVideosPage } from '@/pages/admin/AdminVideosPage'
 import { BlogDetailPage } from '@/pages/public/BlogDetailPage'
 import { BookmarksPage } from '@/pages/public/BookmarksPage'
 import { BlogsPage } from '@/pages/public/BlogsPage'
+import { CategoryPage } from '@/pages/public/CategoryPage'
 import { FeedbackPage } from '@/pages/public/FeedbackPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { LivePage } from '@/pages/public/LivePage'
@@ -81,6 +82,7 @@ export function AppRouter() {
       <Route path="/shorts" element={<PublicPage><ShortsPage /></PublicPage>} />
       <Route path="/shorts/watch/:slug" element={<ShortReelsPage />} />
       <Route path="/today-news" element={<PublicPage><Placeholder title="Today News" /></PublicPage>} />
+      <Route path="/category/:slug" element={<PublicPage><CategoryPage /></PublicPage>} />
       <Route path="/news" element={<PublicPage><NewsPage /></PublicPage>} />
       <Route path="/news/:slug" element={<PublicPage><NewsDetailPage /></PublicPage>} />
       <Route path="/blogs" element={<PublicPage><BlogsPage /></PublicPage>} />

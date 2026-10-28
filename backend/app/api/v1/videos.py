@@ -6,6 +6,7 @@ from app.schemas.content import PaginatedVideos, VideoCreate, VideoResponse, Vid
 from app.schemas.video_engagement import (
     VideoCommentCreate,
     VideoCommentListResponse,
+    VideoCommentReactionPayload,
     VideoCommentResponse,
     VideoEngagementResponse,
     VideoLikePayload,
@@ -63,8 +64,11 @@ def list_video_comments(
     db: DbSession,
     language: ContentLanguage | None = None,
     limit: int = Query(default=50, ge=1, le=100),
+    visitor_key: str | None = Query(default=None, max_length=64),
 ) -> VideoCommentListResponse:
-    return VideoEngagementService(db).list_comments(slug, language=language, limit=limit)
+    return VideoEngagementService(db).list_comments(
+        slug, language=language, limit=limit, visitor_key=visitor_key
+    )
 
 
 @router.post("/videos/{slug}/comments", response_model=VideoCommentResponse, status_code=status.HTTP_201_CREATED)
@@ -75,6 +79,17 @@ def create_video_comment(
     language: ContentLanguage | None = None,
 ) -> VideoCommentResponse:
     return VideoEngagementService(db).add_comment(slug, payload, language)
+
+
+@router.post("/video-comments/{comment_id}/react", response_model=VideoCommentResponse)
+def react_to_video_comment(
+    comment_id: str,
+    payload: VideoCommentReactionPayload,
+    db: DbSession,
+) -> VideoCommentResponse:
+    return VideoEngagementService(db).react_to_comment(
+        comment_id, payload.visitor_key, payload.reaction
+    )
 
 
 @router.get("/videos/{slug}", response_model=VideoResponse)

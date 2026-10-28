@@ -185,10 +185,13 @@ Blogs have no `news_type` / breaking flags.
 | GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
 | GET | `/videos/{slug}/engagement` | Anyone | Like/comment counts + allow toggles; query `visitor_key` (optional) |
 | POST | `/videos/{slug}/like` | Anyone | Toggle like — body `{ "visitor_key": "…" }` |
-| GET | `/videos/{slug}/comments` | Anyone | Visible comments for a short |
+| GET | `/videos/{slug}/comments` | Anyone | Visible comments; optional query `visitor_key` returns counts + your reaction |
 | POST | `/videos/{slug}/comments` | Anyone | Add comment — `{ "visitor_key", "author_name", "body" }` |
-| GET | `/admin/videos/{id}/comments` | Admin | All comments on a video |
+| POST | `/video-comments/{comment_id}/react` | Anyone | Toggle/switch like or dislike — `{ "visitor_key", "reaction": "like" \| "dislike" }` |
+| GET | `/admin/videos/{id}/comments` | Admin | All comments on a video (includes like/dislike counts) |
 | DELETE | `/admin/video-comments/{comment_id}` | Admin | Remove a comment |
+
+Each comment in list/create/react responses includes **`like_count`**, **`dislike_count`**, and **`viewer_reaction`** (`like`, `dislike`, or null).
 
 Video list/detail responses include **`like_count`** and **`comment_count`** (aggregated from `video_likes` / `video_comments`).
 | GET | `/admin/videos` | Admin | List all |

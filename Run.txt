@@ -59,15 +59,24 @@ PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
   - If you use port 5432 in DATABASE_URL you may get:
     "password authentication failed for user digitalnews"
 
------ Admin CMS login (created on first API start from .env) -----
-  URL      : http://localhost:5173/admin/login
-  Email    : admin@example.com
-  Password : Admin@12345
+----- Admin CMS login (from backend\.env + database) -----
+  URL      : http://localhost:5173/admin/login  (same /login for public site)
 
-  Change in backend\.env:
-    ADMIN_EMAIL=admin@example.com
-    ADMIN_PASSWORD=Admin@12345
+  Login checks the **users table**, not .env directly.
+  On API start, ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_FULL_NAME:
+    - Create that admin if the email does not exist yet.
+    - If DEBUG=true, also **reset that user's password** from ADMIN_PASSWORD on each restart.
+
+  After changing ADMIN_* in .env → restart uvicorn, then sign in.
+
+  Example (match your backend\.env):
+    ADMIN_EMAIL=...
+    ADMIN_PASSWORD=...
     ADMIN_FULL_NAME=Site Admin
+
+  "Invalid email or password" usually means:
+    - Wrong email/password, or uvicorn not restarted after .env change (when DEBUG=false).
+    - Another account exists with that email but a different password (use Admin → Users or set DEBUG=true).
 
 ----- Frontend API URL -----
   frontend\.env:
@@ -253,6 +262,10 @@ ERROR: relation "users" does not exist / table missing
 ERROR: column videos.short_allow_likes does not exist (admin Videos/Shorts list fails)
   → DB is behind code — cd backend && .\.venv\Scripts\activate && alembic upgrade head
   → Needs revision 0015_video_short_engagement (short toggles + video_likes + video_comments)
+
+ERROR: relation "video_comment_reactions" does not exist (comment like/dislike fails)
+  → cd backend && .\.venv\Scripts\activate && alembic upgrade head
+  → Needs revision 0016_video_comment_reactions
 
 ERROR: ModuleNotFoundError / no module named app
   → cd backend && .\.venv\Scripts\activate

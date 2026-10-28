@@ -313,6 +313,7 @@ Remove old item
 | Publish Latest / Trending / More | Matching home sections |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
+| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
@@ -323,6 +324,7 @@ Public URLs (local):
 
 ```text
 http://localhost:5173/          Home
+http://localhost:5173/category/sports   Example category hub (slug from admin)
 http://localhost:5173/news      All news (list)
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
