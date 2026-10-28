@@ -1,6 +1,7 @@
 export const news = {
   latestNews: 'తాజా వార్తలు',
   topStories: 'ముఖ్య వార్తలు',
+  moreHeadlines: 'మరిన్ని శీర్షికలు',
   featuredNews: 'ఫీచర్డ్',
   trendingNews: 'ట్రెండింగ్',
   moreNews: 'మరిన్ని వార్తలు',

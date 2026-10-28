@@ -12,8 +12,8 @@ export function HomeNewsSkeleton() {
   return (
     <div className="home-skel" aria-busy="true" aria-label={t('news.loadingList')}>
       <section className="home-skel__section">
-        <SectionHeader title={t('news.featuredNews')} />
-        <div className="home-skel__featured">
+        <SectionHeader title={t('news.topStories')} />
+        <div className="home-skel__hub">
           <div className="home-skel__card home-skel__card--lead">
             <Bone className="home-skel__media home-skel__media--lead" />
             <Bone className="home-skel__line home-skel__line--cat" />
@@ -22,7 +22,7 @@ export function HomeNewsSkeleton() {
             <Bone className="home-skel__line home-skel__line--meta" />
           </div>
           <div className="home-skel__side">
-            {Array.from({ length: 3 }, (_, i) => (
+            {Array.from({ length: 5 }, (_, i) => (
               <div key={i} className="home-skel__compact">
                 <Bone className="home-skel__thumb" />
                 <div className="home-skel__compact-body">
@@ -33,13 +33,22 @@ export function HomeNewsSkeleton() {
               </div>
             ))}
           </div>
+          <div className="home-skel__headlines">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="home-skel__headline-row">
+                <Bone className="home-skel__line home-skel__line--cat" />
+                <Bone className="home-skel__line home-skel__line--title" />
+                <Bone className="home-skel__line home-skel__line--meta" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="home-skel__section">
         <SectionHeader title={t('news.latestNews')} />
-        <div className="home-skel__latest">
-          {Array.from({ length: 4 }, (_, i) => (
+        <div className="home-skel__latest home-skel__latest--dense">
+          {Array.from({ length: 8 }, (_, i) => (
             <div key={i} className="home-skel__card">
               <Bone className="home-skel__media" />
               <Bone className="home-skel__line home-skel__line--cat" />

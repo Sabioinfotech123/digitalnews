@@ -309,8 +309,9 @@ Remove old item
 
 | Admin action | Public result |
 |--------------|---------------|
-| Publish Featured news | Home → Featured section |
-| Publish Latest / Trending / More | Matching home sections |
+| Publish Featured news | Home → **Top stories** lead column |
+| Publish Latest / Trending / More | Home **Latest** grid (up to 16 cards), trending list, more headlines |
+| Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
 | **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |
