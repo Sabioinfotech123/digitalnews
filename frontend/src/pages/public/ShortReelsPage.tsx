@@ -1,6 +1,6 @@
 import { App, Drawer, Input } from 'antd'
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   fetchVideoComments,
   fetchVideoEngagement,
@@ -228,6 +228,7 @@ function ReelSlide({
 export function ShortReelsPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, contentLanguage } = useLanguage()
   const { user, isAuthenticated } = useAuth()
   const { message } = App.useApp()
@@ -239,7 +240,6 @@ export function ShortReelsPage() {
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [commentsSlug, setCommentsSlug] = useState<string | null>(null)
   const [comments, setComments] = useState<VideoCommentItem[]>([])
-  const [commentName, setCommentName] = useState('')
   const [commentBody, setCommentBody] = useState('')
   const [commentSubmitting, setCommentSubmitting] = useState(false)
   const [commentReactBusy, setCommentReactBusy] = useState<string | null>(null)
@@ -374,12 +374,19 @@ export function ShortReelsPage() {
     }
   }
 
+  const goToLoginForComment = useCallback(() => {
+    message.info(t('shorts.commentLoginRequired'))
+    navigate('/login', { state: { from: location.pathname } })
+  }, [location.pathname, message, navigate, t])
+
   const submitComment = async () => {
     if (!commentsSlug) return
+    if (!isAuthenticated) {
+      goToLoginForComment()
+      return
+    }
     const body = commentBody.trim()
-    const name = isAuthenticated
-      ? (user?.full_name?.trim() || '')
-      : commentName.trim()
+    const name = user?.full_name?.trim() || ''
     if (body.length < 1) {
       message.warning(t('shorts.commentRequiredBody'))
       return
@@ -392,7 +399,6 @@ export function ShortReelsPage() {
     try {
       await postVideoComment(commentsSlug, name, body, contentLanguage)
       setCommentBody('')
-      if (!isAuthenticated) setCommentName('')
       const list = await fetchVideoComments(commentsSlug, contentLanguage)
       setComments(list)
       const eng = await fetchVideoEngagement(commentsSlug, contentLanguage)
@@ -622,44 +628,53 @@ export function ShortReelsPage() {
 
           <footer className="short-reels__comments-composer">
             {!isAuthenticated ? (
-              <Input
-                className="short-reels__comments-name"
-                placeholder={t('shorts.yourName')}
-                value={commentName}
-                onChange={(e) => setCommentName(e.target.value)}
-                maxLength={120}
-                prefix={<i className="fa-solid fa-user text-ink-muted" aria-hidden />}
-              />
-            ) : null}
-            <div className="short-reels__comments-input-row">
-              {isAuthenticated && user ? (
-                <span className="short-reels__comment-avatar short-reels__comment-avatar--sm" aria-hidden>
-                  {commentInitials(user.full_name)}
-                </span>
-              ) : null}
-              <Input.TextArea
-                className="short-reels__comments-text"
-                placeholder={t('shorts.addComment')}
-                value={commentBody}
-                onChange={(e) => setCommentBody(e.target.value)}
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                maxLength={2000}
-              />
-            </div>
-            {isAuthenticated && user ? (
-              <p className="short-reels__comment-as">
-                {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
-              </p>
-            ) : null}
-            <AppButton
-              type="primary"
-              block
-              className="short-reels__comment-submit btn-soft-primary"
-              loading={commentSubmitting}
-              onClick={() => void submitComment()}
-            >
-              {t('shorts.postComment')}
-            </AppButton>
+              <div className="short-reels__comment-login">
+                <p className="short-reels__comment-login-hint">
+                  <i className="fa-solid fa-lock" aria-hidden />
+                  {t('shorts.commentLoginRequired')}
+                </p>
+                <AppButton
+                  type="primary"
+                  block
+                  className="short-reels__comment-submit btn-soft-primary"
+                  onClick={goToLoginForComment}
+                >
+                  {t('bookmarks.signIn')}
+                </AppButton>
+              </div>
+            ) : (
+              <>
+                <div className="short-reels__comments-input-row">
+                  {user ? (
+                    <span className="short-reels__comment-avatar short-reels__comment-avatar--sm" aria-hidden>
+                      {commentInitials(user.full_name)}
+                    </span>
+                  ) : null}
+                  <Input.TextArea
+                    className="short-reels__comments-text"
+                    placeholder={t('shorts.addComment')}
+                    value={commentBody}
+                    onChange={(e) => setCommentBody(e.target.value)}
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    maxLength={2000}
+                  />
+                </div>
+                {user ? (
+                  <p className="short-reels__comment-as">
+                    {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
+                  </p>
+                ) : null}
+                <AppButton
+                  type="primary"
+                  block
+                  className="short-reels__comment-submit btn-soft-primary"
+                  loading={commentSubmitting}
+                  onClick={() => void submitComment()}
+                >
+                  {t('shorts.postComment')}
+                </AppButton>
+              </>
+            )}
           </footer>
         </div>
       </Drawer>

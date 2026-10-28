@@ -210,7 +210,7 @@ Video list/detail responses include **`like_count`** and **`comment_count`** (ag
 | `category_id` / `tag_ids` | Optional | Same idea as news/blogs |
 | `video_url` | One of these | Uploaded file URL |
 | `youtube_url` | One of these | Full YouTube URL |
-| `thumbnail_url` | Required if `video_url` | Optional when YouTube-only |
+| `thumbnail_url` | Required when **published/scheduled** and `video_url` is set | Optional for drafts; optional for YouTube-only |
 | `status` | Optional | default `draft` |
 | `sort_order` | Optional | lower first |
 | SEO fields | Optional | `seo_title` / `seo_description` / `seo_keywords` |

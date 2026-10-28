@@ -141,12 +141,16 @@ export class BrowserSpeechPlayer {
     if (!isBrowserSpeechSupported() || !this.units.length) return
     this.stopped = false
     this.paused = false
-    this.index = startIndex
+    this.index = Math.max(0, Math.min(startIndex, this.units.length - 1))
     window.speechSynthesis.cancel()
+    window.speechSynthesis.resume()
     this.stopKeepAlive?.()
     this.stopKeepAlive = startSpeechKeepAlive()
     this.callbacks.onStart?.()
-    this.speakCurrent()
+    // Chrome may ignore speak() immediately after cancel while paused.
+    window.setTimeout(() => {
+      if (!this.stopped) this.speakCurrent()
+    }, 0)
   }
 
   private speakCurrent() {
@@ -193,17 +197,13 @@ export class BrowserSpeechPlayer {
   }
 
   skipNext() {
-    if (this.index >= this.units.length - 1) return
-    this.index += 1
-    window.speechSynthesis.cancel()
-    this.speakCurrent()
+    if (!this.units.length || this.index >= this.units.length - 1) return
+    this.speakFrom(this.index + 1)
   }
 
   skipPrev() {
-    if (this.index <= 0) return
-    this.index = Math.max(0, this.index - 1)
-    window.speechSynthesis.cancel()
-    this.speakCurrent()
+    if (!this.units.length || this.index <= 0) return
+    this.speakFrom(this.index - 1)
   }
 
   setRate(rate: number) {

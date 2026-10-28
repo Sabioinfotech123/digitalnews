@@ -9,6 +9,7 @@ import {
   fetchTags,
   updateAdminVideo,
 } from '@/api/content'
+import { AdminCommentReactionCounts } from '@/components/admin/AdminCommentReactionCounts'
 import { AppButton } from '@/components/common/AppButton'
 import { AppEditor } from '@/components/common/AppEditor'
 import { AppLoader } from '@/components/common/AppLoader'
@@ -19,6 +20,7 @@ import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
 import { slugify } from '@/utils/slugify'
 import { stripHtml } from '@/utils/publicNews'
+import { confirmDelete } from '@/utils/confirmDelete'
 import { deleteAdminVideoComment, fetchAdminVideoComments, type VideoCommentItem } from '@/api/videoEngagement'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { BRAND } from '@/config/brand'
@@ -46,7 +48,7 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
   const navigate = useNavigate()
   const isShortRoute = defaultShort || location.pathname.includes('/admin/shorts/')
   const { t } = useLanguage()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const videoUpload = useVideoUpload()
   const getDraftSession = videoUpload?.getDraftSession
   const updateDraft = videoUpload?.updateDraft
@@ -59,8 +61,11 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
   const [shortComments, setShortComments] = useState<VideoCommentItem[]>([])
   const draftKey = mode === 'create' ? 'video:create' : `video:edit:${id ?? ''}`
   const watchedVideoUrl = Form.useWatch('video_url', form)
+  const watchedStatus = Form.useWatch('status', form)
   const isShortForm = isShortRoute || Boolean(video?.is_short)
-  const thumbnailRequired = Boolean(String(watchedVideoUrl || '').trim())
+  const thumbnailRequired =
+    Boolean(String(watchedVideoUrl || '').trim()) &&
+    (watchedStatus === 'published' || watchedStatus === 'scheduled')
 
   useDocumentTitle(
     mode === 'create'
@@ -209,8 +214,12 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
       message.error('Upload a video file or add a YouTube URL (or both)')
       return
     }
-    if (hasUploadedVideo(values) && !values.thumbnail_url?.trim()) {
-      message.error('Thumbnail is required when uploading a video file')
+    if (
+      hasUploadedVideo(values) &&
+      !values.thumbnail_url?.trim() &&
+      (values.status === 'published' || values.status === 'scheduled')
+    ) {
+      message.error('Add a thumbnail before publishing a video with an uploaded file')
       return
     }
 
@@ -363,15 +372,15 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
               required={thumbnailRequired}
               extra={
                 thumbnailRequired
-                  ? 'Required when a video file is uploaded.'
-                  : 'Optional for YouTube-only videos.'
+                  ? 'Required before you publish (or schedule) a video with an uploaded file.'
+                  : 'Optional while draft. Upload the video first, add a thumbnail, then publish.'
               }
               rules={[
                 {
                   validator: async (_, value) => {
                     if (!thumbnailRequired) return
                     if (!String(value || '').trim()) {
-                      throw new Error('Thumbnail is required when uploading a video file')
+                      throw new Error('Add a thumbnail before publishing')
                     }
                   },
                 },
@@ -479,13 +488,24 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
                     <li key={row.id}>
                       <strong>{row.author_name}</strong>
                       <p>{row.body}</p>
+                      <AdminCommentReactionCounts
+                        likeCount={row.like_count}
+                        dislikeCount={row.dislike_count}
+                      />
                       <AppButton
                         size="small"
                         danger
                         onClick={() => {
-                          void deleteAdminVideoComment(row.id).then(() => {
-                            setShortComments((prev) => prev.filter((c) => c.id !== row.id))
-                            message.success('Comment removed')
+                          confirmDelete({
+                            modal,
+                            title: 'Delete this comment?',
+                            content: `Remove the comment from ${row.author_name}? This cannot be undone.`,
+                            onConfirm: () => {
+                              void deleteAdminVideoComment(row.id).then(() => {
+                                setShortComments((prev) => prev.filter((c) => c.id !== row.id))
+                                message.success('Comment removed')
+                              })
+                            },
                           })
                         }}
                       >

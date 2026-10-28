@@ -226,7 +226,7 @@ Admin → **Videos**. Each row needs at least one source: uploaded file and/or Y
 | `category_id` | Optional category |
 | `video_url` | Uploaded file URL (optional if YouTube set) |
 | `youtube_url` | YouTube link (optional if file set) |
-| `thumbnail_url` | Poster image — **required** if a video file is uploaded; optional for YouTube-only |
+| `thumbnail_url` | Poster — required when status is **published/scheduled** and a file is in `video_url`; optional for drafts |
 | `status` | draft / published / … |
 | `is_short` | `true` = vertical short (9:16) shown on `/shorts`; `false` = long video on `/videos` |
 | `short_allow_likes` / `short_allow_comments` / `short_allow_share` | Per-short toggles for reels viewer (Admin → Shorts form) |

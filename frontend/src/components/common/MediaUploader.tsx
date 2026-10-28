@@ -102,7 +102,13 @@ async function assertThumbnailNotNineBySixteen(file: File): Promise<void> {
   }
 }
 
+function isUploadCancelled(err: unknown): boolean {
+  if (err instanceof DOMException && err.name === 'AbortError') return true
+  return axios.isCancel(err)
+}
+
 function uploadErrorMessage(err: unknown, isVideo: boolean): string {
+  if (isUploadCancelled(err)) return ''
   if (err instanceof Error && (/16:9|9:16/.test(err.message))) {
     return err.message
   }
@@ -163,7 +169,8 @@ export function MediaUploader({
         const result = await videoUpload.startUpload(uploadSessionKey, file as File)
         onChange?.(result.url)
       } catch (err) {
-        message.error(uploadErrorMessage(err, true))
+        const msg = uploadErrorMessage(err, true)
+        if (msg) message.error(msg)
       }
       return false
     }

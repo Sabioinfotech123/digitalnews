@@ -8,6 +8,7 @@ import {
   type VideoCommentItem,
 } from '@/api/videoEngagement'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { AdminCommentReactionCounts } from '@/components/admin/AdminCommentReactionCounts'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
 import { LanguageBadge } from '@/components/common/LanguageBadge'
@@ -15,6 +16,24 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import type { ContentLanguage, ContentStatus, VideoItem } from '@/types/content'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { confirmDelete } from '@/utils/confirmDelete'
+import './AdminVideosPage.scss'
+
+function CommentCountChip({ count, onClick }: { count: number; onClick: () => void }) {
+  const active = count > 0
+  return (
+    <Tooltip title="View comments">
+      <button
+        type="button"
+        className={`admin-comment-count-chip${active ? ' admin-comment-count-chip--active' : ''}`}
+        aria-label={`View ${count} comments`}
+        onClick={onClick}
+      >
+        <i className="fa-regular fa-comment-dots" aria-hidden />
+        <span className="tabular-nums">{count}</span>
+      </button>
+    </Tooltip>
+  )
+}
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
   return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' })
@@ -159,6 +178,15 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
     }
   }
 
+  const askDeleteComment = (comment: VideoCommentItem) => {
+    confirmDelete({
+      modal,
+      title: 'Delete this comment?',
+      content: `Remove the comment from ${comment.author_name}? This cannot be undone.`,
+      onConfirm: () => void handleDeleteComment(comment.id),
+    })
+  }
+
   const askDelete = (row: VideoItem) => {
     confirmDelete({
       modal,
@@ -236,13 +264,10 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
               align: 'center' as const,
               sorter: (a: VideoItem, b: VideoItem) => a.comment_count - b.comment_count,
               render: (_: unknown, row: VideoItem) => (
-                <AppButton
-                  type="link"
-                  className="!px-1 tabular-nums"
+                <CommentCountChip
+                  count={row.comment_count ?? 0}
                   onClick={() => void openCommentsModal(row)}
-                >
-                  {row.comment_count ?? 0}
-                </AppButton>
+                />
               ),
             },
           ]
@@ -367,6 +392,10 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
                 <div>
                   <strong className="font-ui text-sm text-ink">{c.author_name}</strong>
                   <p className="m-0 mt-1 text-sm text-ink-muted">{c.body}</p>
+                  <AdminCommentReactionCounts
+                    likeCount={c.like_count}
+                    dislikeCount={c.dislike_count}
+                  />
                   <time className="mt-1 block text-xs text-ink-muted">
                     {formatUpdatedAt(c.created_at)}
                   </time>
@@ -374,7 +403,7 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
                 <AppButton
                   size="small"
                   danger
-                  onClick={() => void handleDeleteComment(c.id)}
+                  onClick={() => askDeleteComment(c)}
                 >
                   Delete
                 </AppButton>
