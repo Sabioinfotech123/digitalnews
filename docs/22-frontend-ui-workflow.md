@@ -259,7 +259,7 @@ Same pattern as news: pencil / trash on the blog table.
 3. Upload **9:16 vertical** MP4/WEBM first (saves as **draft** without thumbnail). Add thumbnail, then set **Published** (thumbnail required only when publishing).
 4. Turn **Allow likes**, **Allow comments**, **Allow share** on or off for this short
 5. Publish → appears on `/shorts` and home short row (not on `/videos` list)
-6. **Admin → Shorts** table shows **Likes** and **Comments** (click count → popup to read/delete comments)
+6. **Admin → Shorts** table shows **Views**, **Likes**, and **Comments** (click comment count → popup to read/delete comments). Views increase when someone opens that short in the reels viewer (`/shorts/watch/:slug`, once per visit per short).
 7. **Shorts list → Comments** (or edit form): view each comment with **like / dislike counts**; delete if needed
 
 ---

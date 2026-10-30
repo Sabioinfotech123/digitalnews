@@ -182,7 +182,7 @@ Blogs have no `news_type` / breaking flags.
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
 | GET | `/videos` | Anyone | List **published** videos. Query `is_short=true` → shorts only; default `is_short=false` → long videos only |
-| GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/videos/{slug}` | Anyone | Video detail (**increments `view_count`** — used for long video pages and when a short becomes active in the reels viewer) |
 | GET | `/videos/{slug}/engagement` | Anyone | Like/comment counts + allow toggles; query `visitor_key` (optional) |
 | POST | `/videos/{slug}/like` | Anyone | Toggle like — body `{ "visitor_key": "…" }` |
 | GET | `/videos/{slug}/comments` | Anyone | Visible comments; optional query `visitor_key` returns counts + your reaction |
@@ -193,7 +193,7 @@ Blogs have no `news_type` / breaking flags.
 
 Each comment in list/create/react responses includes **`like_count`**, **`dislike_count`**, and **`viewer_reaction`** (`like`, `dislike`, or null).
 
-Video list/detail responses include **`like_count`** and **`comment_count`** (aggregated from `video_likes` / `video_comments`).
+Video list/detail responses include **`view_count`**, **`like_count`**, and **`comment_count`** (likes/comments aggregated from `video_likes` / `video_comments`).
 | GET | `/admin/videos` | Admin | List all |
 | POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
 | GET | `/admin/videos/{id}` | Admin | Get one |

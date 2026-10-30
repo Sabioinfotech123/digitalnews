@@ -248,6 +248,16 @@ export function AdminVideosPage({ shortsOnly = false }: AdminVideosPageProps) {
       ...(shortsOnly
         ? [
             {
+              title: 'Views',
+              dataIndex: 'view_count',
+              width: 80,
+              align: 'center' as const,
+              sorter: (a: VideoItem, b: VideoItem) => a.view_count - b.view_count,
+              render: (value: number) => (
+                <span className="font-ui tabular-nums text-ink">{value ?? 0}</span>
+              ),
+            },
+            {
               title: 'Likes',
               dataIndex: 'like_count',
               width: 80,

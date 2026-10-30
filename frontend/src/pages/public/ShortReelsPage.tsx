@@ -17,6 +17,8 @@ import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
 import { ShareModal } from '@/components/common/ShareModal'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { fetchPublicVideoBySlug } from '@/api/content'
+import { isSampleShortSlug } from '@/config/sampleShorts'
 import { loadPublicShortVideos } from '@/utils/loadPublicShorts'
 import type { SupportedLanguage } from '@/config/app'
 import { BRAND } from '@/config/brand'
@@ -95,7 +97,10 @@ function ReelSlide({
   const stats = engagementForVideo(video, engagement)
   const videoRef = useRef<HTMLVideoElement>(null)
   const playbackHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoplayFailTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [videoPaused, setVideoPaused] = useState(true)
+  /** Show center play only after user pauses or autoplay fails — not while the reel is starting. */
+  const [showPlayOverlay, setShowPlayOverlay] = useState(false)
   const [playbackHint, setPlaybackHint] = useState<'pause' | null>(null)
   const src = video.video_url?.trim() || ''
   const poster = video.thumbnail_url?.trim() || undefined
@@ -110,6 +115,7 @@ function ReelSlide({
   useEffect(
     () => () => {
       if (playbackHintTimer.current) clearTimeout(playbackHintTimer.current)
+      if (autoplayFailTimer.current) clearTimeout(autoplayFailTimer.current)
     },
     [],
   )
@@ -123,17 +129,41 @@ function ReelSlide({
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
+    if (autoplayFailTimer.current) {
+      clearTimeout(autoplayFailTimer.current)
+      autoplayFailTimer.current = null
+    }
     if (active) {
-      void el.play().catch(() => undefined)
+      setShowPlayOverlay(false)
+      setPlaybackHint(null)
+      const tryPlay = () => {
+        void el.play().catch(() => setShowPlayOverlay(true))
+      }
+      tryPlay()
+      autoplayFailTimer.current = setTimeout(() => {
+        if (el.paused) setShowPlayOverlay(true)
+      }, 700)
+      const onLoaded = () => tryPlay()
+      if (el.readyState < 2) {
+        el.addEventListener('loadeddata', onLoaded, { once: true })
+      }
+      return () => {
+        if (autoplayFailTimer.current) {
+          clearTimeout(autoplayFailTimer.current)
+          autoplayFailTimer.current = null
+        }
+        el.removeEventListener('loadeddata', onLoaded)
+      }
     } else {
       el.pause()
       el.currentTime = 0
       setVideoPaused(true)
+      setShowPlayOverlay(false)
       setPlaybackHint(null)
     }
-  }, [active])
+  }, [active, src])
 
-  const showCenterPlay = videoPaused && active
+  const showCenterPlay = videoPaused && active && showPlayOverlay
   const showCenterPause = playbackHint === 'pause' && active
 
   const togglePlayback = () => {
@@ -150,21 +180,27 @@ function ReelSlide({
           <video
             ref={videoRef}
             src={src}
-            poster={poster}
+            poster={active ? undefined : poster}
             playsInline
             loop
             muted={muted}
-            preload="metadata"
+            preload={active ? 'auto' : 'none'}
             controls={false}
             aria-label={video.title}
             onClick={togglePlayback}
             onPlay={() => {
               setVideoPaused(false)
+              setShowPlayOverlay(false)
+              if (autoplayFailTimer.current) {
+                clearTimeout(autoplayFailTimer.current)
+                autoplayFailTimer.current = null
+              }
               flashPauseHint()
             }}
             onPause={() => {
               setVideoPaused(true)
               setPlaybackHint(null)
+              if (active) setShowPlayOverlay(true)
             }}
           />
         ) : (
@@ -247,6 +283,7 @@ export function ShortReelsPage() {
   const [shareTitle, setShareTitle] = useState('')
   const [soundMuted, setSoundMuted] = useState(false)
   const touchStartY = useRef<number | null>(null)
+  const recordedViewSlugs = useRef<Set<string>>(new Set())
 
   const activeVideo = items[activeIndex] ?? null
 
@@ -308,6 +345,14 @@ export function ShortReelsPage() {
     setActiveIndex(next)
     void loadEngagement(items[next].slug)
   }, [items, slug, loadEngagement])
+
+  useEffect(() => {
+    const video = items[activeIndex]
+    if (!video?.slug || isSampleShortSlug(video.slug)) return
+    if (recordedViewSlugs.current.has(video.slug)) return
+    recordedViewSlugs.current.add(video.slug)
+    void fetchPublicVideoBySlug(video.slug, contentLanguage).catch(() => undefined)
+  }, [activeIndex, items, contentLanguage])
 
   useEffect(() => {
     const prev = document.body.style.overflow
