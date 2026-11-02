@@ -174,7 +174,7 @@ You can create from:
 | Title | Required |
 | Slug | Required (unique per language) |
 | Short description | Summary |
-| Content | Full article |
+| Content | Full article — use **Enhance content** (polish draft) or **Regenerate content** (new AI draft from title + summary) above the editor; needs `GEMINI_API_KEY` or `OPENAI_API_KEY` in backend `.env` |
 | **News image** | **Required** — upload first |
 | News type | Locked if you came from Featured/Latest/…; from **All news** you can pick any type |
 

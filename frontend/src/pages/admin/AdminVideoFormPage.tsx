@@ -11,7 +11,7 @@ import {
 } from '@/api/content'
 import { AdminCommentReactionCounts } from '@/components/admin/AdminCommentReactionCounts'
 import { AppButton } from '@/components/common/AppButton'
-import { AppEditor } from '@/components/common/AppEditor'
+import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
@@ -320,14 +320,13 @@ export function AdminVideoFormPage({ mode, defaultShort = false }: AdminVideoFor
             </Form.Item>
 
             {!isShortForm ? (
-              <Form.Item
-                name="content"
-                label="Content"
-                rules={[{ required: true, message: 'Content is required' }]}
-                className="w-full"
-              >
-                <AppEditor placeholder="Write the full video details…" minHeight={360} />
-              </Form.Item>
+              <ContentFieldWithAi
+                form={form}
+                disabled={loading || saving}
+                shortDescriptionField="description"
+                placeholder="Write the full video details…"
+                minHeight={360}
+              />
             ) : (
               <Form.Item name="content" hidden>
                 <Input />

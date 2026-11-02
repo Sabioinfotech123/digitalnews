@@ -373,6 +373,14 @@ Imported rows set `is_local: true` (shown as a **Local** flag in admin news list
 
 After import, the item appears under **All news**, the chosen type list, homepage section (if published), and public `/news`.
 
+### AI content (news / blog editor)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/admin/ai/content` | Admin | Enhance or regenerate article HTML — body `{ "mode": "enhance" \| "regenerate", "title", "short_description", "content", "language" }` → `{ "content", "provider" }` |
+
+Uses the same env as AI verify: `AI_VERIFY_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_API_KEY`.
+
 ### AI verify + verified news
 
 | Method | Path | Who | What it does |

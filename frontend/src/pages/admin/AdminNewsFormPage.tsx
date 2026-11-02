@@ -9,7 +9,7 @@ import {
   updateAdminNews,
 } from '@/api/content'
 import { AppButton } from '@/components/common/AppButton'
-import { AppEditor } from '@/components/common/AppEditor'
+import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
@@ -236,14 +236,12 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               />
             </Form.Item>
 
-            <Form.Item
-              name="content"
-              label="Content"
-              rules={[{ required: true, message: 'Content is required' }]}
-              className="w-full"
-            >
-              <AppEditor placeholder="Write the full article…" minHeight={360} />
-            </Form.Item>
+            <ContentFieldWithAi
+              form={form}
+              disabled={loading || saving}
+              placeholder="Write the full article…"
+              minHeight={360}
+            />
           </div>
 
           <div className="news-form-page__side lg:col-span-4 lg:sticky lg:top-4">
