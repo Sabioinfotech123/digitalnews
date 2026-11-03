@@ -27,6 +27,30 @@
     }
   }
 
+  &__media {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+
+    // Few shorts / videos: put both on one row so neither looks empty.
+    &--paired {
+      @media (min-width: 900px) {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 2.25rem;
+        align-items: start;
+
+        .home__shorts {
+          overflow-x: visible;
+        }
+
+        .home__videos {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    }
+  }
+
   &__shorts {
     display: flex;
     gap: 1rem;
@@ -34,6 +58,49 @@
     padding-bottom: 0.35rem;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+  }
+
+  &__more-tile {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 1rem;
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: #fafafa;
+    color: var(--color-text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease,
+      background 0.15s ease;
+
+    i {
+      font-size: 1.75rem;
+      color: var(--color-primary);
+    }
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: #fff;
+    }
+
+    &--short {
+      width: 160px;
+      aspect-ratio: 9 / 16;
+
+      @media (min-width: 768px) {
+        width: 180px;
+      }
+    }
   }
 
   &__videos {
@@ -46,6 +113,15 @@
 
     @media (min-width: 1024px) {
       grid-template-columns: repeat(4, 1fr);
+
+      &--count-1,
+      &--count-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      &--count-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
   }
 }

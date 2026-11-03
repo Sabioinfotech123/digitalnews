@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { fetchPublicNews, fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { FeaturedNewsSection } from '@/components/news/FeaturedNewsSection'
 import { HomeNewsHub } from '@/components/news/HomeNewsHub'
 import { HomeNewsSkeleton } from '@/components/news/HomeNewsSkeleton'
 import { LatestNewsSection } from '@/components/news/LatestNewsSection'
@@ -33,6 +35,7 @@ const NEWS_TYPE_LIMITS: Record<NewsType, number> = {
 }
 
 const HOME_FEED_SIZE = 40
+const HUB_MIN_UNIQUE = 5
 
 async function loadType(
   newsType: NewsType,
@@ -82,8 +85,22 @@ export function HomePage() {
     [featured, latest, feed, trending, more],
   )
 
-  const hubStream = useMemo(() => stream.slice(0, 17), [stream])
-  const latestGrid = useMemo(() => stream.slice(17, 33), [stream])
+  const featuredBlock = useMemo(() => featured.slice(0, 4), [featured])
+  const latestGrid = useMemo(() => {
+    const featuredIds = new Set(featuredBlock.map((a) => a.id))
+    const source = latest.length ? latest : feed.filter((a) => !featuredIds.has(a.id))
+    return source.slice(0, 8)
+  }, [latest, feed, featuredBlock])
+
+  // Prefer stories not already shown in Featured / Latest. With a small catalog, allow repeats so the hub
+  // isn't empty, but keep Featured stories last so the hub lead never matches the Featured lead.
+  const hubStream = useMemo(() => {
+    const reserved = new Set([...featuredBlock, ...latestGrid].map((a) => a.id))
+    const unique = stream.filter((a) => !reserved.has(a.id))
+    if (unique.length >= HUB_MIN_UNIQUE) return unique.slice(0, 17)
+    return mergeHomeNews(unique, latestGrid, stream).slice(0, 17)
+  }, [stream, featuredBlock, latestGrid])
+
   const moreStrip = useMemo(() => {
     const used = new Set(hubStream.map((a) => a.id))
     const fromMore = more.filter((a) => !used.has(a.id))
@@ -130,6 +147,7 @@ export function HomePage() {
         ) : (
           <>
             <HomeNewsHub stream={hubStream} />
+            <FeaturedNewsSection articles={featuredBlock} />
             <LatestNewsSection articles={latestGrid} dense />
             <div className="home__split">
               <TrendingNewsSection articles={trending} />
@@ -138,34 +156,50 @@ export function HomePage() {
           </>
         )}
 
-        {shorts.length > 0 ? (
-          <section className="home__section home__section--shorts">
-            <SectionHeader
-              title={t('videos.shortVideos')}
-              moreLabel={t('navigation.shorts')}
-              moreTo="/shorts"
-            />
-            <div className="home__shorts">
-              {shorts.slice(0, 8).map((video) => (
-                <ShortVideoCard key={video.id} video={video} />
-              ))}
-            </div>
-          </section>
-        ) : null}
+        {shorts.length > 0 || videos.length > 0 ? (
+          <div
+            className={`home__media${
+              shorts.length > 0 && videos.length > 0 && (shorts.length <= 3 || videos.length <= 2)
+                ? ' home__media--paired'
+                : ''
+            }`}
+          >
+            {shorts.length > 0 ? (
+              <section className="home__section home__section--shorts">
+                <SectionHeader
+                  title={t('videos.shortVideos')}
+                  moreLabel={t('navigation.shorts')}
+                  moreTo="/shorts"
+                />
+                <div className="home__shorts">
+                  {shorts.slice(0, 8).map((video) => (
+                    <ShortVideoCard key={video.id} video={video} />
+                  ))}
+                  {shorts.length < 4 ? (
+                    <Link to="/shorts" className="home__more-tile home__more-tile--short">
+                      <i className="fa-solid fa-circle-play" aria-hidden />
+                      <span>{t('videos.watchMoreShorts')}</span>
+                    </Link>
+                  ) : null}
+                </div>
+              </section>
+            ) : null}
 
-        {videos.length > 0 ? (
-          <section className="home__section">
-            <SectionHeader
-              title={t('videos.latestVideos')}
-              moreLabel={t('videos.viewAllVideos')}
-              moreTo="/videos"
-            />
-            <div className="home__videos">
-              {videos.map((video) => (
-                <VideoCard key={video.id} video={video} />
-              ))}
-            </div>
-          </section>
+            {videos.length > 0 ? (
+              <section className="home__section home__section--videos">
+                <SectionHeader
+                  title={t('videos.latestVideos')}
+                  moreLabel={t('videos.viewAllVideos')}
+                  moreTo="/videos"
+                />
+                <div className={`home__videos home__videos--count-${Math.min(videos.length, 4)}`}>
+                  {videos.map((video) => (
+                    <VideoCard key={video.id} video={video} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </main>

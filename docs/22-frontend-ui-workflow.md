@@ -309,8 +309,10 @@ Remove old item
 
 | Admin action | Public result |
 |--------------|---------------|
-| Publish Featured news | Home → **Top stories** lead column |
-| Publish Latest / Trending / More | Home **Latest** grid (up to 16 cards), trending list, more headlines |
+| Publish Featured news | Home → **Featured news** section (up to 4) and the **Top stories** block |
+| Publish Latest news | Home → **Latest news** grid (up to 8; uses newest published news if no Latest items) |
+| Publish Trending / More | Home → trending list and more headlines |
+| Few shorts / videos | Home shows **Short Videos** and **Latest Videos** side by side, plus a **Watch more shorts** tile when there are under 4 shorts |
 | Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
