@@ -28,7 +28,7 @@ AWS keys stay in `backend/.env` only — never in the frontend.
 |---------|-------------|----------|
 | News | `image_url` | Yes (admin form) |
 | Videos catalog | `video_url` and/or `youtube_url` | At least one; uploaded video must be **16:9** |
-| Videos catalog | `thumbnail_url` | Required if `video_url` is set; any size **except 9:16**; optional for YouTube-only |
+| Videos catalog | `thumbnail_url` | Required only when **publishing/scheduling** with `video_url`; optional while draft; optional for YouTube-only |
 
 ## Env (`backend/.env`)
 

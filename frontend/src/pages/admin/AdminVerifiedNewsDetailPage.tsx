@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCategories, fetchTags } from '@/api/content'
 import { fetchVerifiedNewsById, importVerifiedNews } from '@/api/localNews'
 import { AppButton } from '@/components/common/AppButton'
-import { AppEditor } from '@/components/common/AppEditor'
+import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { StatusBadge } from '@/components/common/StatusBadge'
@@ -253,13 +253,12 @@ export function AdminVerifiedNewsDetailPage() {
               />
             </Form.Item>
 
-            <Form.Item
-              name="content"
-              label="Content"
-              rules={[{ required: true, message: 'Content is required' }]}
-            >
-              <AppEditor placeholder="Write the full article…" minHeight={360} />
-            </Form.Item>
+            <ContentFieldWithAi
+              form={form}
+              disabled={loading || saving}
+              placeholder="Write the full article…"
+              minHeight={360}
+            />
           </Col>
 
           <Col xs={24} lg={8}>
