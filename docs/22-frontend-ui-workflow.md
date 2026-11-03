@@ -174,7 +174,7 @@ You can create from:
 | Title | Required |
 | Slug | Required (unique per language) |
 | Short description | Summary |
-| Content | Full article |
+| Content | Full article — use **Enhance content** (polish draft) or **Regenerate content** (new AI draft from title + summary) above the editor; needs `GEMINI_API_KEY` or `OPENAI_API_KEY` in backend `.env` |
 | **News image** | **Required** — upload first |
 | News type | Locked if you came from Featured/Latest/…; from **All news** you can pick any type |
 
@@ -250,17 +250,17 @@ Same pattern as news: pencil / trash on the blog table.
 **Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
 
 **Public site:** long videos → Home **Latest Videos**, `/videos`, `/videos/:slug`.  
-**Shorts:** Admin → **Shorts** → upload **9:16** MP4 + thumbnail → set **Allow likes / comments / share** → publish. Public: `/shorts` grid → opens **Reels viewer** at `/shorts/watch/:slug` (vertical scroll, like / comment / share). Old `/videos/:slug` for a short redirects to the reels URL.
+**Shorts:** Admin → **Shorts** → upload **9:16** MP4 + thumbnail → set **Allow likes / comments / share** → publish. Public: `/shorts` grid → opens **Reels viewer** at `/shorts/watch/:slug` (vertical scroll, like / comment / share). **Posting a comment requires sign-in** (guests see a login prompt in the comments drawer; same pattern as bookmarks). Old `/videos/:slug` for a short redirects to the reels URL.
 
 ## Step 4.6 — Shorts workflow
 
 1. Sidebar → **Videos → Shorts** (or **Add → Create short**)
 2. Fill title, slug, and short description (no long **Content** field)
-3. Upload **9:16 vertical** MP4/WEBM + thumbnail (YouTube URL optional)
+3. Upload **9:16 vertical** MP4/WEBM first (saves as **draft** without thumbnail). Add thumbnail, then set **Published** (thumbnail required only when publishing).
 4. Turn **Allow likes**, **Allow comments**, **Allow share** on or off for this short
 5. Publish → appears on `/shorts` and home short row (not on `/videos` list)
-6. **Admin → Shorts** table shows **Likes** and **Comments** (click count → popup to read/delete comments)
-7. On edit, remove visitor comments from the list under **Comments on this short** if needed
+6. **Admin → Shorts** table shows **Views**, **Likes**, and **Comments** (click comment count → popup to read/delete comments). Views increase when someone opens that short in the reels viewer (`/shorts/watch/:slug`, once per visit per short).
+7. **Shorts list → Comments** (or edit form): view each comment with **like / dislike counts**; delete if needed
 
 ---
 
@@ -309,8 +309,12 @@ Remove old item
 
 | Admin action | Public result |
 |--------------|---------------|
-| Publish Featured news | Home → Featured section |
-| Publish Latest / Trending / More | Matching home sections |
+| Publish Featured news | Home → **Featured** band (up to 4) and **Top stories** |
+| Publish Latest news | Home → **Latest news** grid (up to 8) |
+| Publish Trending / More | Home → **Headlines**, **In depth**, trending list, and **More news** |
+| Publish news in a **category** | Home may show a **category rail** (lead + side list) with **See more** → `/category/{slug}` when that category has published items |
+| Few shorts / videos | Home shows **Short Videos** and **Latest Videos** side by side when counts are low |
+| Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
 | **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |

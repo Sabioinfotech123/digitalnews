@@ -9,6 +9,7 @@ export const videos = {
   watchOnYoutube: 'Watch on YouTube',
   subscribeYoutube: 'Subscribe on YouTube',
   viewAllVideos: 'View all videos',
+  watchMoreShorts: 'Watch more shorts',
   back: 'Back',
   duration: 'Duration',
   play: 'Play',

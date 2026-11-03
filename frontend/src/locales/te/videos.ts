@@ -9,6 +9,7 @@ export const videos = {
   watchOnYoutube: 'YouTubeలో చూడండి',
   subscribeYoutube: 'YouTubeలో సబ్‌స్క్రైబ్',
   viewAllVideos: 'అన్ని వీడియోలు',
+  watchMoreShorts: 'మరిన్ని షార్ట్‌లు చూడండి',
   back: 'వెనుకకు',
   duration: 'నిడివి',
   play: 'ప్లే',

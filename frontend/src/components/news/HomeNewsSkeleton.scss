@@ -20,15 +20,36 @@
     border-radius: 2px;
   }
 
-  &__featured {
+  &__hub {
     display: grid;
     gap: 1.5rem;
 
-    @media (min-width: 880px) {
-      grid-template-columns: 1.4fr 1fr;
-      gap: 1.75rem;
+    @media (min-width: 960px) {
+      grid-template-columns: 1.35fr 1fr 0.95fr;
+      gap: 1.25rem 1.5rem;
       align-items: start;
     }
+  }
+
+  &__headlines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    padding-top: 0.75rem;
+
+    @media (min-width: 960px) {
+      border-top: none;
+      border-left: 1px solid var(--color-border, #e5e7eb);
+      padding-top: 0;
+      padding-left: 1.25rem;
+    }
+  }
+
+  &__headline-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
   &__side {
