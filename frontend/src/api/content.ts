@@ -227,16 +227,24 @@ export async function fetchAdminVideoById(id: string): Promise<VideoItem> {
   return data
 }
 
-export async function createAdminVideo(payload: VideoPayload): Promise<VideoItem> {
-  const { data } = await apiClient.post<VideoItem>('/admin/videos', payload)
+export async function createAdminVideo(
+  payload: VideoPayload,
+  options?: { signal?: AbortSignal },
+): Promise<VideoItem> {
+  const { data } = await apiClient.post<VideoItem>('/admin/videos', payload, {
+    signal: options?.signal,
+  })
   return data
 }
 
 export async function updateAdminVideo(
   id: string,
   payload: Partial<VideoPayload>,
+  options?: { signal?: AbortSignal },
 ): Promise<VideoItem> {
-  const { data } = await apiClient.patch<VideoItem>(`/admin/videos/${id}`, payload)
+  const { data } = await apiClient.patch<VideoItem>(`/admin/videos/${id}`, payload, {
+    signal: options?.signal,
+  })
   return data
 }
 

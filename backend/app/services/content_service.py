@@ -418,6 +418,7 @@ def _require_video_source(
     video_url: str | None,
     youtube_url: str | None,
     thumbnail_url: str | None = None,
+    status: ContentStatus | None = None,
 ) -> None:
     has_file = bool((video_url or "").strip())
     has_yt = bool((youtube_url or "").strip())
@@ -426,10 +427,11 @@ def _require_video_source(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Upload a video file or add a YouTube URL (or both)",
         )
-    if has_file and not (thumbnail_url or "").strip():
+    needs_thumbnail = status in (ContentStatus.published, ContentStatus.scheduled)
+    if has_file and needs_thumbnail and not (thumbnail_url or "").strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Thumbnail is required when uploading a video file",
+            detail="Thumbnail is required before publishing a video with an uploaded file",
         )
 
 
@@ -538,6 +540,7 @@ class VideoService:
             video_url=payload.video_url,
             youtube_url=payload.youtube_url,
             thumbnail_url=payload.thumbnail_url,
+            status=payload.status,
         )
         if self.repo.get_by_slug(payload.slug, payload.language):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
@@ -588,6 +591,7 @@ class VideoService:
             video_url=item.video_url,
             youtube_url=item.youtube_url,
             thumbnail_url=item.thumbnail_url,
+            status=item.status,
         )
         if item.status == ContentStatus.published and item.published_at is None:
             item.published_at = datetime.now(timezone.utc)

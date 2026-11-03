@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     admin,
+    ai_content,
     auth,
     bookmarks,
     blogs,
@@ -23,6 +24,7 @@ api_router.include_router(health.router)
 api_router.include_router(auth.router)
 api_router.include_router(bookmarks.router)
 api_router.include_router(admin.router)
+api_router.include_router(ai_content.router)
 api_router.include_router(news.router)
 api_router.include_router(read_aloud.router)
 api_router.include_router(blogs.router)
