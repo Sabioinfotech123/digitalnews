@@ -16,6 +16,12 @@
     min-width: 0;
   }
 
+  &__category-rails {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
   &__split {
     display: grid;
     gap: 2rem;

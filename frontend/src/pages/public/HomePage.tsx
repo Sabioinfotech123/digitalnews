@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchPublicNews, fetchPublicVideos } from '@/api/content'
+import { fetchCategories, fetchPublicNews, fetchPublicVideos } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { FeaturedNewsSection } from '@/components/news/FeaturedNewsSection'
+import { HomeCategoryRailSection } from '@/components/news/HomeCategoryRailSection'
+import { HomeHeadlinesSection } from '@/components/news/HomeHeadlinesSection'
 import { HomeNewsHub } from '@/components/news/HomeNewsHub'
+import { HomeSpotlightSection } from '@/components/news/HomeSpotlightSection'
 import { HomeNewsSkeleton } from '@/components/news/HomeNewsSkeleton'
 import { LatestNewsSection } from '@/components/news/LatestNewsSection'
 import { MoreNewsSection } from '@/components/news/MoreNewsSection'
@@ -12,8 +15,13 @@ import { SectionHeader } from '@/components/common/SectionHeader'
 import { ShortVideoCard } from '@/components/common/ShortVideoCard'
 import { VideoCard } from '@/components/common/VideoCard'
 import { SAMPLE_NEWS, sampleNewsByType } from '@/constants/sampleNews'
-import type { NewsType } from '@/types/content'
+import type { Category, NewsType } from '@/types/content'
 import { loadPublicShortCards } from '@/utils/loadPublicShorts'
+import {
+  attachCategorySlugs,
+  buildHomeCategoryBlocks,
+  pickHeadlineList,
+} from '@/utils/homeSections'
 import { mergeHomeNews } from '@/utils/mergeHomeNews'
 import {
   mapApiNewsToCard,
@@ -34,7 +42,7 @@ const NEWS_TYPE_LIMITS: Record<NewsType, number> = {
   more: 12,
 }
 
-const HOME_FEED_SIZE = 40
+const HOME_FEED_SIZE = 60
 const HUB_MIN_UNIQUE = 5
 
 async function loadType(
@@ -78,7 +86,13 @@ export function HomePage() {
   const [feed, setFeed] = useState<PublicNewsCardModel[]>([])
   const [videos, setVideos] = useState<PublicVideoCardModel[]>([])
   const [shorts, setShorts] = useState<PublicShortCardModel[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+
+  const activeCategorySlugs = useMemo(
+    () => new Set(categories.filter((c) => c.is_active).map((c) => c.slug)),
+    [categories],
+  )
 
   const stream = useMemo(
     () => mergeHomeNews(featured, latest, feed, trending, more),
@@ -108,12 +122,54 @@ export function HomePage() {
     return mergeHomeNews(fromMore, fromStream).slice(0, 10)
   }, [hubStream, more, stream])
 
+  // Small catalogs: allow the same story in multiple sections (like major news sites), so the home never looks empty.
+  const categoryRails = useMemo(() => {
+    const pool = feed.length ? feed : stream
+    const blocks = buildHomeCategoryBlocks(pool, {
+      maxBlocks: 4,
+      minPerBlock: 1,
+    })
+    if (!activeCategorySlugs.size) return blocks
+    const matched = blocks.filter((block) => activeCategorySlugs.has(block.categorySlug))
+    return matched.length ? matched : blocks
+  }, [feed, stream, activeCategorySlugs])
+
+  const headlineList = useMemo(() => {
+    const pool = mergeHomeNews(trending, more, feed, stream)
+    const picked = pickHeadlineList(pool, 8, new Set())
+    return picked.length ? picked : pool.slice(0, 8)
+  }, [trending, more, feed, stream])
+
+  const spotlightList = useMemo(() => {
+    const pool = mergeHomeNews(trending, more, featured, latest)
+    return pool.slice(0, 4)
+  }, [trending, more, featured, latest])
+
+  const trendingDisplay = useMemo(() => {
+    if (trending.length) return trending.slice(0, 10)
+    return mergeHomeNews(latest, feed).slice(0, 8)
+  }, [trending, latest, feed])
+
+  const moreDisplay = useMemo(() => {
+    if (moreStrip.length) return moreStrip
+    return mergeHomeNews(more, feed).slice(0, 8)
+  }, [moreStrip, more, feed])
+
   useEffect(() => {
     let active = true
     setLoading(true)
     ;(async () => {
-      const [featuredItems, latestItems, trendingItems, moreItems, feedItems, videoList, shortList] =
-        await Promise.all([
+      const [
+        cats,
+        featuredItems,
+        latestItems,
+        trendingItems,
+        moreItems,
+        feedItems,
+        videoList,
+        shortList,
+      ] = await Promise.all([
+          fetchCategories().catch(() => []),
           loadType('featured', contentLanguage),
           loadType('latest', contentLanguage),
           loadType('trending', contentLanguage),
@@ -125,11 +181,13 @@ export function HomePage() {
           loadPublicShortCards(contentLanguage, { page: 1, page_size: 8 }).then((data) => data.items),
         ])
       if (!active) return
-      setFeatured(featuredItems)
-      setLatest(latestItems)
-      setTrending(trendingItems)
-      setMore(moreItems)
-      setFeed(feedItems)
+      setCategories(cats)
+      const enrich = (list: PublicNewsCardModel[]) => attachCategorySlugs(list, cats)
+      setFeatured(enrich(featuredItems))
+      setLatest(enrich(latestItems))
+      setTrending(enrich(trendingItems))
+      setMore(enrich(moreItems))
+      setFeed(enrich(feedItems))
       setVideos(videoList)
       setShorts(shortList)
       setLoading(false)
@@ -148,10 +206,19 @@ export function HomePage() {
           <>
             <HomeNewsHub stream={hubStream} />
             <FeaturedNewsSection articles={featuredBlock} />
+            <HomeHeadlinesSection articles={headlineList} />
+            {categoryRails.length ? (
+              <div className="home__category-rails">
+                {categoryRails.map((block) => (
+                  <HomeCategoryRailSection key={block.categorySlug} block={block} />
+                ))}
+              </div>
+            ) : null}
             <LatestNewsSection articles={latestGrid} dense />
+            <HomeSpotlightSection articles={spotlightList} />
             <div className="home__split">
-              <TrendingNewsSection articles={trending} />
-              <MoreNewsSection articles={moreStrip} />
+              <TrendingNewsSection articles={trendingDisplay} />
+              <MoreNewsSection articles={moreDisplay} />
             </div>
           </>
         )}

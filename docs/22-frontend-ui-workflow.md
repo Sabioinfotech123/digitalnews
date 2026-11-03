@@ -309,10 +309,11 @@ Remove old item
 
 | Admin action | Public result |
 |--------------|---------------|
-| Publish Featured news | Home → **Featured news** section (up to 4) and the **Top stories** block |
-| Publish Latest news | Home → **Latest news** grid (up to 8; uses newest published news if no Latest items) |
-| Publish Trending / More | Home → trending list and more headlines |
-| Few shorts / videos | Home shows **Short Videos** and **Latest Videos** side by side, plus a **Watch more shorts** tile when there are under 4 shorts |
+| Publish Featured news | Home → **Featured** band (up to 4) and **Top stories** |
+| Publish Latest news | Home → **Latest news** grid (up to 8) |
+| Publish Trending / More | Home → **Headlines**, **In depth**, trending list, and **More news** |
+| Publish news in a **category** | Home may show a **category rail** (lead + side list) with **See more** → `/category/{slug}` when that category has published items |
+| Few shorts / videos | Home shows **Short Videos** and **Latest Videos** side by side when counts are low |
 | Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
