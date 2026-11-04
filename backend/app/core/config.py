@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
 
     cors_origins: str = "http://localhost:5173,http://localhost:5174"
+    # Allow any http(s)://localhost or 127.0.0.1 port, so `npm run dev` can call a remote API.
+    # Set false in production.
+    cors_allow_localhost: bool = True
 
     # S3-only media storage
     storage_backend: str = "s3"
