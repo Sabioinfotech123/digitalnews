@@ -4,7 +4,7 @@
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_API_URL` | Backend API base URL (e.g. `http://localhost:8000/api/v1`) |
+| `VITE_API_URL` | Backend API base URL (e.g. `http://localhost:8000/api/v1`, or the QA server `http://<ip>:8088/api/v1`) |
 
 ## Backend (`backend/.env`)
 
@@ -16,6 +16,7 @@
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access TTL |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | Refresh TTL |
 | `CORS_ORIGINS` | Comma-separated origins |
+| `CORS_ALLOW_LOCALHOST` | `true` (default) — any `localhost` / `127.0.0.1` port may call the API, so `npm run dev` works against QA. Set `false` in production |
 | `STORAGE_BACKEND` | `s3` (S3 only) |
 | `MAX_IMAGE_SIZE_MB` / `MAX_VIDEO_SIZE_MB` | Upload limits |
 | `AWS_ACCESS_KEY_ID` | IAM access key |

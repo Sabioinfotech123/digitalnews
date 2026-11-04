@@ -79,8 +79,16 @@ PASSWORDS / CREDENTIALS (LOCAL DEFAULTS)
     - Another account exists with that email but a different password (use Admin → Users or set DEBUG=true).
 
 ----- Frontend API URL -----
-  frontend\.env:
-    VITE_API_URL=http://localhost:8000/api/v1
+  frontend\.env — full URL (shows in browser Network tab):
+    VITE_API_URL=http://98.94.124.146:8088/api/v1     ← QA from npm run dev
+    VITE_API_URL=http://localhost:8000/api/v1        ← local uvicorn
+
+  QA backend allows any localhost port by default (CORS_ALLOW_LOCALHOST=true), so no
+  CORS_ORIGINS edit is needed for npm run dev. Needs the API image rebuilt once with this code:
+    docker compose -f docker-compose.qa.yml up -d --build api
+  Production: set CORS_ALLOW_LOCALHOST=false.
+
+  Docker QA in browser (http://IP:8088): built with VITE_API_URL=/api/v1 (same host, no CORS issue).
 
 ----- JWT / security (backend\.env) -----
   JWT_SECRET_KEY=change-me-in-production
