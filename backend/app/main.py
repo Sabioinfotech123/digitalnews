@@ -43,8 +43,11 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
-    # Local Vite ports (any) while DEBUG=true — fixes FE on 5173/5174 calling remote/local API
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?" if settings.debug else None,
+    allow_origin_regex=(
+        r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
+        if settings.debug or settings.cors_allow_localhost
+        else None
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
