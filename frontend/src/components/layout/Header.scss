@@ -42,23 +42,46 @@
   }
 
   &__link {
+    position: relative;
     font-family: var(--font-ui);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    color: rgba(255, 255, 255, 0.82);
+    color: rgba(255, 255, 255, 0.72);
     text-decoration: none;
-    padding: 0.45rem 0.75rem;
+    padding: 0.5rem 0.85rem;
     border-radius: var(--radius-sm);
     transition: background var(--transition-fast), color var(--transition-fast);
 
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0.85rem;
+      right: 0.85rem;
+      bottom: 0.1rem;
+      height: 3px;
+      border-radius: 3px;
+      background: var(--color-primary);
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.2s ease;
+    }
+
     &:hover {
       color: var(--color-white);
-      background: rgba(var(--color-primary-rgb), 0.25);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     &--active {
-      color: var(--color-on-primary);
-      background: var(--color-primary);
+      color: var(--color-white);
+      font-weight: var(--font-weight-semibold);
+
+      &::after {
+        transform: scaleX(1);
+      }
+
+      &:hover {
+        background: transparent;
+      }
     }
   }
 

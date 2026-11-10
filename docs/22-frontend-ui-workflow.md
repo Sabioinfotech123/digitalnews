@@ -317,7 +317,8 @@ Remove old item
 | Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
-| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |
+| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category). With **more than 7** active categories, desktop shows the first 7 and a **More** menu (opens on hover or click, two columns) for the rest; phones keep all of them in a sideways-scrolling strip |
+| **Category blocks on home** | Each category rail has **Collapse** / **Expand** in the section header; choice is remembered in the browser per category |
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
