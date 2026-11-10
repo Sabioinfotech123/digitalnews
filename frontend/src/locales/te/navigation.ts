@@ -5,6 +5,8 @@ export const navigation = {
   blogs: 'బ్లాగులు',
   videos: 'వీడియోలు',
   live: 'లైవ్ టీవీ',
+  liveShort: 'లైవ్',
+  you: 'మీరు',
   shorts: 'షార్ట్స్',
   search: 'వెతకండి',
   login: 'లాగిన్',

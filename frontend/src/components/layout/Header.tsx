@@ -7,6 +7,7 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { useSiteSettings } from '@/app/providers/SiteSettingsProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { BRAND } from '@/config/brand'
+import { HeaderWeather } from './HeaderWeather'
 import { cn } from '@/utils/cn'
 import { confirmAction } from '@/utils/confirmAction'
 import './Header.scss'
@@ -157,13 +158,15 @@ export function Header() {
               />
             )}
           </div>
+          <HeaderWeather />
           <Link to="/live" className="hide-on-mobile">
             <AppButton
               type="primary"
               className="site-header__live-btn"
+              aria-label={t('videos.watchLive')}
               icon={<i className="fa-solid fa-tower-broadcast" aria-hidden />}
             >
-              {t('videos.watchLive')}
+              {t('navigation.liveShort')}
             </AppButton>
           </Link>
           <AppButton
@@ -179,9 +182,13 @@ export function Header() {
             placement="bottomRight"
             trigger={['click']}
           >
-            <button type="button" className="site-header__account hide-on-mobile">
+            <button
+              type="button"
+              className="site-header__account hide-on-mobile"
+              aria-label={t('auth.account')}
+            >
               <i className="fa-solid fa-user" aria-hidden />
-              <span>{t('auth.account')}</span>
+              <span>{t('navigation.you')}</span>
               <i className="fa-solid fa-chevron-down site-header__account-caret" aria-hidden />
             </button>
           </Dropdown>
