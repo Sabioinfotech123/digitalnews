@@ -140,7 +140,7 @@ Need **ADMIN** token.
 | `image_url` | **Yes** | Upload first, then paste URL |
 | `news_type` | Yes | featured / latest / trending / more |
 | `status` | Optional | default `draft` |
-| `category_id` | Optional | |
+| `category_id` | **Yes** | Valid category ID |
 | `tag_ids` | Optional | array of tag IDs |
 | `is_breaking` | Optional | true/false |
 | SEO fields | Optional | |

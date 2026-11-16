@@ -118,7 +118,7 @@ These are fixed options used in several tables:
 | `language` | `en` or `te` |
 | `short_description` | Short summary |
 | `content` | Full article HTML |
-| `category_id` | Which category (optional) |
+| `category_id` | Which category (**required** for news) |
 | `author_id` | Who wrote it |
 | `status` | draft / published / … |
 | `news_type` | featured / latest / trending / more |

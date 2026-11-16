@@ -1,0 +1,18 @@
+.category-form-select {
+  width: 100%;
+
+  &__dropdown-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+    padding: 0.45rem 0.5rem;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+    background: #fafafa;
+  }
+
+  &__dropdown-btn {
+    font-size: 0.8rem !important;
+    padding-inline: 0.35rem !important;
+  }
+}

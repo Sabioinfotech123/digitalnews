@@ -1,6 +1,6 @@
 import { App, InputNumber, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { deleteAdminNews, fetchAdminNews, updateAdminNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
@@ -9,6 +9,7 @@ import { LanguageBadge } from '@/components/common/LanguageBadge'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { adminNewsEditPath } from '@/config/adminPages'
 import type { ContentLanguage, ContentStatus, NewsItem, NewsType } from '@/types/content'
+import type { TranslationKey } from '@/utils/i18n'
 import { NEWS_TYPES } from '@/types/content'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { confirmDelete } from '@/utils/confirmDelete'
@@ -18,6 +19,20 @@ const TYPE_LABELS: Record<NewsType, string> = {
   latest: 'Latest news',
   trending: 'Trending news',
   more: 'More news',
+}
+
+const TYPE_LIST_PATH: Record<NewsType, string> = {
+  featured: '/admin/news/featured',
+  latest: '/admin/news/latest',
+  trending: '/admin/news/trending',
+  more: '/admin/news/more',
+}
+
+const TYPE_I18N: Record<NewsType, TranslationKey> = {
+  featured: 'admin.featuredNews',
+  latest: 'admin.latestNews',
+  trending: 'admin.trendingNews',
+  more: 'admin.moreNews',
 }
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
@@ -152,13 +167,19 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
 
   const columns: TableColumnsType<NewsItem> = useMemo(
     () => {
-      const orderColumn: TableColumnsType<NewsItem>[number] = {
+      const orderSorter = (a: NewsItem, b: NewsItem) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+
+      const orderColumnBase = {
         title: 'Order',
-        dataIndex: 'sort_order',
+        dataIndex: 'sort_order' as const,
         key: 'sort_order',
-        width: 100,
-        align: 'center',
-        sorter: (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        width: newsType ? 100 : 72,
+        align: 'center' as const,
+        sorter: orderSorter,
+      }
+
+      const orderColumnEditable: TableColumnsType<NewsItem>[number] = {
+        ...orderColumnBase,
         defaultSortOrder: 'ascend',
         render: (value: number | undefined, row) => (
           <InputNumber
@@ -178,6 +199,50 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       }
 
+      const orderColumnReadonly: TableColumnsType<NewsItem>[number] = {
+        ...orderColumnBase,
+        render: (value: number | undefined, row) => {
+          const type = row.news_type as NewsType
+          const listPath = TYPE_LIST_PATH[type]
+          const typeTitle = TYPE_I18N[type] ? t(TYPE_I18N[type]) : row.news_type
+          return (
+            <Tooltip
+              title={
+                <div className="max-w-[220px]">
+                  <div className="font-ui text-xs font-semibold leading-snug">
+                    {t('admin.news')} › {typeTitle}
+                  </div>
+                  <div className="mt-1.5 font-ui text-xs leading-snug opacity-90">
+                    {t('admin.newsOrderHint')}
+                  </div>
+                  {listPath ? (
+                    <Link
+                      to={listPath}
+                      className="mt-2 inline-flex items-center gap-1 font-ui text-xs font-semibold text-white underline"
+                    >
+                      {t('admin.newsOrderOpenList')}
+                      <i className="fa-solid fa-arrow-right text-[0.65rem]" aria-hidden />
+                    </Link>
+                  ) : null}
+                </div>
+              }
+            >
+              <span className="font-ui tabular-nums text-ink-muted cursor-help border-b border-dotted border-ink-muted/50">
+                {value ?? 0}
+              </span>
+            </Tooltip>
+          )
+        },
+      }
+
+      const typeColumn: TableColumnsType<NewsItem>[number] = {
+        title: 'Type',
+        dataIndex: 'news_type',
+        width: 110,
+        sorter: (a, b) => compareText(a.news_type, b.news_type),
+        render: (value: string) => <StatusBadge status={value} />,
+      }
+
       return [
       {
         title: 'Title',
@@ -193,14 +258,8 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           </div>
         ),
       },
-      ...(newsType ? [orderColumn] : []),
-      {
-        title: 'Type',
-        dataIndex: 'news_type',
-        width: 110,
-        sorter: (a, b) => compareText(a.news_type, b.news_type),
-        render: (value: string) => <StatusBadge status={value} />,
-      },
+      ...(newsType ? [orderColumnEditable] : [typeColumn, orderColumnReadonly]),
+      ...(newsType ? [typeColumn] : []),
       {
         title: 'Lun',
         dataIndex: 'language',
@@ -286,7 +345,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     ]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [load, message, navigate, newsType],
+    [load, message, navigate, newsType, t],
   )
 
   return (

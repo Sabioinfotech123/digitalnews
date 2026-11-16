@@ -27,7 +27,7 @@ Password: Admin@12345
 ```
 
 **Why?**  
-When you create news/blog, the form asks you to pick a **category** and **tags**.  
+When you create **news**, **category** is required (blogs: category optional). Pick **tags** as needed.  
 If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 
 ---
@@ -180,7 +180,7 @@ You can create from:
 
 | Language | English / Telugu |
 | Status | draft / published / … |
-| Category | Pick from Catalog |
+| Category | **Required** — pick from Catalog; dropdown has **Refresh list** (reload categories without losing form data) and **Add category** (opens Catalog in a new tab) |
 | Tags | Pick one or more |
 | Breaking | Optional flag |
 | **Display order** | Lower number shows first on the public homepage for that type (0, 1, 2…) |
@@ -192,8 +192,8 @@ You can create from:
 
 ### 3C) Edit news / change order
 
-1. Open a typed list (**Featured** / **Latest** / **Trending** / **More**) — Order is not shown on **All news**
-2. Change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
+1. **All news** shows **Order** read-only next to **Type**. Hover the order number for a short path (**News › Featured news**, etc.) and a link to that typed list. Change order on **Featured** / **Latest** / **Trending** / **More** only.
+2. On a typed list, change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
 3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
 
 ### 3D) Delete news

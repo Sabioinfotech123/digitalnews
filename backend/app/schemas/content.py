@@ -55,7 +55,7 @@ class NewsCreate(BaseModel):
     language: ContentLanguage
     short_description: str | None = None
     content: str = ""
-    category_id: str | None = None
+    category_id: str
     tag_ids: list[str] = Field(default_factory=list)
     status: ContentStatus = ContentStatus.draft
     news_type: NewsType = NewsType.latest
