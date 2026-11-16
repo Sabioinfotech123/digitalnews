@@ -8,6 +8,8 @@ export const admin = {
   moreNews: 'More news',
   allNews: 'All news',
   newsOrderHint: 'On that page, change the Order column for this item.',
+  newsRankingHint:
+    'This number sets where the story appears on the public All news page (/news). Use 0 for the top spot, then 1, 2, 3… In each language, only one story can have the same number — if you reuse a number, the two stories trade places. Leave blank to show the story at the bottom.',
   newsOrderOpenList: 'Open list',
   localNews: 'Local news',
   verifiedNews: 'Verified news',

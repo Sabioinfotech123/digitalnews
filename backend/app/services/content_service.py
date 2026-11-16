@@ -56,6 +56,7 @@ def _news_response(item: News) -> NewsResponse:
         is_breaking=item.is_breaking,
         is_local=bool(getattr(item, "is_local", False)),
         sort_order=int(getattr(item, "sort_order", 0) or 0),
+        all_news_rank=getattr(item, "all_news_rank", None),
         image_url=item.image_url,
         video_url=getattr(item, "video_url", None),
         youtube_url=getattr(item, "youtube_url", None),
@@ -214,6 +215,11 @@ class NewsService:
             is_breaking=payload.is_breaking,
             is_local=payload.is_local,
             sort_order=max(0, int(payload.sort_order or 0)),
+            all_news_rank=(
+                None
+                if payload.all_news_rank is None
+                else max(0, int(payload.all_news_rank))
+            ),
             image_url=payload.image_url,
             video_url=payload.video_url,
             youtube_url=payload.youtube_url,
@@ -255,6 +261,22 @@ class NewsService:
                 )
                 if other:
                     other.sort_order = old_order
+                    self.repo.db.add(other)
+
+        if "all_news_rank" in data:
+            raw_rank = data["all_news_rank"]
+            new_rank = None if raw_rank is None else max(0, int(raw_rank))
+            old_rank = item.all_news_rank
+            data["all_news_rank"] = new_rank
+            if new_rank is not None and new_rank != old_rank:
+                target_lang = data.get("language", item.language)
+                other = self.repo.get_by_all_news_rank(
+                    language=target_lang,
+                    all_news_rank=new_rank,
+                    exclude_id=item.id,
+                )
+                if other:
+                    other.all_news_rank = old_rank
                     self.repo.db.add(other)
 
         if "category_id" in data:

@@ -114,7 +114,11 @@ Example:
 GET /api/v1/news?language=en&news_type=latest&page=1
 ```
 
-List order: `sort_order` ascending (lower first), then newest `created_at`. Set `sort_order` on create/update (`PATCH /admin/news/{id}`). If the new order is already used by another news with the **same `news_type` + `language`**, those two rows **swap** orders.
+List order:
+- **All news** (no `news_type` filter): `all_news_rank` ascending (nulls last), then `created_at` descending. Ranking is global per **language** (Featured + Latest + … on one ladder).
+- **Typed list** (`news_type=featured`, etc.): `sort_order` ascending, then `created_at`.
+
+Admin: set `all_news_rank` from **News → All news** (duplicates in the same language **swap**). Set `sort_order` on typed lists or the news form; duplicates swap within **same `news_type` + `language`**.
 ---
 
 ## 4) News (admin CMS)

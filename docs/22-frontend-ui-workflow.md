@@ -192,7 +192,7 @@ You can create from:
 
 ### 3C) Edit news / change order
 
-1. **All news** shows **Order** read-only next to **Type**. Hover the order number for a short path (**News › Featured news**, etc.) and a link to that typed list. Change order on **Featured** / **Latest** / **Trending** / **More** only.
+1. **All news** has an editable **Ranking** column (mixes Featured, Latest, etc.). Lower number shows first on the public **`/news`** page. Same rank in one language **swaps** with the other article. Leave empty to show that item last. Homepage sections still use **Order** on each typed list (Featured / Latest / …).
 2. On a typed list, change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
 3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
 

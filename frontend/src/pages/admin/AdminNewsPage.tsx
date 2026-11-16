@@ -1,6 +1,6 @@
 import { App, InputNumber, Select, Space, Tooltip, type TableColumnsType } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { deleteAdminNews, fetchAdminNews, updateAdminNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
@@ -9,7 +9,6 @@ import { LanguageBadge } from '@/components/common/LanguageBadge'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { adminNewsEditPath } from '@/config/adminPages'
 import type { ContentLanguage, ContentStatus, NewsItem, NewsType } from '@/types/content'
-import type { TranslationKey } from '@/utils/i18n'
 import { NEWS_TYPES } from '@/types/content'
 import { getApiErrorMessage } from '@/utils/apiError'
 import { confirmDelete } from '@/utils/confirmDelete'
@@ -19,20 +18,6 @@ const TYPE_LABELS: Record<NewsType, string> = {
   latest: 'Latest news',
   trending: 'Trending news',
   more: 'More news',
-}
-
-const TYPE_LIST_PATH: Record<NewsType, string> = {
-  featured: '/admin/news/featured',
-  latest: '/admin/news/latest',
-  trending: '/admin/news/trending',
-  more: '/admin/news/more',
-}
-
-const TYPE_I18N: Record<NewsType, TranslationKey> = {
-  featured: 'admin.featuredNews',
-  latest: 'admin.latestNews',
-  trending: 'admin.trendingNews',
-  more: 'admin.moreNews',
 }
 
 function compareText(a: string | null | undefined, b: string | null | undefined) {
@@ -133,6 +118,22 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     navigate(adminNewsEditPath(row.news_type, row.id))
   }
 
+  const saveAllNewsRank = async (row: NewsItem, nextRank: number | null) => {
+    const normalized =
+      nextRank === null || nextRank === undefined || Number.isNaN(Number(nextRank))
+        ? null
+        : Math.max(0, Math.floor(Number(nextRank)))
+    if (normalized === (row.all_news_rank ?? null)) return
+    try {
+      await updateAdminNews(row.id, { all_news_rank: normalized })
+      message.success('Ranking updated')
+      void load()
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Could not update ranking'))
+      void load()
+    }
+  }
+
   const saveSortOrder = async (row: NewsItem, nextOrder: number | null) => {
     const sortOrder = Math.max(0, Math.floor(Number(nextOrder ?? 0)))
     if (sortOrder === (row.sort_order ?? 0)) return
@@ -199,40 +200,38 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       }
 
-      const orderColumnReadonly: TableColumnsType<NewsItem>[number] = {
-        ...orderColumnBase,
-        render: (value: number | undefined, row) => {
-          const type = row.news_type as NewsType
-          const listPath = TYPE_LIST_PATH[type]
-          const typeTitle = TYPE_I18N[type] ? t(TYPE_I18N[type]) : row.news_type
-          return (
-            <Tooltip
-              title={
-                <div className="max-w-[220px]">
-                  <div className="font-ui text-xs font-semibold leading-snug">
-                    {t('admin.news')} › {typeTitle}
-                  </div>
-                  <div className="mt-1.5 font-ui text-xs leading-snug opacity-90">
-                    {t('admin.newsOrderHint')}
-                  </div>
-                  {listPath ? (
-                    <Link
-                      to={listPath}
-                      className="mt-2 inline-flex items-center gap-1 font-ui text-xs font-semibold text-white underline"
-                    >
-                      {t('admin.newsOrderOpenList')}
-                      <i className="fa-solid fa-arrow-right text-[0.65rem]" aria-hidden />
-                    </Link>
-                  ) : null}
-                </div>
-              }
-            >
-              <span className="font-ui tabular-nums text-ink-muted cursor-help border-b border-dotted border-ink-muted/50">
-                {value ?? 0}
-              </span>
-            </Tooltip>
-          )
-        },
+      const rankSorter = (a: NewsItem, b: NewsItem) =>
+        (a.all_news_rank ?? Number.MAX_SAFE_INTEGER) - (b.all_news_rank ?? Number.MAX_SAFE_INTEGER)
+
+      const rankingColumn: TableColumnsType<NewsItem>[number] = {
+        title: 'Ranking',
+        dataIndex: 'all_news_rank',
+        key: 'all_news_rank',
+        width: 100,
+        align: 'center',
+        sorter: rankSorter,
+        defaultSortOrder: 'ascend',
+        render: (value: number | null | undefined, row) => (
+          <Tooltip title={t('admin.newsRankingHint')} overlayStyle={{ maxWidth: 320 }}>
+            <InputNumber
+              min={0}
+              step={1}
+              size="small"
+              value={value ?? undefined}
+              placeholder="—"
+              className="w-full"
+              onPressEnter={(e) => {
+                const target = e.target as HTMLInputElement
+                const raw = target.value.trim()
+                void saveAllNewsRank(row, raw === '' ? null : Number(raw))
+              }}
+              onBlur={(e) => {
+                const raw = e.target.value.trim()
+                void saveAllNewsRank(row, raw === '' ? null : Number(raw))
+              }}
+            />
+          </Tooltip>
+        ),
       }
 
       const typeColumn: TableColumnsType<NewsItem>[number] = {
@@ -258,8 +257,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           </div>
         ),
       },
-      ...(newsType ? [orderColumnEditable] : [typeColumn, orderColumnReadonly]),
-      ...(newsType ? [typeColumn] : []),
+      ...(newsType ? [orderColumnEditable, typeColumn] : [typeColumn, rankingColumn]),
       {
         title: 'Lun',
         dataIndex: 'language',

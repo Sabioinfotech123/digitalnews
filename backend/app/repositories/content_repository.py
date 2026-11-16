@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import func, nullslast, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.content import Blog, BreakingNews, Category, ContentLanguage, ContentStatus, News, NewsType, Tag, Video
@@ -133,12 +133,27 @@ class NewsRepository:
             count_stmt = count_stmt.where(filter_expr)
 
         total = int(self.db.scalar(count_stmt) or 0)
-        stmt = (
-            stmt.order_by(News.sort_order.asc(), News.created_at.desc())
-            .offset((page - 1) * page_size)
-            .limit(page_size)
-        )
+        if news_type is None:
+            stmt = stmt.order_by(nullslast(News.all_news_rank.asc()), News.created_at.desc())
+        else:
+            stmt = stmt.order_by(News.sort_order.asc(), News.created_at.desc())
+        stmt = stmt.offset((page - 1) * page_size).limit(page_size)
         return list(self.db.scalars(stmt).all()), total
+
+    def get_by_all_news_rank(
+        self,
+        *,
+        language: ContentLanguage,
+        all_news_rank: int,
+        exclude_id: str | None = None,
+    ) -> News | None:
+        stmt = self._base().where(
+            News.language == language,
+            News.all_news_rank == all_news_rank,
+        )
+        if exclude_id:
+            stmt = stmt.where(News.id != exclude_id)
+        return self.db.scalar(stmt.order_by(News.created_at.desc()).limit(1))
 
     def get(self, news_id: str) -> News | None:
         return self.db.scalar(self._base().where(News.id == news_id))
