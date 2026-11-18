@@ -6,12 +6,12 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { NewsCard } from '@/components/common/NewsCard'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { PUBLIC_NEWS_MAX_ITEMS, PUBLIC_NEWS_PAGE_SIZE } from '@/config/app'
 import { BRAND } from '@/config/brand'
 import type { BlogItem, Category } from '@/types/content'
 import { mapApiNewsToCard, stripHtml, type PublicNewsCardModel } from '@/utils/publicNews'
 import './CategoryPage.scss'
 
-const NEWS_PAGE_SIZE = 12
 const BLOG_LIMIT = 6
 
 export function CategoryPage() {
@@ -59,7 +59,7 @@ export function CategoryPage() {
         const [newsData, blogData] = await Promise.all([
           fetchPublicNews({
             page,
-            page_size: NEWS_PAGE_SIZE,
+            page_size: PUBLIC_NEWS_PAGE_SIZE,
             language: contentLanguage,
             category_id: match.id,
           }),
@@ -72,7 +72,7 @@ export function CategoryPage() {
         ])
         if (!active) return
         setNews(newsData.items.map((item) => mapApiNewsToCard(item, contentLanguage)))
-        setNewsTotal(newsData.total)
+        setNewsTotal(Math.min(newsData.total, PUBLIC_NEWS_MAX_ITEMS))
         setBlogs(blogData.items)
       } catch {
         if (!active) return
@@ -134,11 +134,11 @@ export function CategoryPage() {
               <NewsCard key={article.id} article={article} from={categoryPath} />
             ))}
           </div>
-          {newsTotal > NEWS_PAGE_SIZE ? (
+          {newsTotal > PUBLIC_NEWS_PAGE_SIZE ? (
             <div className="category-page__pager">
               <Pagination
                 current={page}
-                pageSize={NEWS_PAGE_SIZE}
+                pageSize={PUBLIC_NEWS_PAGE_SIZE}
                 total={newsTotal}
                 onChange={setPage}
                 showSizeChanger={false}

@@ -115,8 +115,9 @@ GET /api/v1/news?language=en&news_type=latest&page=1
 ```
 
 List order:
-- **All news** (no `news_type` filter): `all_news_rank` ascending (nulls last), then `created_at` descending. Ranking is global per **language** (Featured + Latest + … on one ladder).
-- **Typed list** (`news_type=featured`, etc.): `sort_order` ascending, then `created_at`.
+- **All news** (no `news_type` filter, no `search`): `all_news_rank` ascending (nulls last), then `created_at` descending. Ranking is global per **language** (Featured + Latest + … on one ladder). **Max 48** published items returned in total (4 pages × 12). Same cap applies when filtering by `category_id` only.
+- **Search** (`search` param): newest `created_at` first, **no** rank cap (search results page).
+- **Typed list** (`news_type=featured`, etc.): `sort_order` ascending, then `created_at` (no 48 cap).
 
 Admin: set `all_news_rank` from **News → All news** (duplicates in the same language **swap**). Set `sort_order` on typed lists or the news form; duplicates swap within **same `news_type` + `language`**.
 ---

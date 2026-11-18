@@ -331,7 +331,7 @@ Public URLs (local):
 ```text
 http://localhost:5173/          Home
 http://localhost:5173/category/sports   Example category hub (slug from admin)
-http://localhost:5173/news      All news (list)
+http://localhost:5173/news      All news (list) — ranked items only, max 48 (12 per page × 4 pages). Category hubs use the same rule for their news block; search is not capped.
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search

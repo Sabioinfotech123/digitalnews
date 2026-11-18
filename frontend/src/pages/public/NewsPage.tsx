@@ -5,11 +5,11 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppLoader } from '@/components/common/AppLoader'
 import { NewsCard } from '@/components/common/NewsCard'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { PUBLIC_NEWS_MAX_ITEMS, PUBLIC_NEWS_PAGE_SIZE } from '@/config/app'
 import { BRAND } from '@/config/brand'
 import { cn } from '@/utils/cn'
 import { mapApiNewsToCard, type PublicNewsCardModel } from '@/utils/publicNews'
 
-const PAGE_SIZE = 12
 const VIEW_KEY = 'news-page-view'
 
 type NewsViewMode = 'grid' | 'list'
@@ -52,12 +52,12 @@ export function NewsPage() {
       try {
         const data = await fetchPublicNews({
           page,
-          page_size: PAGE_SIZE,
+          page_size: PUBLIC_NEWS_PAGE_SIZE,
           language: contentLanguage,
         })
         if (!active) return
         setItems(data.items.map((item) => mapApiNewsToCard(item, contentLanguage)))
-        setTotal(data.total)
+        setTotal(Math.min(data.total, PUBLIC_NEWS_MAX_ITEMS))
       } catch {
         if (!active) return
         setItems([])
@@ -120,11 +120,11 @@ export function NewsPage() {
             ))}
           </div>
 
-          {total > PAGE_SIZE ? (
+          {total > PUBLIC_NEWS_PAGE_SIZE ? (
             <div className="mt-8 flex justify-center">
               <Pagination
                 current={page}
-                pageSize={PAGE_SIZE}
+                pageSize={PUBLIC_NEWS_PAGE_SIZE}
                 total={total}
                 onChange={setPage}
                 showSizeChanger={false}
