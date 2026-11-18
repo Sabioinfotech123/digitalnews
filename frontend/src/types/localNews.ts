@@ -74,6 +74,8 @@ export interface VerifiedLocalNewsItem {
   verified_at: string
   created_at: string
   updated_at: string
+  imported_news_id?: string | null
+  imported_news_type?: string | null
 }
 
 export interface PaginatedVerifiedLocalNews {

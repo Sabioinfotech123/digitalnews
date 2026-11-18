@@ -139,7 +139,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 2. Modal shows title, source, date → **Run AI verify** (Gemini or OpenAI — set key in backend `.env`)
 3. Result (likely real / likely fake / uncertain + summary) is saved
 4. Open **Local feed → Verified news** to browse all AI-checked items
-5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on)
+5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on). After import, the list shows a green **Added** tag instead of **View & add** (pencil opens the CMS article). Importing the same item again is blocked.
 
 Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. AI keys: `GEMINI_API_KEY` and/or `OPENAI_API_KEY`. Default provider `gemini` tries Gemini first and falls back to OpenAI when Gemini is flaky (set `AI_VERIFY_PROVIDER=openai` to use OpenAI only).
 

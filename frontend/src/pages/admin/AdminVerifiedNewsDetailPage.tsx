@@ -196,14 +196,26 @@ export function AdminVerifiedNewsDetailPage() {
             {item.source_name || 'Unknown source'} · {formatDate(item.published_at)}
             {item.country ? ` · ${item.country}` : ''} · Local flag will be set
           </p>
-          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <StatusBadge status={item.verdict} />
+            {item.imported_news_id ? <StatusBadge status="added" /> : null}
             <span className="text-xs text-ink-muted">
               {item.confidence}% · {item.ai_provider}
             </span>
           </div>
         </div>
-        <Space>
+        <Space wrap>
+          {item.imported_news_id && item.imported_news_type ? (
+            <AppButton
+              type="primary"
+              icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+              onClick={() =>
+                navigate(adminNewsEditPath(item.imported_news_type as NewsType, item.imported_news_id!))
+              }
+            >
+              Open in CMS
+            </AppButton>
+          ) : null}
           <AppButton
             href={item.url}
             target="_blank"
@@ -219,7 +231,7 @@ export function AdminVerifiedNewsDetailPage() {
       <Form
         form={form}
         layout="vertical"
-        disabled={saving}
+        disabled={saving || Boolean(item.imported_news_id)}
         className="news-form-page__form"
         onValuesChange={handleValuesChange}
         onFinishFailed={handleFinishFailed}
@@ -325,9 +337,15 @@ export function AdminVerifiedNewsDetailPage() {
                 <Input />
               </Form.Item>
 
-              <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary">
-                Add to CMS news
-              </AppButton>
+              {item.imported_news_id ? (
+                <p className="m-0 text-center font-ui text-sm text-ink-muted">
+                  This item is already in CMS news.
+                </p>
+              ) : (
+                <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary">
+                  Add to CMS news
+                </AppButton>
+              )}
             </div>
           </Col>
         </Row>

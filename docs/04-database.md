@@ -274,8 +274,9 @@ Saved when admin runs **Verify** on a Local feed article.
 | `ai_summary` | Short AI explanation |
 | `ai_provider` | `gemini` or `openai` |
 | `verified_at` | When checked |
+| `imported_news_id` | CMS `news.id` after **View & add** import (null until added) |
 
-Migration: `0007_verified_local_news.py`
+Migrations: `0007_verified_local_news.py`, `0018_verified_imported_news.py`
 
 ---
 
