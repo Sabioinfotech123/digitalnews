@@ -20,6 +20,8 @@ class VerifiedLocalNewsResponse(BaseModel):
     verified_at: datetime
     created_at: datetime
     updated_at: datetime
+    imported_news_id: str | None = None
+    imported_news_type: str | None = None
 
     model_config = {"from_attributes": True}
 

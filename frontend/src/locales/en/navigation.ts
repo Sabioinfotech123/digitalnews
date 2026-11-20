@@ -5,6 +5,8 @@ export const navigation = {
   blogs: 'Blogs',
   videos: 'Videos',
   live: 'Live TV',
+  liveShort: 'Live',
+  you: 'You',
   shorts: 'Shorts',
   search: 'Search',
   login: 'Login',

@@ -2,8 +2,8 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -44,3 +44,7 @@ class VerifiedLocalNews(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+    imported_news_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("news.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    imported_news = relationship("News", foreign_keys=[imported_news_id], lazy="selectin")

@@ -6,6 +6,55 @@
     border-bottom-color: #ddd;
   }
 
+  &--collapsed &__header {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0.35rem;
+  }
+
+  &__collapse {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    background: #fff;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease,
+      background 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: #fdf2f2;
+    }
+
+    i {
+      font-size: 0.7rem;
+    }
+  }
+
+  &__collapse-label {
+    @media (max-width: 479px) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
   &__grid {
     display: grid;
     gap: 1.25rem;

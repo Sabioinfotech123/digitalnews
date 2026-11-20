@@ -56,6 +56,7 @@ def _news_response(item: News) -> NewsResponse:
         is_breaking=item.is_breaking,
         is_local=bool(getattr(item, "is_local", False)),
         sort_order=int(getattr(item, "sort_order", 0) or 0),
+        all_news_rank=getattr(item, "all_news_rank", None),
         image_url=item.image_url,
         video_url=getattr(item, "video_url", None),
         youtube_url=getattr(item, "youtube_url", None),
@@ -137,6 +138,20 @@ class NewsService:
         self.db = db
         self.repo = NewsRepository(db)
         self.tags = TagRepository(db)
+        self.categories = CategoryRepository(db)
+
+    def _assert_news_category(self, category_id: str | None) -> str:
+        if not category_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Category is required",
+            )
+        if not self.categories.get(category_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Category not found",
+            )
+        return category_id
 
     def list(
         self,
@@ -182,6 +197,7 @@ class NewsService:
         existing = self.repo.get_by_slug(payload.slug, payload.language)
         if existing:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Slug already used for this language")
+        category_id = self._assert_news_category(payload.category_id)
         tags = self.tags.get_many(payload.tag_ids)
         news_type = payload.news_type
         is_featured = payload.is_featured or news_type == NewsType.featured
@@ -191,7 +207,7 @@ class NewsService:
             language=payload.language,
             short_description=payload.short_description,
             content=payload.content,
-            category_id=payload.category_id,
+            category_id=category_id,
             author_id=author_id,
             status=payload.status,
             news_type=news_type,
@@ -199,6 +215,11 @@ class NewsService:
             is_breaking=payload.is_breaking,
             is_local=payload.is_local,
             sort_order=max(0, int(payload.sort_order or 0)),
+            all_news_rank=(
+                None
+                if payload.all_news_rank is None
+                else max(0, int(payload.all_news_rank))
+            ),
             image_url=payload.image_url,
             video_url=payload.video_url,
             youtube_url=payload.youtube_url,
@@ -242,6 +263,25 @@ class NewsService:
                     other.sort_order = old_order
                     self.repo.db.add(other)
 
+        if "all_news_rank" in data:
+            raw_rank = data["all_news_rank"]
+            new_rank = None if raw_rank is None else max(0, int(raw_rank))
+            old_rank = item.all_news_rank
+            data["all_news_rank"] = new_rank
+            if new_rank is not None and new_rank != old_rank:
+                target_lang = data.get("language", item.language)
+                other = self.repo.get_by_all_news_rank(
+                    language=target_lang,
+                    all_news_rank=new_rank,
+                    exclude_id=item.id,
+                )
+                if other:
+                    other.all_news_rank = old_rank
+                    self.repo.db.add(other)
+
+        if "category_id" in data:
+            data["category_id"] = self._assert_news_category(data["category_id"])
+
         for key, value in data.items():
             setattr(item, key, value)
         if "news_type" in data:
@@ -250,6 +290,7 @@ class NewsService:
                 item.is_featured = True
         if tag_ids is not None:
             item.tags = self.tags.get_many(tag_ids)
+        self._assert_news_category(item.category_id)
         if item.status == ContentStatus.published and item.published_at is None:
             item.published_at = datetime.now(timezone.utc)
         return _news_response(self.repo.save(item))

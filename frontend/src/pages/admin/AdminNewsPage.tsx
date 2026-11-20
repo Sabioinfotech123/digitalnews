@@ -118,6 +118,22 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     navigate(adminNewsEditPath(row.news_type, row.id))
   }
 
+  const saveAllNewsRank = async (row: NewsItem, nextRank: number | null) => {
+    const normalized =
+      nextRank === null || nextRank === undefined || Number.isNaN(Number(nextRank))
+        ? null
+        : Math.max(0, Math.floor(Number(nextRank)))
+    if (normalized === (row.all_news_rank ?? null)) return
+    try {
+      await updateAdminNews(row.id, { all_news_rank: normalized })
+      message.success('Ranking updated')
+      void load()
+    } catch (err) {
+      message.error(getApiErrorMessage(err, 'Could not update ranking'))
+      void load()
+    }
+  }
+
   const saveSortOrder = async (row: NewsItem, nextOrder: number | null) => {
     const sortOrder = Math.max(0, Math.floor(Number(nextOrder ?? 0)))
     if (sortOrder === (row.sort_order ?? 0)) return
@@ -152,13 +168,19 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
 
   const columns: TableColumnsType<NewsItem> = useMemo(
     () => {
-      const orderColumn: TableColumnsType<NewsItem>[number] = {
+      const orderSorter = (a: NewsItem, b: NewsItem) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+
+      const orderColumnBase = {
         title: 'Order',
-        dataIndex: 'sort_order',
+        dataIndex: 'sort_order' as const,
         key: 'sort_order',
-        width: 100,
-        align: 'center',
-        sorter: (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+        width: newsType ? 100 : 72,
+        align: 'center' as const,
+        sorter: orderSorter,
+      }
+
+      const orderColumnEditable: TableColumnsType<NewsItem>[number] = {
+        ...orderColumnBase,
         defaultSortOrder: 'ascend',
         render: (value: number | undefined, row) => (
           <InputNumber
@@ -178,6 +200,48 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
         ),
       }
 
+      const rankSorter = (a: NewsItem, b: NewsItem) =>
+        (a.all_news_rank ?? Number.MAX_SAFE_INTEGER) - (b.all_news_rank ?? Number.MAX_SAFE_INTEGER)
+
+      const rankingColumn: TableColumnsType<NewsItem>[number] = {
+        title: 'Ranking',
+        dataIndex: 'all_news_rank',
+        key: 'all_news_rank',
+        width: 100,
+        align: 'center',
+        sorter: rankSorter,
+        defaultSortOrder: 'ascend',
+        render: (value: number | null | undefined, row) => (
+          <Tooltip title={t('admin.newsRankingHint')} overlayStyle={{ maxWidth: 320 }}>
+            <InputNumber
+              min={0}
+              step={1}
+              size="small"
+              value={value ?? undefined}
+              placeholder="—"
+              className="w-full"
+              onPressEnter={(e) => {
+                const target = e.target as HTMLInputElement
+                const raw = target.value.trim()
+                void saveAllNewsRank(row, raw === '' ? null : Number(raw))
+              }}
+              onBlur={(e) => {
+                const raw = e.target.value.trim()
+                void saveAllNewsRank(row, raw === '' ? null : Number(raw))
+              }}
+            />
+          </Tooltip>
+        ),
+      }
+
+      const typeColumn: TableColumnsType<NewsItem>[number] = {
+        title: 'Type',
+        dataIndex: 'news_type',
+        width: 110,
+        sorter: (a, b) => compareText(a.news_type, b.news_type),
+        render: (value: string) => <StatusBadge status={value} />,
+      }
+
       return [
       {
         title: 'Title',
@@ -193,14 +257,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
           </div>
         ),
       },
-      ...(newsType ? [orderColumn] : []),
-      {
-        title: 'Type',
-        dataIndex: 'news_type',
-        width: 110,
-        sorter: (a, b) => compareText(a.news_type, b.news_type),
-        render: (value: string) => <StatusBadge status={value} />,
-      },
+      ...(newsType ? [orderColumnEditable, typeColumn] : [typeColumn, rankingColumn]),
       {
         title: 'Lun',
         dataIndex: 'language',
@@ -286,7 +343,7 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
     ]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [load, message, navigate, newsType],
+    [load, message, navigate, newsType, t],
   )
 
   return (

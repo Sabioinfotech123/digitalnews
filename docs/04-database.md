@@ -118,14 +118,15 @@ These are fixed options used in several tables:
 | `language` | `en` or `te` |
 | `short_description` | Short summary |
 | `content` | Full article HTML |
-| `category_id` | Which category (optional) |
+| `category_id` | Which category (**required** for news) |
 | `author_id` | Who wrote it |
 | `status` | draft / published / … |
 | `news_type` | featured / latest / trending / more |
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
 | `is_local` | Added from **Local news** import |
-| `sort_order` | Display order within type (lower = first on public site) |
+| `sort_order` | Display order within type (lower = first on homepage sections for that type) |
+| `all_news_rank` | Global order for the public **All news** list (`/news`), unique per language across all types (lower = first). Empty/null shows last. Duplicates swap when edited in admin |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -273,8 +274,9 @@ Saved when admin runs **Verify** on a Local feed article.
 | `ai_summary` | Short AI explanation |
 | `ai_provider` | `gemini` or `openai` |
 | `verified_at` | When checked |
+| `imported_news_id` | CMS `news.id` after **View & add** import (null until added) |
 
-Migration: `0007_verified_local_news.py`
+Migrations: `0007_verified_local_news.py`, `0018_verified_imported_news.py`
 
 ---
 
