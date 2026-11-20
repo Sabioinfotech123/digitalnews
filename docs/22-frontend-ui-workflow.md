@@ -27,7 +27,7 @@ Password: Admin@12345
 ```
 
 **Why?**  
-When you create news/blog, the form asks you to pick a **category** and **tags**.  
+When you create **news**, **category** is required (blogs: category optional). Pick **tags** as needed.  
 If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 
 ---
@@ -139,7 +139,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 2. Modal shows title, source, date → **Run AI verify** (Gemini or OpenAI — set key in backend `.env`)
 3. Result (likely real / likely fake / uncertain + summary) is saved
 4. Open **Local feed → Verified news** to browse all AI-checked items
-5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on)
+5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on). After import, the list shows a green **Added** tag instead of **View & add** (pencil opens the CMS article). Importing the same item again is blocked.
 
 Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. AI keys: `GEMINI_API_KEY` and/or `OPENAI_API_KEY`. Default provider `gemini` tries Gemini first and falls back to OpenAI when Gemini is flaky (set `AI_VERIFY_PROVIDER=openai` to use OpenAI only).
 
@@ -180,7 +180,7 @@ You can create from:
 
 | Language | English / Telugu |
 | Status | draft / published / … |
-| Category | Pick from Catalog |
+| Category | **Required** — pick from Catalog; dropdown has **Refresh list** (reload categories without losing form data) and **Add category** (opens Catalog in a new tab) |
 | Tags | Pick one or more |
 | Breaking | Optional flag |
 | **Display order** | Lower number shows first on the public homepage for that type (0, 1, 2…) |
@@ -192,8 +192,8 @@ You can create from:
 
 ### 3C) Edit news / change order
 
-1. Open a typed list (**Featured** / **Latest** / **Trending** / **More**) — Order is not shown on **All news**
-2. Change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
+1. **All news** has an editable **Ranking** column (mixes Featured, Latest, etc.). Lower number shows first on the public **`/news`** page. Same rank in one language **swaps** with the other article. Leave empty to show that item last. Homepage sections still use **Order** on each typed list (Featured / Latest / …).
+2. On a typed list, change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
 3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
 
 ### 3D) Delete news
@@ -317,7 +317,9 @@ Remove old item
 | Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
-| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |
+| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category). With **more than 7** active categories, desktop shows the first 7 and a **More** menu (opens on hover or click, two columns) for the rest; phones keep all of them in a sideways-scrolling strip |
+| **Category blocks on home** | Each category rail has **Collapse** / **Expand** in the section header; choice is remembered in the browser per category |
+| **Header weather** (no admin setting) | Public header shows the current temperature next to **Live**; hover or tap for details (feels like, high/low, humidity, wind, rain, sunrise/sunset) plus a **7-day forecast** (day, icon, rain chance, high/low). Free Open-Meteo data, no API key. Default city is Hyderabad; **Change location** (next to "Updated …") opens a popup to search any city, town or village (free OpenStreetMap search via Photon, no key; Indian places listed first, nearby places ranked higher) or **Use my location**. Very small villages may not be in OpenStreetMap; add the district (e.g. "Joypur Howrah") or pick the nearest town. The choice is remembered in the browser. Header buttons are short: **Live** and **You** (account menu) |
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
@@ -329,7 +331,7 @@ Public URLs (local):
 ```text
 http://localhost:5173/          Home
 http://localhost:5173/category/sports   Example category hub (slug from admin)
-http://localhost:5173/news      All news (list)
+http://localhost:5173/news      All news (list) — ranked items only, max 48 (12 per page × 4 pages). Category hubs use the same rule for their news block; search is not capped.
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search
@@ -345,7 +347,7 @@ http://localhost:5173/bookmarks Saved for later (login required)
 **Bookmarks (read later):**
 1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)
 2. Guests are sent to **Login**; after sign-in they can save
-3. Account menu → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
+3. **You** menu (header) → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
 
 ---
 

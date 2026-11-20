@@ -4,16 +4,16 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   createAdminNews,
   fetchAdminNewsById,
-  fetchCategories,
   fetchTags,
   updateAdminNews,
 } from '@/api/content'
 import { AppButton } from '@/components/common/AppButton'
+import { CategoryFormSelect } from '@/components/admin/CategoryFormSelect'
 import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
-import type { Category, NewsItem, NewsPayload, NewsType, TagItem } from '@/types/content'
+import type { NewsItem, NewsPayload, NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
 import { getFormValidationMessage, type FormValidationInfo } from '@/utils/formFeedback'
@@ -51,7 +51,6 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
   const [form] = Form.useForm<NewsPayload>()
   const [loading, setLoading] = useState(mode === 'edit')
   const [saving, setSaving] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
   const [news, setNews] = useState<NewsItem | null>(null)
 
@@ -77,15 +76,11 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
 
     async function loadFormData() {
       try {
-        const [cats, tagList] = await Promise.all([fetchCategories(), fetchTags()])
+        const tagList = await fetchTags()
         if (!active) return
-        setCategories(cats)
         setTags(tagList)
 
         if (mode === 'create') {
-          if (!cats.length) {
-            message.warning('Please create a category before adding news')
-          }
           if (!tagList.length) {
             message.warning('Please create a tag before adding news')
           }
@@ -158,7 +153,7 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
         ...values,
         news_type: values.news_type || lockedType,
         is_featured: values.news_type === 'featured' || Boolean(values.is_featured),
-        category_id: values.category_id || null,
+        category_id: values.category_id,
         tag_ids: values.tag_ids || [],
       }
       if (mode === 'create') {
@@ -297,14 +292,20 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
               </Form.Item>
             </div>
 
-            <Form.Item name="category_id" label="Category" className="w-full">
-              <Select
+            <Form.Item
+              name="category_id"
+              label="Category"
+              rules={[{ required: true, message: 'Category is required' }]}
+              className="w-full"
+            >
+              <CategoryFormSelect
                 className="w-full"
-                allowClear
-                showSearch
-                optionFilterProp="label"
-                options={categories.map((c) => ({ value: c.id, label: c.name }))}
-                placeholder="Select category"
+                disabled={loading || saving}
+                onCategoriesLoaded={(cats) => {
+                  if (mode === 'create' && !cats.length) {
+                    message.warning('Please create a category before adding news')
+                  }
+                }}
               />
             </Form.Item>
 

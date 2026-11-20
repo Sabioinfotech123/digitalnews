@@ -1,14 +1,15 @@
 import { App, Col, Form, Input, Row, Select, Space, Switch, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchCategories, fetchTags } from '@/api/content'
+import { fetchTags } from '@/api/content'
 import { fetchLocalNewsById, importLocalNews } from '@/api/localNews'
 import { AppButton } from '@/components/common/AppButton'
+import { CategoryFormSelect } from '@/components/admin/CategoryFormSelect'
 import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { adminNewsEditPath } from '@/config/adminPages'
-import type { Category, NewsType, TagItem } from '@/types/content'
+import type { NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import type { LocalNewsArticle } from '@/types/localNews'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
@@ -67,7 +68,6 @@ export function AdminLocalNewsDetailPage() {
   const [article, setArticle] = useState<LocalNewsArticle | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
 
   useEffect(() => {
@@ -76,14 +76,9 @@ export function AdminLocalNewsDetailPage() {
     ;(async () => {
       setLoading(true)
       try {
-        const [data, cats, tagList] = await Promise.all([
-          fetchLocalNewsById(id),
-          fetchCategories(),
-          fetchTags(),
-        ])
+        const [data, tagList] = await Promise.all([fetchLocalNewsById(id), fetchTags()])
         if (!active) return
         setArticle(data)
-        setCategories(cats)
         setTags(tagList)
         const description = data.description || data.title
         form.setFieldsValue({
@@ -142,7 +137,7 @@ export function AdminLocalNewsDetailPage() {
         news_type: values.news_type,
         language: values.language,
         status: values.status === 'published' || values.status === 'draft' ? values.status : 'draft',
-        category_id: values.category_id || null,
+        category_id: values.category_id,
         tag_ids: values.tag_ids || [],
         is_breaking: Boolean(values.is_breaking),
         title: values.title,
@@ -284,14 +279,12 @@ export function AdminLocalNewsDetailPage() {
                 />
               </Form.Item>
 
-              <Form.Item name="category_id" label="Category">
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  options={categories.map((c) => ({ value: c.id, label: c.name }))}
-                  placeholder="Select category"
-                />
+              <Form.Item
+                name="category_id"
+                label="Category"
+                rules={[{ required: true, message: 'Category is required' }]}
+              >
+                <CategoryFormSelect disabled={loading || saving} />
               </Form.Item>
 
               <Form.Item name="tag_ids" label="Tags">
