@@ -12,6 +12,7 @@ import { share as enShare } from '@/locales/en/share'
 import { speech as enSpeech } from '@/locales/en/speech'
 import { shorts as enShorts } from '@/locales/en/shorts'
 import { videos as enVideos } from '@/locales/en/videos'
+import { weather as enWeather } from '@/locales/en/weather'
 import { admin as teAdmin } from '@/locales/te/admin'
 import { auth as teAuth } from '@/locales/te/auth'
 import { blogs as teBlogs } from '@/locales/te/blogs'
@@ -25,6 +26,7 @@ import { share as teShare } from '@/locales/te/share'
 import { speech as teSpeech } from '@/locales/te/speech'
 import { shorts as teShorts } from '@/locales/te/shorts'
 import { videos as teVideos } from '@/locales/te/videos'
+import { weather as teWeather } from '@/locales/te/weather'
 
 const catalogs = {
   en: {
@@ -41,6 +43,7 @@ const catalogs = {
     share: enShare,
     speech: enSpeech,
     admin: enAdmin,
+    weather: enWeather,
   },
   te: {
     common: teCommon,
@@ -56,6 +59,7 @@ const catalogs = {
     share: teShare,
     speech: teSpeech,
     admin: teAdmin,
+    weather: teWeather,
   },
 } as const
 

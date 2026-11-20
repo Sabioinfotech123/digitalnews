@@ -118,14 +118,15 @@ These are fixed options used in several tables:
 | `language` | `en` or `te` |
 | `short_description` | Short summary |
 | `content` | Full article HTML |
-| `category_id` | Which category (optional) |
+| `category_id` | Which category (**required** for news) |
 | `author_id` | Who wrote it |
 | `status` | draft / published / … |
 | `news_type` | featured / latest / trending / more |
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
 | `is_local` | Added from **Local news** import |
-| `sort_order` | Display order within type (lower = first on public site) |
+| `sort_order` | Display order within type (lower = first on homepage sections for that type) |
+| `all_news_rank` | Global order for the public **All news** list (`/news`), unique per language across all types (lower = first). Empty/null shows last. Duplicates swap when edited in admin |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |
@@ -226,7 +227,7 @@ Admin → **Videos**. Each row needs at least one source: uploaded file and/or Y
 | `category_id` | Optional category |
 | `video_url` | Uploaded file URL (optional if YouTube set) |
 | `youtube_url` | YouTube link (optional if file set) |
-| `thumbnail_url` | Poster image — **required** if a video file is uploaded; optional for YouTube-only |
+| `thumbnail_url` | Poster — required when status is **published/scheduled** and a file is in `video_url`; optional for drafts |
 | `status` | draft / published / … |
 | `is_short` | `true` = vertical short (9:16) shown on `/shorts`; `false` = long video on `/videos` |
 | `short_allow_likes` / `short_allow_comments` / `short_allow_share` | Per-short toggles for reels viewer (Admin → Shorts form) |
@@ -273,8 +274,9 @@ Saved when admin runs **Verify** on a Local feed article.
 | `ai_summary` | Short AI explanation |
 | `ai_provider` | `gemini` or `openai` |
 | `verified_at` | When checked |
+| `imported_news_id` | CMS `news.id` after **View & add** import (null until added) |
 
-Migration: `0007_verified_local_news.py`
+Migrations: `0007_verified_local_news.py`, `0018_verified_imported_news.py`
 
 ---
 

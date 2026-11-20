@@ -8,6 +8,8 @@ export interface PublicNewsCardModel {
   title: string
   excerpt: string
   category: string
+  categoryId?: string | null
+  categorySlug?: string
   publishedLabel: string
   newsType: NewsType
   accent: string
@@ -72,6 +74,7 @@ export function mapApiNewsToCard(item: NewsItem, language: SupportedLanguage): P
     title: item.title,
     excerpt: stripHtml(item.short_description) || stripHtml(item.content).slice(0, 160),
     category: item.category_name || (language === 'te' ? 'వార్తలు' : 'News'),
+    categoryId: item.category_id,
     publishedLabel: formatPublishedLabel(item.published_at || item.created_at, language),
     newsType: item.news_type,
     accent: accentForId(item.id),

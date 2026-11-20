@@ -9,7 +9,7 @@ import {
   updateAdminBlog,
 } from '@/api/content'
 import { AppButton } from '@/components/common/AppButton'
-import { AppEditor } from '@/components/common/AppEditor'
+import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
@@ -188,13 +188,12 @@ export function AdminBlogFormPage({ mode }: AdminBlogFormPageProps) {
               <Input.TextArea rows={4} placeholder="Write a short summary…" showCount maxLength={500} />
             </Form.Item>
 
-            <Form.Item
-              name="content"
-              label="Content"
-              rules={[{ required: true, message: 'Content is required' }]}
-            >
-              <AppEditor placeholder="Write the full blog…" minHeight={360} />
-            </Form.Item>
+            <ContentFieldWithAi
+              form={form}
+              disabled={loading || saving}
+              placeholder="Write the full blog…"
+              minHeight={360}
+            />
           </Col>
 
           <Col xs={24} lg={8}>

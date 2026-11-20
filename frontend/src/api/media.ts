@@ -25,6 +25,23 @@ export interface UploadMediaOptions {
   kind?: MediaUploadKind
   folder?: string
   onProgress?: (loaded: number, total: number) => void
+  signal?: AbortSignal
+  /** Called when multipart session starts (video) so the UI can abort S3 parts. */
+  onMultipartSession?: (sessionId: string | null) => void
+}
+
+export async function abortMultipartUpload(sessionId: string): Promise<void> {
+  try {
+    await apiClient.post(`/admin/media/multipart/${sessionId}/abort`)
+  } catch {
+    // ignore
+  }
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) {
+    throw new DOMException('Upload cancelled', 'AbortError')
+  }
 }
 
 interface MultipartStartResult {
@@ -39,7 +56,9 @@ async function uploadViaApi(
   kind: MediaUploadKind,
   folder: string,
   onProgress?: (loaded: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<MediaUploadResult> {
+  throwIfAborted(signal)
   const formData = new FormData()
   formData.append('file', file)
   formData.append('kind', kind)
@@ -47,6 +66,7 @@ async function uploadViaApi(
 
   const { data } = await apiClient.post<MediaUploadResult>('/admin/media/upload', formData, {
     timeout: UPLOAD_TIMEOUT_MS[kind],
+    signal,
     onUploadProgress: (event) => {
       const total = event.total && event.total > 0 ? event.total : file.size
       // Ignore premature 100% — body queued ≠ S3 finish.
@@ -63,17 +83,25 @@ async function uploadVideoMultipart(
   file: File,
   folder: string,
   onProgress?: (loaded: number, total: number) => void,
+  signal?: AbortSignal,
+  onMultipartSession?: (sessionId: string | null) => void,
 ): Promise<MediaUploadResult> {
   const total = file.size
   onProgress?.(0, total)
+  throwIfAborted(signal)
 
-  const { data: started } = await apiClient.post<MultipartStartResult>('/admin/media/multipart/start', {
-    kind: 'video',
-    folder,
-    filename: file.name || 'video.mp4',
-    content_type: file.type || 'video/mp4',
-    size_bytes: total,
-  })
+  const { data: started } = await apiClient.post<MultipartStartResult>(
+    '/admin/media/multipart/start',
+    {
+      kind: 'video',
+      folder,
+      filename: file.name || 'video.mp4',
+      content_type: file.type || 'video/mp4',
+      size_bytes: total,
+    },
+    { signal },
+  )
+  onMultipartSession?.(started.session_id)
 
   const partSize = started.part_size || VIDEO_PART_SIZE
   let offset = 0
@@ -81,6 +109,7 @@ async function uploadVideoMultipart(
 
   try {
     while (offset < total) {
+      throwIfAborted(signal)
       const remaining = total - offset
       const end = remaining > partSize ? offset + partSize : total
       const chunk = file.slice(offset, end)
@@ -95,6 +124,7 @@ async function uploadVideoMultipart(
         formData,
         {
           timeout: UPLOAD_TIMEOUT_MS.video,
+          signal,
           onUploadProgress: (event) => {
             const loadedInPart = event.loaded || 0
             const visible = Math.min(base + loadedInPart, base + chunkSize - 1)
@@ -108,16 +138,25 @@ async function uploadVideoMultipart(
       partNumber += 1
     }
 
-    const { data } = await apiClient.post<MediaUploadResult>('/admin/media/multipart/complete', {
-      session_id: started.session_id,
-    })
+    throwIfAborted(signal)
+    const { data } = await apiClient.post<MediaUploadResult>(
+      '/admin/media/multipart/complete',
+      { session_id: started.session_id },
+      { signal },
+    )
+    onMultipartSession?.(null)
     onProgress?.(total, total)
     return data
   } catch (err) {
+    onMultipartSession?.(null)
+    const aborted = signal?.aborted || (err instanceof DOMException && err.name === 'AbortError')
     try {
       await apiClient.post(`/admin/media/multipart/${started.session_id}/abort`)
     } catch {
       // ignore abort errors
+    }
+    if (aborted) {
+      throw new DOMException('Upload cancelled', 'AbortError')
     }
     throw err
   }
@@ -131,10 +170,17 @@ export async function uploadMediaFile(
   const kind = options?.kind ?? 'image'
   const folder = options?.folder ?? 'news'
   const onProgress = options?.onProgress
+  const signal = options?.signal
 
   if (kind === 'video') {
-    return uploadVideoMultipart(file, folder, onProgress)
+    return uploadVideoMultipart(
+      file,
+      folder,
+      onProgress,
+      signal,
+      options?.onMultipartSession,
+    )
   }
 
-  return uploadViaApi(file, kind, folder, onProgress)
+  return uploadViaApi(file, kind, folder, onProgress, signal)
 }

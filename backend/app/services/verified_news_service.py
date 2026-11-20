@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.verified_news import VerifiedLocalNews
 from app.schemas.local_news import LocalNewsArticle
@@ -17,6 +17,15 @@ class VerifiedLocalNewsService:
         self.db = db
         self.ai = AiVerifyService()
 
+    @staticmethod
+    def _to_response(item: VerifiedLocalNews) -> VerifiedLocalNewsResponse:
+        data = VerifiedLocalNewsResponse.model_validate(item)
+        if item.imported_news:
+            news_type = item.imported_news.news_type
+            type_value = news_type.value if hasattr(news_type, "value") else str(news_type)
+            return data.model_copy(update={"imported_news_type": type_value})
+        return data
+
     def list(
         self,
         *,
@@ -27,7 +36,7 @@ class VerifiedLocalNewsService:
     ) -> PaginatedVerifiedLocalNews:
         page = max(1, page)
         page_size = min(max(1, page_size), 50)
-        stmt = select(VerifiedLocalNews)
+        stmt = select(VerifiedLocalNews).options(selectinload(VerifiedLocalNews.imported_news))
         count_stmt = select(func.count()).select_from(VerifiedLocalNews)
         if search:
             like = f"%{search.strip()}%"
@@ -48,17 +57,29 @@ class VerifiedLocalNewsService:
             .limit(page_size)
         ).all()
         return PaginatedVerifiedLocalNews(
-            items=[VerifiedLocalNewsResponse.model_validate(item) for item in items],
+            items=[self._to_response(item) for item in items],
             total=total,
             page=page,
             page_size=page_size,
         )
 
     def get(self, item_id: str) -> VerifiedLocalNewsResponse:
+        item = self.db.scalar(
+            select(VerifiedLocalNews)
+            .where(VerifiedLocalNews.id == item_id)
+            .options(selectinload(VerifiedLocalNews.imported_news))
+        )
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verified news not found")
+        return self._to_response(item)
+
+    def mark_imported(self, item_id: str, news_id: str) -> None:
         item = self.db.get(VerifiedLocalNews, item_id)
         if not item:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verified news not found")
-        return VerifiedLocalNewsResponse.model_validate(item)
+        item.imported_news_id = news_id
+        self.db.add(item)
+        self.db.commit()
 
     def get_by_external_id(self, external_id: str) -> VerifiedLocalNews | None:
         return self.db.scalar(

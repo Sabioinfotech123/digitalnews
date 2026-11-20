@@ -100,7 +100,7 @@ export function ListenToArticle({ title, summary, html, language }: ListenToArti
               type="button"
               className="listen__btn"
               onClick={() => read.skipPrev()}
-              disabled={read.chunkIndex <= 0}
+              disabled={read.totalSteps <= 1 || read.chunkIndex <= 0}
               aria-label={t('speech.previous')}
             >
               <i className="fa-solid fa-backward-step" aria-hidden />
@@ -109,7 +109,7 @@ export function ListenToArticle({ title, summary, html, language }: ListenToArti
               type="button"
               className="listen__btn"
               onClick={() => read.skipNext()}
-              disabled={read.totalSteps > 0 && read.chunkIndex >= read.totalSteps - 1}
+              disabled={read.totalSteps <= 1 || read.chunkIndex >= read.totalSteps - 1}
               aria-label={t('speech.next')}
             >
               <i className="fa-solid fa-forward-step" aria-hidden />

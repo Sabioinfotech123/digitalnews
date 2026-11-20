@@ -108,7 +108,8 @@ Required variables are listed in `deploy/qa.env.example`. Notable QA values:
 | `AWS_REGION` | `us-east-1` |
 | `AWS_S3_BUCKET` | `digitalnews-media` |
 | `AWS_S3_PUBLIC_BASE_URL` | `https://digitalnews-media.s3.us-east-1.amazonaws.com` |
-| `CORS_ORIGINS` | `https://<qa-hostname>` |
+| `CORS_ORIGINS` | `https://<qa-hostname>,http://98.94.124.146:8088` |
+| `CORS_ALLOW_LOCALHOST` | `true` (default) — lets developers run `npm run dev` on their PC against QA. Set `false` on production |
 | `VITE_API_URL` | `/api/v1` (Dockerfile; not this env file) |
 
 The API creates an admin user on **first boot** only if `ADMIN_EMAIL` does not already exist. Changing `ADMIN_PASSWORD` later does not update that user.

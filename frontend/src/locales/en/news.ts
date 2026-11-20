@@ -1,6 +1,11 @@
 export const news = {
   latestNews: 'Latest News',
-  topStories: 'Top Stories',
+  topStories: 'Top stories',
+  moreHeadlines: 'More headlines',
+  headlines: 'Headlines',
+  seeMore: 'See more',
+  inDepth: 'In depth',
+  inDepthSub: 'Longer reads and standout reports from across the site.',
   featuredNews: 'Featured',
   trendingNews: 'Trending',
   moreNews: 'More News',

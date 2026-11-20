@@ -27,7 +27,7 @@ Password: Admin@12345
 ```
 
 **Why?**  
-When you create news/blog, the form asks you to pick a **category** and **tags**.  
+When you create **news**, **category** is required (blogs: category optional). Pick **tags** as needed.  
 If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 
 ---
@@ -139,7 +139,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 2. Modal shows title, source, date → **Run AI verify** (Gemini or OpenAI — set key in backend `.env`)
 3. Result (likely real / likely fake / uncertain + summary) is saved
 4. Open **Local feed → Verified news** to browse all AI-checked items
-5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on)
+5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on). After import, the list shows a green **Added** tag instead of **View & add** (pencil opens the CMS article). Importing the same item again is blocked.
 
 Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. AI keys: `GEMINI_API_KEY` and/or `OPENAI_API_KEY`. Default provider `gemini` tries Gemini first and falls back to OpenAI when Gemini is flaky (set `AI_VERIFY_PROVIDER=openai` to use OpenAI only).
 
@@ -174,13 +174,13 @@ You can create from:
 | Title | Required |
 | Slug | Required (unique per language) |
 | Short description | Summary |
-| Content | Full article |
+| Content | Full article — use **Enhance content** (polish draft) or **Regenerate content** (new AI draft from title + summary) above the editor; needs `GEMINI_API_KEY` or `OPENAI_API_KEY` in backend `.env` |
 | **News image** | **Required** — upload first |
 | News type | Locked if you came from Featured/Latest/…; from **All news** you can pick any type |
 
 | Language | English / Telugu |
 | Status | draft / published / … |
-| Category | Pick from Catalog |
+| Category | **Required** — pick from Catalog; dropdown has **Refresh list** (reload categories without losing form data) and **Add category** (opens Catalog in a new tab) |
 | Tags | Pick one or more |
 | Breaking | Optional flag |
 | **Display order** | Lower number shows first on the public homepage for that type (0, 1, 2…) |
@@ -192,8 +192,8 @@ You can create from:
 
 ### 3C) Edit news / change order
 
-1. Open a typed list (**Featured** / **Latest** / **Trending** / **More**) — Order is not shown on **All news**
-2. Change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
+1. **All news** has an editable **Ranking** column (mixes Featured, Latest, etc.). Lower number shows first on the public **`/news`** page. Same rank in one language **swaps** with the other article. Leave empty to show that item last. Homepage sections still use **Order** on each typed list (Featured / Latest / …).
+2. On a typed list, change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
 3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
 
 ### 3D) Delete news
@@ -250,17 +250,17 @@ Same pattern as news: pencil / trash on the blog table.
 **Edit / Delete** same as blogs. Video + YouTube live only on **Videos** (not on the news form).
 
 **Public site:** long videos → Home **Latest Videos**, `/videos`, `/videos/:slug`.  
-**Shorts:** Admin → **Shorts** → upload **9:16** MP4 + thumbnail → set **Allow likes / comments / share** → publish. Public: `/shorts` grid → opens **Reels viewer** at `/shorts/watch/:slug` (vertical scroll, like / comment / share). Old `/videos/:slug` for a short redirects to the reels URL.
+**Shorts:** Admin → **Shorts** → upload **9:16** MP4 + thumbnail → set **Allow likes / comments / share** → publish. Public: `/shorts` grid → opens **Reels viewer** at `/shorts/watch/:slug` (vertical scroll, like / comment / share). **Posting a comment requires sign-in** (guests see a login prompt in the comments drawer; same pattern as bookmarks). Old `/videos/:slug` for a short redirects to the reels URL.
 
 ## Step 4.6 — Shorts workflow
 
 1. Sidebar → **Videos → Shorts** (or **Add → Create short**)
 2. Fill title, slug, and short description (no long **Content** field)
-3. Upload **9:16 vertical** MP4/WEBM + thumbnail (YouTube URL optional)
+3. Upload **9:16 vertical** MP4/WEBM first (saves as **draft** without thumbnail). Add thumbnail, then set **Published** (thumbnail required only when publishing).
 4. Turn **Allow likes**, **Allow comments**, **Allow share** on or off for this short
 5. Publish → appears on `/shorts` and home short row (not on `/videos` list)
-6. **Admin → Shorts** table shows **Likes** and **Comments** (click count → popup to read/delete comments)
-7. On edit, remove visitor comments from the list under **Comments on this short** if needed
+6. **Admin → Shorts** table shows **Views**, **Likes**, and **Comments** (click comment count → popup to read/delete comments). Views increase when someone opens that short in the reels viewer (`/shorts/watch/:slug`, once per visit per short).
+7. **Shorts list → Comments** (or edit form): view each comment with **like / dislike counts**; delete if needed
 
 ---
 
@@ -309,11 +309,17 @@ Remove old item
 
 | Admin action | Public result |
 |--------------|---------------|
-| Publish Featured news | Home → Featured section |
-| Publish Latest / Trending / More | Matching home sections |
+| Publish Featured news | Home → **Featured** band (up to 4) and **Top stories** |
+| Publish Latest news | Home → **Latest news** grid (up to 8) |
+| Publish Trending / More | Home → **Headlines**, **In depth**, trending list, and **More news** |
+| Publish news in a **category** | Home may show a **category rail** (lead + side list) with **See more** → `/category/{slug}` when that category has published items |
+| Few shorts / videos | Home shows **Short Videos** and **Latest Videos** side by side when counts are low |
+| Publish any news (All news) | Fills home feed when section types run low (up to ~40 items on home) |
 | **View all news** (home sections) | `/news` — all published news (paginated; grid / list toggle) |
 | Publish Blog | `/blogs` list + detail |
-| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category) |
+| **Active category** (Catalog → Categories) | White **category bar** under the header on the public site; tap a name → `/category/{slug}` (news + blogs in that category). With **more than 7** active categories, desktop shows the first 7 and a **More** menu (opens on hover or click, two columns) for the rest; phones keep all of them in a sideways-scrolling strip |
+| **Category blocks on home** | Each category rail has **Collapse** / **Expand** in the section header; choice is remembered in the browser per category |
+| **Header weather** (no admin setting) | Public header shows the current temperature next to **Live**; hover or tap for details (feels like, high/low, humidity, wind, rain, sunrise/sunset) plus a **7-day forecast** (day, icon, rain chance, high/low). Free Open-Meteo data, no API key. Default city is Hyderabad; **Change location** (next to "Updated …") opens a popup to search any city, town or village (free OpenStreetMap search via Photon, no key; Indian places listed first, nearby places ranked higher) or **Use my location**. Very small villages may not be in OpenStreetMap; add the district (e.g. "Joypur Howrah") or pick the nearest town. The choice is remembered in the browser. Header buttons are short: **Live** and **You** (account menu) |
 | **Settings → logo / favicon / primary color** | Header/footer logo, browser tab icon + site accent color |
 | **News → Local news → Add** | Imports into Featured/Latest/Trending/More + All news / site |
 | Open article on site | Increases **Views** in admin table |
@@ -325,7 +331,7 @@ Public URLs (local):
 ```text
 http://localhost:5173/          Home
 http://localhost:5173/category/sports   Example category hub (slug from admin)
-http://localhost:5173/news      All news (list)
+http://localhost:5173/news      All news (list) — ranked items only, max 48 (12 per page × 4 pages). Category hubs use the same rule for their news block; search is not capped.
 http://localhost:5173/news/...  News detail
 http://localhost:5173/blogs     Blogs
 http://localhost:5173/search    Search
@@ -341,7 +347,7 @@ http://localhost:5173/bookmarks Saved for later (login required)
 **Bookmarks (read later):**
 1. On a **news**, **blog**, or **video** detail page → **Save** (bookmark icon next to title)
 2. Guests are sent to **Login**; after sign-in they can save
-3. Account menu → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
+3. **You** menu (header) → **Bookmarks** (or `/bookmarks`) → filter All / News / Blogs / Videos, open item or remove with trash
 
 ---
 

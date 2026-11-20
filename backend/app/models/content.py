@@ -83,6 +83,7 @@ class News(Base):
     is_breaking: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_local: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False, index=True)
+    all_news_rank: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     video_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     youtube_url: Mapped[str | None] = mapped_column(String(500), nullable=True)

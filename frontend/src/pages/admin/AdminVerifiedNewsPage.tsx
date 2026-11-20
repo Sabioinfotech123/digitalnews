@@ -6,6 +6,8 @@ import { useLanguage } from '@/app/providers/LanguageProvider'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
 import { StatusBadge } from '@/components/common/StatusBadge'
+import { adminNewsEditPath } from '@/config/adminPages'
+import type { NewsType } from '@/types/content'
 import type { VerifiedLocalNewsItem } from '@/types/localNews'
 import { getApiErrorMessage } from '@/utils/apiError'
 import './AdminLocalNewsPage.scss'
@@ -117,14 +119,39 @@ export function AdminVerifiedNewsPage() {
         fixed: 'right',
         render: (_, row) => (
           <Space size={6} wrap>
-            <AppButton
-              type="default"
-              size="small"
-              className="admin-local-news__action-btn"
-              onClick={() => navigate(`/admin/verified-news/${row.id}`)}
-            >
-              View & add
-            </AppButton>
+            {row.imported_news_id ? (
+              <>
+                <StatusBadge status="added" />
+                {row.imported_news_type ? (
+                  <Tooltip title="Open in CMS">
+                    <AppButton
+                      type="text"
+                      size="small"
+                      aria-label="Open in CMS"
+                      className="app-table__icon-btn app-table__icon-btn--edit"
+                      icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+                      onClick={() =>
+                        navigate(
+                          adminNewsEditPath(
+                            row.imported_news_type as NewsType,
+                            row.imported_news_id!,
+                          ),
+                        )
+                      }
+                    />
+                  </Tooltip>
+                ) : null}
+              </>
+            ) : (
+              <AppButton
+                type="default"
+                size="small"
+                className="admin-local-news__action-btn"
+                onClick={() => navigate(`/admin/verified-news/${row.id}`)}
+              >
+                View & add
+              </AppButton>
+            )}
             <Tooltip title="Open original">
               <AppButton
                 type="text"

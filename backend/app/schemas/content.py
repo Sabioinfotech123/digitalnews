@@ -55,7 +55,7 @@ class NewsCreate(BaseModel):
     language: ContentLanguage
     short_description: str | None = None
     content: str = ""
-    category_id: str | None = None
+    category_id: str
     tag_ids: list[str] = Field(default_factory=list)
     status: ContentStatus = ContentStatus.draft
     news_type: NewsType = NewsType.latest
@@ -63,6 +63,7 @@ class NewsCreate(BaseModel):
     is_breaking: bool = False
     is_local: bool = False
     sort_order: int = 0
+    all_news_rank: int | None = Field(default=None, ge=0)
     image_url: str = Field(min_length=1, max_length=500)
     video_url: str | None = Field(default=None, max_length=500)
     youtube_url: str | None = Field(default=None, max_length=500)
@@ -86,6 +87,7 @@ class NewsUpdate(BaseModel):
     is_breaking: bool | None = None
     is_local: bool | None = None
     sort_order: int | None = Field(default=None, ge=0)
+    all_news_rank: int | None = Field(default=None, ge=0)
     image_url: str | None = Field(default=None, min_length=1, max_length=500)
     video_url: str | None = Field(default=None, max_length=500)
     youtube_url: str | None = Field(default=None, max_length=500)
@@ -112,6 +114,7 @@ class NewsResponse(BaseModel):
     is_breaking: bool
     is_local: bool = False
     sort_order: int = 0
+    all_news_rank: int | None = None
     image_url: str | None = None
     video_url: str | None = None
     youtube_url: str | None = None

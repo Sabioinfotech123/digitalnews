@@ -7,3 +7,7 @@ export const APP_CONFIG = {
 } as const
 
 export type SupportedLanguage = (typeof APP_CONFIG.supportedLanguages)[number]
+
+/** Public `/news` and category news lists: 12 per page, 4 pages max. */
+export const PUBLIC_NEWS_PAGE_SIZE = 12
+export const PUBLIC_NEWS_MAX_ITEMS = 48

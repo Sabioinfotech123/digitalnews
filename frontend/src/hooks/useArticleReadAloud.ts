@@ -113,7 +113,7 @@ export function useArticleReadAloud({ title, summary, html, language }: UseArtic
   useEffect(() => () => stop(), [stop])
 
   useEffect(() => {
-    if (status !== 'playing' || engine !== 'browser') return undefined
+    if ((status !== 'playing' && status !== 'paused') || engine !== 'browser') return undefined
     const id = window.setInterval(() => {
       setChunkIndex(browserPlayerRef.current.progress.index)
     }, 350)
@@ -311,26 +311,37 @@ export function useArticleReadAloud({ title, summary, html, language }: UseArtic
 
   const skipNext = useCallback(() => {
     if (engine === 'browser') {
-      browserPlayerRef.current.skipNext()
-      setChunkIndex(browserPlayerRef.current.progress.index)
-      return
-    }
-    if (engine === 'polly' && audioRef.current) {
-      audioRef.current.pause()
-      playPollyFrom(pollyIndexRef.current + 1)
-    }
-  }, [engine, playPollyFrom])
-
-  const skipPrev = useCallback(() => {
-    if (engine === 'browser') {
-      browserPlayerRef.current.skipPrev()
-      setChunkIndex(browserPlayerRef.current.progress.index)
+      const player = browserPlayerRef.current
+      const { index, total } = player.progress
+      if (total <= 1 || index >= total - 1) return
+      player.skipNext()
+      setChunkIndex(player.progress.index)
+      setStatus('playing')
       return
     }
     if (engine === 'polly') {
-      const prev = Math.max(0, pollyIndexRef.current - 1)
+      const next = pollyIndexRef.current + 1
+      if (next >= pollyChunks.length) return
       if (audioRef.current) audioRef.current.pause()
-      playPollyFrom(prev)
+      void playPollyFrom(next)
+    }
+  }, [engine, playPollyFrom, pollyChunks.length])
+
+  const skipPrev = useCallback(() => {
+    if (engine === 'browser') {
+      const player = browserPlayerRef.current
+      const { index, total } = player.progress
+      if (total <= 1 || index <= 0) return
+      player.skipPrev()
+      setChunkIndex(player.progress.index)
+      setStatus('playing')
+      return
+    }
+    if (engine === 'polly') {
+      const prev = pollyIndexRef.current - 1
+      if (prev < 0) return
+      if (audioRef.current) audioRef.current.pause()
+      void playPollyFrom(prev)
     }
   }, [engine, playPollyFrom])
 

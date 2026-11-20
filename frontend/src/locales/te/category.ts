@@ -1,5 +1,8 @@
 export const category = {
   navLabel: 'వార్తా వర్గాలు',
+  more: 'మరిన్ని',
+  collapseSection: 'మూసివేయి',
+  expandSection: 'తెరువు',
   title: 'వర్గం',
   loading: 'వర్గం లోడ్ అవుతోంది…',
   notFound: 'వర్గం కనుగొనబడలేదు',

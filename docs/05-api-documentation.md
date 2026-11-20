@@ -114,7 +114,12 @@ Example:
 GET /api/v1/news?language=en&news_type=latest&page=1
 ```
 
-List order: `sort_order` ascending (lower first), then newest `created_at`. Set `sort_order` on create/update (`PATCH /admin/news/{id}`). If the new order is already used by another news with the **same `news_type` + `language`**, those two rows **swap** orders.
+List order:
+- **All news** (no `news_type` filter, no `search`): `all_news_rank` ascending (nulls last), then `created_at` descending. Ranking is global per **language** (Featured + Latest + … on one ladder). **Max 48** published items returned in total (4 pages × 12). Same cap applies when filtering by `category_id` only.
+- **Search** (`search` param): newest `created_at` first, **no** rank cap (search results page).
+- **Typed list** (`news_type=featured`, etc.): `sort_order` ascending, then `created_at` (no 48 cap).
+
+Admin: set `all_news_rank` from **News → All news** (duplicates in the same language **swap**). Set `sort_order` on typed lists or the news form; duplicates swap within **same `news_type` + `language`**.
 ---
 
 ## 4) News (admin CMS)
@@ -140,7 +145,7 @@ Need **ADMIN** token.
 | `image_url` | **Yes** | Upload first, then paste URL |
 | `news_type` | Yes | featured / latest / trending / more |
 | `status` | Optional | default `draft` |
-| `category_id` | Optional | |
+| `category_id` | **Yes** | Valid category ID |
 | `tag_ids` | Optional | array of tag IDs |
 | `is_breaking` | Optional | true/false |
 | SEO fields | Optional | |
@@ -182,7 +187,7 @@ Blogs have no `news_type` / breaking flags.
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
 | GET | `/videos` | Anyone | List **published** videos. Query `is_short=true` → shorts only; default `is_short=false` → long videos only |
-| GET | `/videos/{slug}` | Anyone | Video detail (counts a view) |
+| GET | `/videos/{slug}` | Anyone | Video detail (**increments `view_count`** — used for long video pages and when a short becomes active in the reels viewer) |
 | GET | `/videos/{slug}/engagement` | Anyone | Like/comment counts + allow toggles; query `visitor_key` (optional) |
 | POST | `/videos/{slug}/like` | Anyone | Toggle like — body `{ "visitor_key": "…" }` |
 | GET | `/videos/{slug}/comments` | Anyone | Visible comments; optional query `visitor_key` returns counts + your reaction |
@@ -193,7 +198,7 @@ Blogs have no `news_type` / breaking flags.
 
 Each comment in list/create/react responses includes **`like_count`**, **`dislike_count`**, and **`viewer_reaction`** (`like`, `dislike`, or null).
 
-Video list/detail responses include **`like_count`** and **`comment_count`** (aggregated from `video_likes` / `video_comments`).
+Video list/detail responses include **`view_count`**, **`like_count`**, and **`comment_count`** (likes/comments aggregated from `video_likes` / `video_comments`).
 | GET | `/admin/videos` | Admin | List all |
 | POST | `/admin/videos` | Admin | Create (need file and/or YouTube URL) |
 | GET | `/admin/videos/{id}` | Admin | Get one |
@@ -210,7 +215,7 @@ Video list/detail responses include **`like_count`** and **`comment_count`** (ag
 | `category_id` / `tag_ids` | Optional | Same idea as news/blogs |
 | `video_url` | One of these | Uploaded file URL |
 | `youtube_url` | One of these | Full YouTube URL |
-| `thumbnail_url` | Required if `video_url` | Optional when YouTube-only |
+| `thumbnail_url` | Required when **published/scheduled** and `video_url` is set | Optional for drafts; optional for YouTube-only |
 | `status` | Optional | default `draft` |
 | `sort_order` | Optional | lower first |
 | SEO fields | Optional | `seo_title` / `seo_description` / `seo_keywords` |
@@ -372,6 +377,14 @@ Admin-only browse of regional headlines. Default provider: **Google News RSS** (
 Imported rows set `is_local: true` (shown as a **Local** flag in admin news lists).
 
 After import, the item appears under **All news**, the chosen type list, homepage section (if published), and public `/news`.
+
+### AI content (news / blog editor)
+
+| Method | Path | Who | What it does |
+|--------|------|-----|--------------|
+| POST | `/admin/ai/content` | Admin | Enhance or regenerate article HTML — body `{ "mode": "enhance" \| "regenerate", "title", "short_description", "content", "language" }` → `{ "content", "provider" }` |
+
+Uses the same env as AI verify: `AI_VERIFY_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_API_KEY`.
 
 ### AI verify + verified news
 

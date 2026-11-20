@@ -6,16 +6,17 @@ import './LatestNewsSection.scss'
 
 interface LatestNewsSectionProps {
   articles: PublicNewsCardModel[]
+  dense?: boolean
 }
 
-export function LatestNewsSection({ articles }: LatestNewsSectionProps) {
+export function LatestNewsSection({ articles, dense = false }: LatestNewsSectionProps) {
   const { t } = useLanguage()
   if (!articles.length) return null
 
   return (
     <section className="latest-news" aria-label={t('news.latestNews')}>
       <SectionHeader title={t('news.latestNews')} moreLabel={t('news.viewAllNews')} moreTo="/news" />
-      <div className="latest-news__grid">
+      <div className={dense ? 'latest-news__grid latest-news__grid--dense' : 'latest-news__grid'}>
         {articles.map((article) => (
           <NewsCard key={article.id} article={article} />
         ))}

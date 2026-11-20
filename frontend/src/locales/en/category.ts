@@ -1,5 +1,8 @@
 export const category = {
   navLabel: 'News categories',
+  more: 'More',
+  collapseSection: 'Collapse',
+  expandSection: 'Expand',
   title: 'Category',
   loading: 'Loading category…',
   notFound: 'Category not found',

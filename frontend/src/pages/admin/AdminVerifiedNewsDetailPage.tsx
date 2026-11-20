@@ -1,15 +1,16 @@
 import { App, Col, Form, Input, Row, Select, Space, Switch, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchCategories, fetchTags } from '@/api/content'
+import { fetchTags } from '@/api/content'
 import { fetchVerifiedNewsById, importVerifiedNews } from '@/api/localNews'
 import { AppButton } from '@/components/common/AppButton'
-import { AppEditor } from '@/components/common/AppEditor'
+import { CategoryFormSelect } from '@/components/admin/CategoryFormSelect'
+import { ContentFieldWithAi } from '@/components/admin/ContentFieldWithAi'
 import { AppLoader } from '@/components/common/AppLoader'
 import { MediaUploader } from '@/components/common/MediaUploader'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { adminNewsEditPath } from '@/config/adminPages'
-import type { Category, NewsType, TagItem } from '@/types/content'
+import type { NewsType, TagItem } from '@/types/content'
 import { NEWS_TYPES } from '@/types/content'
 import type { VerifiedLocalNewsItem } from '@/types/localNews'
 import { applyApiFieldErrors, getApiErrorMessage } from '@/utils/apiError'
@@ -74,7 +75,6 @@ export function AdminVerifiedNewsDetailPage() {
   const [item, setItem] = useState<VerifiedLocalNewsItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<TagItem[]>([])
 
   useEffect(() => {
@@ -83,14 +83,9 @@ export function AdminVerifiedNewsDetailPage() {
     ;(async () => {
       setLoading(true)
       try {
-        const [data, cats, tagList] = await Promise.all([
-          fetchVerifiedNewsById(id),
-          fetchCategories(),
-          fetchTags(),
-        ])
+        const [data, tagList] = await Promise.all([fetchVerifiedNewsById(id), fetchTags()])
         if (!active) return
         setItem(data)
-        setCategories(cats)
         setTags(tagList)
         const description = data.description || data.title
         form.setFieldsValue({
@@ -149,7 +144,7 @@ export function AdminVerifiedNewsDetailPage() {
         news_type: values.news_type,
         language: values.language,
         status: values.status === 'published' || values.status === 'draft' ? values.status : 'draft',
-        category_id: values.category_id || null,
+        category_id: values.category_id,
         tag_ids: values.tag_ids || [],
         is_breaking: Boolean(values.is_breaking),
         title: values.title,
@@ -201,14 +196,26 @@ export function AdminVerifiedNewsDetailPage() {
             {item.source_name || 'Unknown source'} · {formatDate(item.published_at)}
             {item.country ? ` · ${item.country}` : ''} · Local flag will be set
           </p>
-          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <StatusBadge status={item.verdict} />
+            {item.imported_news_id ? <StatusBadge status="added" /> : null}
             <span className="text-xs text-ink-muted">
               {item.confidence}% · {item.ai_provider}
             </span>
           </div>
         </div>
-        <Space>
+        <Space wrap>
+          {item.imported_news_id && item.imported_news_type ? (
+            <AppButton
+              type="primary"
+              icon={<i className="fa-solid fa-pen-to-square" aria-hidden />}
+              onClick={() =>
+                navigate(adminNewsEditPath(item.imported_news_type as NewsType, item.imported_news_id!))
+              }
+            >
+              Open in CMS
+            </AppButton>
+          ) : null}
           <AppButton
             href={item.url}
             target="_blank"
@@ -224,7 +231,7 @@ export function AdminVerifiedNewsDetailPage() {
       <Form
         form={form}
         layout="vertical"
-        disabled={saving}
+        disabled={saving || Boolean(item.imported_news_id)}
         className="news-form-page__form"
         onValuesChange={handleValuesChange}
         onFinishFailed={handleFinishFailed}
@@ -253,13 +260,12 @@ export function AdminVerifiedNewsDetailPage() {
               />
             </Form.Item>
 
-            <Form.Item
-              name="content"
-              label="Content"
-              rules={[{ required: true, message: 'Content is required' }]}
-            >
-              <AppEditor placeholder="Write the full article…" minHeight={360} />
-            </Form.Item>
+            <ContentFieldWithAi
+              form={form}
+              disabled={loading || saving}
+              placeholder="Write the full article…"
+              minHeight={360}
+            />
           </Col>
 
           <Col xs={24} lg={8}>
@@ -296,14 +302,12 @@ export function AdminVerifiedNewsDetailPage() {
                 />
               </Form.Item>
 
-              <Form.Item name="category_id" label="Category">
-                <Select
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  options={categories.map((c) => ({ value: c.id, label: c.name }))}
-                  placeholder="Select category"
-                />
+              <Form.Item
+                name="category_id"
+                label="Category"
+                rules={[{ required: true, message: 'Category is required' }]}
+              >
+                <CategoryFormSelect disabled={loading || saving} />
               </Form.Item>
 
               <Form.Item name="tag_ids" label="Tags">
@@ -333,9 +337,15 @@ export function AdminVerifiedNewsDetailPage() {
                 <Input />
               </Form.Item>
 
-              <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary">
-                Add to CMS news
-              </AppButton>
+              {item.imported_news_id ? (
+                <p className="m-0 text-center font-ui text-sm text-ink-muted">
+                  This item is already in CMS news.
+                </p>
+              ) : (
+                <AppButton type="primary" htmlType="submit" loading={saving} block className="btn-soft-primary">
+                  Add to CMS news
+                </AppButton>
+              )}
             </div>
           </Col>
         </Row>

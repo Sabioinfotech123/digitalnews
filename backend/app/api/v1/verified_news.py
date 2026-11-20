@@ -64,7 +64,13 @@ def import_verified_news(
     db: DbSession,
 ) -> LocalNewsImportResponse:
     """Add a verified local-feed item into CMS news (Local flag on)."""
-    item = VerifiedLocalNewsService(db).get(item_id)
+    service = VerifiedLocalNewsService(db)
+    item = service.get(item_id)
+    if item.imported_news_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This item was already added to news",
+        )
     title = (payload.title or item.title).strip()[:300]
     if len(title) < 3:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Title is required")
@@ -134,6 +140,8 @@ def import_verified_news(
             status_code=status.HTTP_409_CONFLICT,
             detail="Could not create a unique slug for this article",
         )
+
+    service.mark_imported(item_id, created.id)
 
     return LocalNewsImportResponse(
         news_id=created.id,

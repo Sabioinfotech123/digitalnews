@@ -1,6 +1,6 @@
 import { App, Drawer, Input } from 'antd'
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   fetchVideoComments,
   fetchVideoEngagement,
@@ -17,6 +17,8 @@ import { AppButton } from '@/components/common/AppButton'
 import { AppLoader } from '@/components/common/AppLoader'
 import { ShareModal } from '@/components/common/ShareModal'
 import { useDocumentTitle } from '@/components/common/DocumentTitle'
+import { fetchPublicVideoBySlug } from '@/api/content'
+import { isSampleShortSlug } from '@/config/sampleShorts'
 import { loadPublicShortVideos } from '@/utils/loadPublicShorts'
 import type { SupportedLanguage } from '@/config/app'
 import { BRAND } from '@/config/brand'
@@ -95,7 +97,10 @@ function ReelSlide({
   const stats = engagementForVideo(video, engagement)
   const videoRef = useRef<HTMLVideoElement>(null)
   const playbackHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoplayFailTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [videoPaused, setVideoPaused] = useState(true)
+  /** Show center play only after user pauses or autoplay fails — not while the reel is starting. */
+  const [showPlayOverlay, setShowPlayOverlay] = useState(false)
   const [playbackHint, setPlaybackHint] = useState<'pause' | null>(null)
   const src = video.video_url?.trim() || ''
   const poster = video.thumbnail_url?.trim() || undefined
@@ -110,6 +115,7 @@ function ReelSlide({
   useEffect(
     () => () => {
       if (playbackHintTimer.current) clearTimeout(playbackHintTimer.current)
+      if (autoplayFailTimer.current) clearTimeout(autoplayFailTimer.current)
     },
     [],
   )
@@ -123,17 +129,41 @@ function ReelSlide({
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
+    if (autoplayFailTimer.current) {
+      clearTimeout(autoplayFailTimer.current)
+      autoplayFailTimer.current = null
+    }
     if (active) {
-      void el.play().catch(() => undefined)
+      setShowPlayOverlay(false)
+      setPlaybackHint(null)
+      const tryPlay = () => {
+        void el.play().catch(() => setShowPlayOverlay(true))
+      }
+      tryPlay()
+      autoplayFailTimer.current = setTimeout(() => {
+        if (el.paused) setShowPlayOverlay(true)
+      }, 700)
+      const onLoaded = () => tryPlay()
+      if (el.readyState < 2) {
+        el.addEventListener('loadeddata', onLoaded, { once: true })
+      }
+      return () => {
+        if (autoplayFailTimer.current) {
+          clearTimeout(autoplayFailTimer.current)
+          autoplayFailTimer.current = null
+        }
+        el.removeEventListener('loadeddata', onLoaded)
+      }
     } else {
       el.pause()
       el.currentTime = 0
       setVideoPaused(true)
+      setShowPlayOverlay(false)
       setPlaybackHint(null)
     }
-  }, [active])
+  }, [active, src])
 
-  const showCenterPlay = videoPaused && active
+  const showCenterPlay = videoPaused && active && showPlayOverlay
   const showCenterPause = playbackHint === 'pause' && active
 
   const togglePlayback = () => {
@@ -150,21 +180,27 @@ function ReelSlide({
           <video
             ref={videoRef}
             src={src}
-            poster={poster}
+            poster={active ? undefined : poster}
             playsInline
             loop
             muted={muted}
-            preload="metadata"
+            preload={active ? 'auto' : 'none'}
             controls={false}
             aria-label={video.title}
             onClick={togglePlayback}
             onPlay={() => {
               setVideoPaused(false)
+              setShowPlayOverlay(false)
+              if (autoplayFailTimer.current) {
+                clearTimeout(autoplayFailTimer.current)
+                autoplayFailTimer.current = null
+              }
               flashPauseHint()
             }}
             onPause={() => {
               setVideoPaused(true)
               setPlaybackHint(null)
+              if (active) setShowPlayOverlay(true)
             }}
           />
         ) : (
@@ -228,6 +264,7 @@ function ReelSlide({
 export function ShortReelsPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, contentLanguage } = useLanguage()
   const { user, isAuthenticated } = useAuth()
   const { message } = App.useApp()
@@ -239,7 +276,6 @@ export function ShortReelsPage() {
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [commentsSlug, setCommentsSlug] = useState<string | null>(null)
   const [comments, setComments] = useState<VideoCommentItem[]>([])
-  const [commentName, setCommentName] = useState('')
   const [commentBody, setCommentBody] = useState('')
   const [commentSubmitting, setCommentSubmitting] = useState(false)
   const [commentReactBusy, setCommentReactBusy] = useState<string | null>(null)
@@ -247,6 +283,7 @@ export function ShortReelsPage() {
   const [shareTitle, setShareTitle] = useState('')
   const [soundMuted, setSoundMuted] = useState(false)
   const touchStartY = useRef<number | null>(null)
+  const recordedViewSlugs = useRef<Set<string>>(new Set())
 
   const activeVideo = items[activeIndex] ?? null
 
@@ -308,6 +345,14 @@ export function ShortReelsPage() {
     setActiveIndex(next)
     void loadEngagement(items[next].slug)
   }, [items, slug, loadEngagement])
+
+  useEffect(() => {
+    const video = items[activeIndex]
+    if (!video?.slug || isSampleShortSlug(video.slug)) return
+    if (recordedViewSlugs.current.has(video.slug)) return
+    recordedViewSlugs.current.add(video.slug)
+    void fetchPublicVideoBySlug(video.slug, contentLanguage).catch(() => undefined)
+  }, [activeIndex, items, contentLanguage])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -374,12 +419,19 @@ export function ShortReelsPage() {
     }
   }
 
+  const goToLoginForComment = useCallback(() => {
+    message.info(t('shorts.commentLoginRequired'))
+    navigate('/login', { state: { from: location.pathname } })
+  }, [location.pathname, message, navigate, t])
+
   const submitComment = async () => {
     if (!commentsSlug) return
+    if (!isAuthenticated) {
+      goToLoginForComment()
+      return
+    }
     const body = commentBody.trim()
-    const name = isAuthenticated
-      ? (user?.full_name?.trim() || '')
-      : commentName.trim()
+    const name = user?.full_name?.trim() || ''
     if (body.length < 1) {
       message.warning(t('shorts.commentRequiredBody'))
       return
@@ -392,7 +444,6 @@ export function ShortReelsPage() {
     try {
       await postVideoComment(commentsSlug, name, body, contentLanguage)
       setCommentBody('')
-      if (!isAuthenticated) setCommentName('')
       const list = await fetchVideoComments(commentsSlug, contentLanguage)
       setComments(list)
       const eng = await fetchVideoEngagement(commentsSlug, contentLanguage)
@@ -622,44 +673,53 @@ export function ShortReelsPage() {
 
           <footer className="short-reels__comments-composer">
             {!isAuthenticated ? (
-              <Input
-                className="short-reels__comments-name"
-                placeholder={t('shorts.yourName')}
-                value={commentName}
-                onChange={(e) => setCommentName(e.target.value)}
-                maxLength={120}
-                prefix={<i className="fa-solid fa-user text-ink-muted" aria-hidden />}
-              />
-            ) : null}
-            <div className="short-reels__comments-input-row">
-              {isAuthenticated && user ? (
-                <span className="short-reels__comment-avatar short-reels__comment-avatar--sm" aria-hidden>
-                  {commentInitials(user.full_name)}
-                </span>
-              ) : null}
-              <Input.TextArea
-                className="short-reels__comments-text"
-                placeholder={t('shorts.addComment')}
-                value={commentBody}
-                onChange={(e) => setCommentBody(e.target.value)}
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                maxLength={2000}
-              />
-            </div>
-            {isAuthenticated && user ? (
-              <p className="short-reels__comment-as">
-                {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
-              </p>
-            ) : null}
-            <AppButton
-              type="primary"
-              block
-              className="short-reels__comment-submit btn-soft-primary"
-              loading={commentSubmitting}
-              onClick={() => void submitComment()}
-            >
-              {t('shorts.postComment')}
-            </AppButton>
+              <div className="short-reels__comment-login">
+                <p className="short-reels__comment-login-hint">
+                  <i className="fa-solid fa-lock" aria-hidden />
+                  {t('shorts.commentLoginRequired')}
+                </p>
+                <AppButton
+                  type="primary"
+                  block
+                  className="short-reels__comment-submit btn-soft-primary"
+                  onClick={goToLoginForComment}
+                >
+                  {t('bookmarks.signIn')}
+                </AppButton>
+              </div>
+            ) : (
+              <>
+                <div className="short-reels__comments-input-row">
+                  {user ? (
+                    <span className="short-reels__comment-avatar short-reels__comment-avatar--sm" aria-hidden>
+                      {commentInitials(user.full_name)}
+                    </span>
+                  ) : null}
+                  <Input.TextArea
+                    className="short-reels__comments-text"
+                    placeholder={t('shorts.addComment')}
+                    value={commentBody}
+                    onChange={(e) => setCommentBody(e.target.value)}
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    maxLength={2000}
+                  />
+                </div>
+                {user ? (
+                  <p className="short-reels__comment-as">
+                    {t('shorts.commentingAs')} <strong>{user.full_name}</strong>
+                  </p>
+                ) : null}
+                <AppButton
+                  type="primary"
+                  block
+                  className="short-reels__comment-submit btn-soft-primary"
+                  loading={commentSubmitting}
+                  onClick={() => void submitComment()}
+                >
+                  {t('shorts.postComment')}
+                </AppButton>
+              </>
+            )}
           </footer>
         </div>
       </Drawer>
