@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteAdminNews, fetchAdminNews, updateAdminNews } from '@/api/content'
 import { useLanguage } from '@/app/providers/LanguageProvider'
+import { AdminNewsSortOrderInput } from '@/components/admin/AdminNewsSortOrderInput'
 import { AppButton } from '@/components/common/AppButton'
 import { AppTable } from '@/components/common/AppTable'
 import { LanguageBadge } from '@/components/common/LanguageBadge'
@@ -137,9 +138,13 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
   const saveSortOrder = async (row: NewsItem, nextOrder: number | null) => {
     const sortOrder = Math.max(0, Math.floor(Number(nextOrder ?? 0)))
     if (sortOrder === (row.sort_order ?? 0)) return
+    // Optimistic: keep the edited value visible even if the row moves after reload.
+    setItems((prev) =>
+      prev.map((item) => (item.id === row.id ? { ...item, sort_order: sortOrder } : item)),
+    )
     try {
       await updateAdminNews(row.id, { sort_order: sortOrder })
-      message.success('Order swapped')
+      message.success(`Order updated to ${sortOrder}`)
       void load()
     } catch (err) {
       message.error(getApiErrorMessage(err, 'Could not update order'))
@@ -181,21 +186,11 @@ export function AdminNewsPage({ newsType }: AdminNewsPageProps) {
 
       const orderColumnEditable: TableColumnsType<NewsItem>[number] = {
         ...orderColumnBase,
-        defaultSortOrder: 'ascend',
         render: (value: number | undefined, row) => (
-          <InputNumber
-            min={0}
-            step={1}
-            size="small"
+          <AdminNewsSortOrderInput
+            row={row}
             value={value ?? 0}
-            className="w-full"
-            onPressEnter={(e) => {
-              const target = e.target as HTMLInputElement
-              void saveSortOrder(row, Number(target.value))
-            }}
-            onBlur={(e) => {
-              void saveSortOrder(row, Number(e.target.value))
-            }}
+            onSave={(item, next) => void saveSortOrder(item, next)}
           />
         ),
       }
