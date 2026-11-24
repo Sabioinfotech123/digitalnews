@@ -118,10 +118,10 @@ export function AdminAgentPage() {
     setSuggestions(items)
   }, [])
 
-  const runControl = async (action: AgentControlAction) => {
+  const runControl = async (action: AgentControlAction, lang: ContentLanguage = language) => {
     setLoading(true)
     try {
-      const st = await controlAgent(action)
+      const st = await controlAgent(action, lang)
       setStatus(st)
       await refreshSuggestions()
       message.success(`Agent ${action}`)
@@ -140,11 +140,13 @@ export function AdminAgentPage() {
         const st = await fetchAgentStatus()
         if (!active) return
         setStatus(st)
+        if (st.fetch_language) setLanguage(st.fetch_language)
         if (!autoStarted.current && st.status === 'stopped') {
           autoStarted.current = true
-          const started = await controlAgent('start')
+          const started = await controlAgent('start', st.fetch_language ?? language)
           if (!active) return
           setStatus(started)
+          if (started.fetch_language) setLanguage(started.fetch_language)
         }
         const items = await fetchAgentSuggestions()
         if (active) setSuggestions(items)
@@ -291,7 +293,11 @@ export function AdminAgentPage() {
           <Select
             value={language}
             style={{ width: 120 }}
-            onChange={setLanguage}
+            disabled={loading}
+            onChange={(val) => {
+              setLanguage(val)
+              void runControl('refetch', val)
+            }}
             options={[
               { value: 'en', label: 'English' },
               { value: 'te', label: 'తెలుగు' },

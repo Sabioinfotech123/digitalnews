@@ -384,7 +384,7 @@ After import, the item appears under **All news**, the chosen type list, homepag
 |--------|------|-----|--------------|
 | POST | `/admin/ai/content` | Admin | **enhance** = in-place HTML polish (~same word count); **regenerate** = full rewrite from title/summary — body `{ "mode", "title", "short_description", "content", "language" }` → `{ "content", "provider" }` |
 | GET | `/admin/agent/status` | Admin | Agent runtime: `stopped` / `running` / `paused`, fetch times, OpenRouter configured |
-| POST | `/admin/agent/control` | Admin | Body `{ "action": "start" \| "stop" \| "pause" \| "resume" \| "refetch" }` |
+| POST | `/admin/agent/control` | Admin | Body `{ "action": "start" \| "stop" \| "pause" \| "resume" \| "refetch", "language"?: "en" \| "te" }` — language drives Google News RSS locale for **start** / **refetch** (and auto-refetch timer). Status includes `fetch_language`. |
 | GET | `/admin/agent/suggestions` | Admin | Cached trending / latest / viral headlines (title, source, URL) |
 | POST | `/admin/agent/chat` | Admin | Body `{ "message", "suggestion_id"?, "language" }` → draft fields + real/fake % + model used |
 

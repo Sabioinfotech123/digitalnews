@@ -68,6 +68,7 @@ class AgentRuntime:
         self.next_fetch_at: datetime | None = None
         self._timer: threading.Timer | None = None
         self._settings: Settings | None = None
+        self.fetch_language: ContentLanguage = ContentLanguage.en
 
     def _interval_sec(self) -> int:
         settings = self._settings or get_settings()
@@ -100,14 +101,16 @@ class AgentRuntime:
         self._timer.start()
 
     def refetch(self) -> int:
-        items = fetch_agent_suggestions()
+        items = fetch_agent_suggestions(language=self.fetch_language)
         with self._lock:
             self.suggestions = items
             self.last_fetch_at = datetime.now(timezone.utc)
         return len(items)
 
-    def control(self, action: AgentControlAction) -> AgentRuntimeStatus:
+    def control(self, action: AgentControlAction, language: ContentLanguage | None = None) -> AgentRuntimeStatus:
         self._settings = get_settings()
+        if language is not None:
+            self.fetch_language = language
         if action == AgentControlAction.start:
             with self._lock:
                 self.status = AgentRuntimeStatus.running
@@ -150,6 +153,7 @@ class AgentRuntime:
                 last_fetch_at=self.last_fetch_at,
                 next_fetch_at=self.next_fetch_at,
                 refetch_interval_minutes=minutes,
+                fetch_language=self.fetch_language,
                 openrouter_configured=router.is_configured(),
                 models=router.model_chain(),
             )
@@ -187,8 +191,8 @@ class AgentService:
     def status(self) -> AgentStatusResponse:
         return self.runtime.get_status()
 
-    def control(self, action: AgentControlAction) -> AgentStatusResponse:
-        self.runtime.control(action)
+    def control(self, action: AgentControlAction, language: ContentLanguage | None = None) -> AgentStatusResponse:
+        self.runtime.control(action, language=language)
         return self.runtime.get_status()
 
     def suggestions(self) -> list[AgentSuggestion]:

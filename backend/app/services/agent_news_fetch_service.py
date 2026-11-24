@@ -5,6 +5,7 @@ from __future__ import annotations
 import urllib.parse
 import xml.etree.ElementTree as ET
 
+from app.models.content import ContentLanguage
 from app.schemas.agent import AgentSuggestion
 from app.services.local_news_service import (
     GOOGLE_NEWS_RSS,
@@ -13,11 +14,29 @@ from app.services.local_news_service import (
     article_id_from_url,
 )
 
-_AGENT_QUERIES: list[tuple[str, str]] = [
+_AGENT_QUERIES_EN: list[tuple[str, str]] = [
     ("trending", "trending India news when:3d"),
     ("latest", "India latest news when:1d"),
     ("viral", "viral OR trending when:3d India"),
 ]
+
+_AGENT_QUERIES_TE: list[tuple[str, str]] = [
+    ("trending", "తాజా వార్తలు భారతదేశం when:3d"),
+    ("latest", "లేటెస్ట్ న్యూస్ ఇండియా when:1d"),
+    ("viral", "వైరల్ వార్తలు when:3d"),
+]
+
+
+def _rss_locale(language: ContentLanguage) -> dict[str, str]:
+    if language == ContentLanguage.te:
+        return {"hl": "te-IN", "gl": "IN", "ceid": "IN:te"}
+    return {"hl": "en-IN", "gl": "IN", "ceid": "IN:en"}
+
+
+def _queries_for(language: ContentLanguage) -> list[tuple[str, str]]:
+    if language == ContentLanguage.te:
+        return _AGENT_QUERIES_TE
+    return _AGENT_QUERIES_EN
 
 
 def _map_rss_item_for_agent(item: ET.Element, feed: str) -> AgentSuggestion | None:
@@ -41,16 +60,20 @@ def _map_rss_item_for_agent(item: ET.Element, feed: str) -> AgentSuggestion | No
     )
 
 
-def fetch_agent_suggestions(*, limit_per_feed: int = 8) -> list[AgentSuggestion]:
+def fetch_agent_suggestions(
+    *,
+    language: ContentLanguage = ContentLanguage.en,
+    limit_per_feed: int = 8,
+) -> list[AgentSuggestion]:
+    locale = _rss_locale(language)
+    queries = _queries_for(language)
     merged: list[AgentSuggestion] = []
     seen: set[str] = set()
 
-    for feed, query in _AGENT_QUERIES:
+    for feed, query in queries:
         params = {
             "q": query,
-            "hl": "en-IN",
-            "gl": "IN",
-            "ceid": "IN:en",
+            **locale,
         }
         url = f"{GOOGLE_NEWS_RSS}?{urllib.parse.urlencode(params)}"
         try:
@@ -73,7 +96,6 @@ def fetch_agent_suggestions(*, limit_per_feed: int = 8) -> list[AgentSuggestion]
             merged.append(mapped)
             count += 1
 
-    # Reuse channel filter from local news — map to LocalNewsArticle-like for filter
     from app.schemas.local_news import LocalNewsArticle
 
     wrap = [

@@ -38,12 +38,14 @@ class AgentStatusResponse(BaseModel):
     last_fetch_at: datetime | None = None
     next_fetch_at: datetime | None = None
     refetch_interval_minutes: int = 15
+    fetch_language: ContentLanguage = ContentLanguage.en
     openrouter_configured: bool = False
     models: list[str] = Field(default_factory=list)
 
 
 class AgentControlRequest(BaseModel):
     action: AgentControlAction
+    language: ContentLanguage | None = None
 
 
 class AgentCredibility(BaseModel):

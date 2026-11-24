@@ -206,7 +206,7 @@ You can create from:
 ### 3F) Agent (AI news assistant)
 
 1. Sidebar → **Agent** (opens with agent **Start** if it was stopped).
-2. Toolbar: **Start** / **Pause** / **Resume** / **Stop** / **Refetch** — while **running**, headlines refresh every ~15 minutes.
+2. Toolbar: **Start** / **Pause** / **Resume** / **Stop** / **Refetch** — while **running**, headlines refresh every ~15 minutes. **English** / **తెలుగు** sets Google News fetch language (changing it runs **Refetch**); chat drafts use the same language.
 2a. Toolbar pill toggles (saved in browser): **Answer details**, **Form title**, **Model name**, **Status bar** — click to turn on/off.
 3. Left: **Suggestions** (trending / latest / viral) with **source** name; click one to chat.
 4. Right: type your own headline or notes → **Send**. Your pink bubble is **title only** when you pick a suggestion. The agent reply shows **title + short description**, trust %, and draft.

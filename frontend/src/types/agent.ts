@@ -23,6 +23,7 @@ export interface AgentStatusResponse {
   last_fetch_at: string | null
   next_fetch_at: string | null
   refetch_interval_minutes: number
+  fetch_language: ContentLanguage
   openrouter_configured: boolean
   models: string[]
 }

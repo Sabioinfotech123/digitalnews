@@ -25,7 +25,7 @@ def agent_suggestions(_admin: AdminUser) -> list[AgentSuggestion]:
 
 @router.post("/admin/agent/control", response_model=AgentStatusResponse)
 def agent_control(payload: AgentControlRequest, _admin: AdminUser) -> AgentStatusResponse:
-    return AgentService().control(payload.action)
+    return AgentService().control(payload.action, language=payload.language)
 
 
 @router.post("/admin/agent/chat", response_model=AgentChatResponse)

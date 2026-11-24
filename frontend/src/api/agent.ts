@@ -18,8 +18,14 @@ export async function fetchAgentSuggestions(): Promise<AgentSuggestion[]> {
   return data
 }
 
-export async function controlAgent(action: AgentControlAction): Promise<AgentStatusResponse> {
-  const { data } = await apiClient.post<AgentStatusResponse>('/admin/agent/control', { action })
+export async function controlAgent(
+  action: AgentControlAction,
+  language?: ContentLanguage,
+): Promise<AgentStatusResponse> {
+  const { data } = await apiClient.post<AgentStatusResponse>('/admin/agent/control', {
+    action,
+    ...(language ? { language } : {}),
+  })
   return data
 }
 
