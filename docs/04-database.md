@@ -125,8 +125,8 @@ These are fixed options used in several tables:
 | `is_featured` | Featured flag |
 | `is_breaking` | Breaking badge on the article (not the header ticker) |
 | `is_local` | Added from **Local news** import |
-| `sort_order` | Display order within type (lower = first on homepage sections for that type) |
-| `all_news_rank` | Global order for the public **All news** list (`/news`), unique per language across all types (lower = first). Empty/null shows last. Duplicates swap when edited in admin |
+| `sort_order` | Display order within type (lower = first on homepage sections for that type). **New news** gets **1**; other rows in the same `news_type` + `language` are bumped down by 1 (each type has its own order ladder) |
+| `all_news_rank` | Global order for the public **All news** list (`/news`), unique per language across all types (lower = first). **New news** is saved as rank **1**; the old #1 is cleared. Empty/null shows last. Duplicates swap when edited in admin |
 | `image_url` | Cover image URL (**required** when creating) |
 | `seo_title` / `seo_description` / `seo_keywords` | SEO fields |
 | `published_at` | When published |

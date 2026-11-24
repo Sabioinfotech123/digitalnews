@@ -188,13 +188,13 @@ You can create from:
 
 4. Click **Create news**
 
-**After create:** you stay on edit page for that item (easy to fix and re-save).
+**After create:** you stay on edit page for that item (easy to fix and re-save). New items get **Order 1** in their type list (Featured / Latest / Trending / More — same language); older items in that type shift down by one. They also get **Ranking 1** on the public All news page; the previous ranking #1 becomes unranked. Featured, Latest, Trending, and More can each have their own **order 1** at the same time.
 
 ### 3C) Edit news / change order
 
 1. **All news** has an editable **Ranking** column (mixes Featured, Latest, etc.). Lower number shows first on the public **`/news`** page. Same rank in one language **swaps** with the other article. Leave empty to show that item last. Homepage sections still use **Order** on each typed list (Featured / Latest / …).
-2. On a typed list, change the **Order** number in the table (Enter or blur saves). If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3).
-3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule)
+2. On a typed list (Featured / Latest / Trending / More), change the **Order** number in the table (Enter or blur saves). You should see **Order updated to N**. If that number is already used by another item in the **same type + language**, the two orders **swap** (e.g. change 3 → 1, the old 1 becomes 3). After save the list reloads sorted by Order, so the row may move — that means it worked.
+3. Or click **Edit** (pencil) → change **Display order** → **Save changes** (same swap rule). New creates ignore the form’s Display order field; the API always places them at **Order 1**.
 
 ### 3D) Delete news
 

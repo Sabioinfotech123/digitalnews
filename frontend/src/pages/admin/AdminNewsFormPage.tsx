@@ -157,7 +157,10 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
         tag_ids: values.tag_ids || [],
       }
       if (mode === 'create') {
-        const created = await createAdminNews(payload)
+        // Backend assigns Order 1 and shifts the typed list; don't send form default 0.
+        const createPayload = { ...payload }
+        delete createPayload.sort_order
+        const created = await createAdminNews(createPayload)
         message.success('News created successfully')
         const newsType = created.news_type || lockedType
         navigate(adminNewsEditPath(newsType, created.id))
@@ -282,14 +285,18 @@ export function AdminNewsFormPage({ mode, defaultNewsType = 'latest' }: AdminNew
                 />
               </Form.Item>
 
-              <Form.Item
-                name="sort_order"
-                label="Display order"
-                tooltip="Lower number shows first on the public site (0, 1, 2…)"
-                className="w-full"
-              >
-                <InputNumber min={0} step={1} className="!w-full" />
-              </Form.Item>
+              {mode === 'edit' ? (
+                <Form.Item
+                  name="sort_order"
+                  label="Display order"
+                  tooltip="Lower number shows first in this type list. Same number as another item (same language) swaps. New items are placed at 1 automatically."
+                  className="w-full"
+                >
+                  <InputNumber min={0} step={1} className="!w-full" />
+                </Form.Item>
+              ) : (
+                <div />
+              )}
             </div>
 
             <Form.Item

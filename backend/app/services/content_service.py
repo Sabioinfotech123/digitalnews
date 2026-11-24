@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.models.content import Blog, ContentLanguage, ContentStatus, News, NewsType, Video
@@ -153,6 +154,29 @@ class NewsService:
             )
         return category_id
 
+    def _place_new_news_at_rank_one(self, language: ContentLanguage) -> None:
+        """New stories start at #1 on All news; previous #1 in this language is unranked."""
+        other = self.repo.get_by_all_news_rank(language=language, all_news_rank=1)
+        if other:
+            other.all_news_rank = None
+            self.repo.db.add(other)
+
+    def _place_new_news_at_sort_order_one(
+        self,
+        news_type: NewsType,
+        language: ContentLanguage,
+    ) -> None:
+        """Push existing rows down so the new story is first in its type + language list."""
+        self.db.execute(
+            update(News)
+            .where(
+                News.deleted_at.is_(None),
+                News.news_type == news_type,
+                News.language == language,
+            )
+            .values(sort_order=News.sort_order + 1)
+        )
+
     def list(
         self,
         *,
@@ -201,6 +225,8 @@ class NewsService:
         tags = self.tags.get_many(payload.tag_ids)
         news_type = payload.news_type
         is_featured = payload.is_featured or news_type == NewsType.featured
+        self._place_new_news_at_rank_one(payload.language)
+        self._place_new_news_at_sort_order_one(news_type, payload.language)
         news = News(
             title=payload.title,
             slug=payload.slug,
@@ -214,12 +240,8 @@ class NewsService:
             is_featured=is_featured,
             is_breaking=payload.is_breaking,
             is_local=payload.is_local,
-            sort_order=max(0, int(payload.sort_order or 0)),
-            all_news_rank=(
-                None
-                if payload.all_news_rank is None
-                else max(0, int(payload.all_news_rank))
-            ),
+            sort_order=1,
+            all_news_rank=1,
             image_url=payload.image_url,
             video_url=payload.video_url,
             youtube_url=payload.youtube_url,
@@ -251,8 +273,12 @@ class NewsService:
             old_order = int(getattr(item, "sort_order", 0) or 0)
             data["sort_order"] = new_order
             if new_order != old_order:
-                target_type = data.get("news_type", item.news_type)
-                target_lang = data.get("language", item.language)
+                raw_type = data.get("news_type", item.news_type)
+                raw_lang = data.get("language", item.language)
+                target_type = raw_type if isinstance(raw_type, NewsType) else NewsType(str(raw_type))
+                target_lang = (
+                    raw_lang if isinstance(raw_lang, ContentLanguage) else ContentLanguage(str(raw_lang))
+                )
                 other = self.repo.get_by_sort_order(
                     news_type=target_type,
                     language=target_lang,
@@ -262,6 +288,7 @@ class NewsService:
                 if other:
                     other.sort_order = old_order
                     self.repo.db.add(other)
+                    self.repo.db.flush()
 
         if "all_news_rank" in data:
             raw_rank = data["all_news_rank"]
@@ -290,10 +317,18 @@ class NewsService:
                 item.is_featured = True
         if tag_ids is not None:
             item.tags = self.tags.get_many(tag_ids)
-        self._assert_news_category(item.category_id)
+        # Allow order/rank-only patches even if older rows are missing a category.
+        order_only = set(data.keys()) <= {"sort_order", "all_news_rank"} and tag_ids is None
+        if not order_only:
+            self._assert_news_category(item.category_id)
         if item.status == ContentStatus.published and item.published_at is None:
             item.published_at = datetime.now(timezone.utc)
-        return _news_response(self.repo.save(item))
+        self.repo.db.add(item)
+        self.repo.db.commit()
+        refreshed = self.repo.get(news_id)
+        if not refreshed:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="News not found")
+        return _news_response(refreshed)
 
     def delete(self, news_id: str) -> None:
         item = self.repo.get(news_id)
