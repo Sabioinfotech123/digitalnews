@@ -27,6 +27,7 @@ export const admin = {
   categorySelectPlaceholder: 'Select category',
   tags: 'Tags',
   breakingNews: 'Breaking news',
+  agent: 'Agent',
   media: 'Media',
   users: 'Users',
   settings: 'Settings',

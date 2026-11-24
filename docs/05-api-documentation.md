@@ -382,9 +382,13 @@ After import, the item appears under **All news**, the chosen type list, homepag
 
 | Method | Path | Who | What it does |
 |--------|------|-----|--------------|
-| POST | `/admin/ai/content` | Admin | Enhance or regenerate article HTML — body `{ "mode": "enhance" \| "regenerate", "title", "short_description", "content", "language" }` → `{ "content", "provider" }` |
+| POST | `/admin/ai/content` | Admin | **enhance** = in-place HTML polish (~same word count); **regenerate** = full rewrite from title/summary — body `{ "mode", "title", "short_description", "content", "language" }` → `{ "content", "provider" }` |
+| GET | `/admin/agent/status` | Admin | Agent runtime: `stopped` / `running` / `paused`, fetch times, OpenRouter configured |
+| POST | `/admin/agent/control` | Admin | Body `{ "action": "start" \| "stop" \| "pause" \| "resume" \| "refetch" }` |
+| GET | `/admin/agent/suggestions` | Admin | Cached trending / latest / viral headlines (title, source, URL) |
+| POST | `/admin/agent/chat` | Admin | Body `{ "message", "suggestion_id"?, "language" }` → draft fields + real/fake % + model used |
 
-Uses the same env as AI verify: `AI_VERIFY_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_API_KEY`.
+Uses **OpenRouter** (same as Agent): `OPENROUTER_API_KEY`, optional `OPENROUTER_MODELS` failover list, `AGENT_LLM_TIMEOUT_SEC`. Response `provider` is `openrouter:<model-id>`.
 
 ### AI verify + verified news
 
@@ -396,8 +400,7 @@ Uses the same env as AI verify: `AI_VERIFY_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_
 | POST | `/admin/verified-news/{id}/import` | Admin | Add into CMS news (`is_local: true`); same body as local-news import |
 
 Verdict values: `likely_real`, `likely_fake`, `uncertain`.  
-Env: `AI_VERIFY_PROVIDER=gemini|openai`, `GEMINI_API_KEY` / `OPENAI_API_KEY`.  
-With `gemini` (default): if Gemini returns high-demand / 503 / similar and `OPENAI_API_KEY` is set, verify automatically falls back to OpenAI.
+Env: `OPENROUTER_API_KEY`, optional `OPENROUTER_MODELS` failover list. Saved `ai_provider` is `openrouter:<model>` (trimmed to 40 chars).
 
 ---
 

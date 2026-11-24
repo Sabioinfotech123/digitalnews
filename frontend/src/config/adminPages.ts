@@ -296,6 +296,12 @@ export function resolveAdminPageMeta(
       menuKey: '/admin/breaking-news',
     },
     {
+      prefix: '/admin/agent',
+      titleKey: 'admin.agent',
+      crumbs: [{ title: t('admin.agent') }],
+      menuKey: '/admin/agent',
+    },
+    {
       prefix: '/admin/feedback',
       titleKey: 'admin.feedback',
       crumbs: [{ title: t('admin.feedback') }],

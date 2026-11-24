@@ -1,0 +1,36 @@
+.admin-news-create-modal {
+  max-width: min(96vw, 1180px) !important;
+
+  .ant-modal-header {
+    margin-bottom: 0;
+    padding: 16px 48px 12px 20px;
+  }
+
+  .ant-modal-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.4;
+  }
+
+  .ant-modal-close {
+    top: 14px;
+    inset-inline-end: 14px;
+    z-index: 2;
+  }
+
+  .ant-modal-body {
+    padding: 12px 20px 16px;
+    max-height: min(68vh, 720px);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .ant-modal-footer {
+    padding: 12px 16px;
+    margin-top: 0;
+  }
+
+  .news-form-page__form {
+    padding-inline: 0;
+  }
+}

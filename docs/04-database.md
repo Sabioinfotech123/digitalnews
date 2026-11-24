@@ -272,7 +272,7 @@ Saved when admin runs **Verify** on a Local feed article.
 | `verdict` | `likely_real` / `likely_fake` / `uncertain` |
 | `confidence` | 0–100 |
 | `ai_summary` | Short AI explanation |
-| `ai_provider` | `gemini` or `openai` |
+| `ai_provider` | OpenRouter model label (e.g. `openrouter:openai/gpt-4o-mini`, max 40 chars) |
 | `verified_at` | When checked |
 | `imported_news_id` | CMS `news.id` after **View & add** import (null until added) |
 

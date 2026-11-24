@@ -27,6 +27,7 @@ export const admin = {
   categorySelectPlaceholder: 'కేటగిరీ ఎంచుకోండి',
   tags: 'ట్యాగులు',
   breakingNews: 'బ్రేకింగ్ న్యూస్',
+  agent: 'Agent',
   media: 'మీడియా',
   users: 'వినియోగదారులు',
   settings: 'సెట్టింగులు',

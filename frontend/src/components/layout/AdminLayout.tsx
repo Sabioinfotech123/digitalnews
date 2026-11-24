@@ -186,6 +186,11 @@ export function AdminLayout() {
       label: <Link to="/admin/breaking-news">{t('admin.breakingNews')}</Link>,
     },
     {
+      key: '/admin/agent',
+      icon: <i className="fa-solid fa-robot" aria-hidden />,
+      label: <Link to="/admin/agent">{t('admin.agent')}</Link>,
+    },
+    {
       key: 'taxonomy',
       icon: <i className="fa-solid fa-tags" aria-hidden />,
       label: t('admin.taxonomy'),

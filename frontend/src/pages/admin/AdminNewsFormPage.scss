@@ -21,8 +21,21 @@
     padding-left: 0.75rem;
   }
 
+  &__grid {
+    align-items: start;
+
+    > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+  }
+
+  &__main {
+    min-width: 0;
+  }
+
   &__side {
-    padding: 1rem;
+    padding: 0 1rem 1rem;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     background: #f7f7f7;

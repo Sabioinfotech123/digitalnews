@@ -46,12 +46,16 @@ class Settings(BaseSettings):
         "https://placehold.co/1200x675/111111/ffffff/png?text=Local+News"
     )
 
-    # AI verify (Local feed → Verified news). Provider: gemini | openai
-    ai_verify_provider: str = "gemini"
-    gemini_api_key: str = ""
-    gemini_model: str = "gemini-3.5-flash-lite"
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    # OpenRouter — Agent, CMS AI content, Local feed verify (shared model list)
+    openrouter_api_key: str = ""
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_models: str = (
+        "google/gemini-2.0-flash-exp:free,"
+        "openai/gpt-4o-mini,"
+        "meta-llama/llama-3.2-3b-instruct:free"
+    )
+    agent_refetch_minutes: int = 15
+    agent_llm_timeout_sec: int = 120
 
     @property
     def cors_origin_list(self) -> list[str]:

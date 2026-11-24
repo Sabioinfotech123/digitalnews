@@ -28,8 +28,10 @@
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional bootstrap (dev only) |
 | `NEWS_API_KEY` | Optional. If set, Local news uses NewsAPI.org; otherwise Google News RSS |
 | `LOCAL_NEWS_PLACEHOLDER_IMAGE` | Optional image URL when imported local news has no photo |
-| `AI_VERIFY_PROVIDER` | `gemini` (default: Gemini first, OpenAI fallback if flaky) or `openai` (OpenAI only) |
-| `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini for Local feed verify |
-| `OPENAI_API_KEY` / `OPENAI_MODEL` | OpenAI verify (used as fallback when Gemini is flaky, or as primary if provider=`openai`) |
+| `OPENROUTER_API_KEY` | **Agent**, **CMS** Enhance/Regenerate, and **Local feed → Verify** (one OpenRouter key) |
+| `OPENROUTER_MODELS` | Comma-separated model IDs to try in order when one hits quota/errors |
+| `OPENROUTER_BASE_URL` | Default `https://openrouter.ai/api/v1` |
+| `AGENT_REFETCH_MINUTES` | Auto-refetch headlines while agent is **running** (default 15) |
+| `AGENT_LLM_TIMEOUT_SEC` | Per OpenRouter attempt timeout on the server (default 120). Agent chat and editor AI use this. Agent chat in the UI waits up to 5 minutes. |
 
 Never commit `.env`. See [21-database.md](./21-database.md) for Postgres + Docker.

@@ -8,6 +8,7 @@ import { AdminBlogCreatePage, AdminBlogEditPage } from '@/pages/admin/AdminBlogF
 import { AdminBlogsPage } from '@/pages/admin/AdminBlogsPage'
 import { AdminBreakingNewsPage } from '@/pages/admin/AdminBreakingNewsPage'
 import { AdminCategoriesPage } from '@/pages/admin/AdminCategoriesPage'
+import { AdminAgentPage } from '@/pages/admin/AdminAgentPage'
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
 import { AdminFeedbackPage } from '@/pages/admin/AdminFeedbackPage'
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
@@ -97,6 +98,7 @@ export function AppRouter() {
       <Route element={<RequireAdmin />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
+          <Route path="agent" element={<AdminAgentPage />} />
           <Route path="news" element={<AdminNewsPage />} />
           <Route path="news/featured" element={<AdminFeaturedNewsPage />} />
           <Route path="news/latest" element={<AdminLatestNewsPage />} />

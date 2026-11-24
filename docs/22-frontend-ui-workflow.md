@@ -38,6 +38,7 @@ If those don’t exist yet, the UI shows a warning and dropdowns stay empty.
 |------|-------------------|
 | **Dashboard** | Overview counts, publish %, quick actions |
 | **Breaking news** | Header ticker headlines (CRUD) |
+| **Agent** | Auto-fetch trending/latest/viral headlines, chat to draft stories, **Add to CMS** → prefilled create form |
 | **Catalog → Categories** | Add/edit/delete categories |
 | **Catalog → Tags** | Add/edit/delete tags |
 | **News → All news** | See every news item |
@@ -141,7 +142,7 @@ Public site and admin UI update after save (refresh if needed). The favicon upda
 4. Open **Local feed → Verified news** to browse all AI-checked items
 5. On Verified news → **View & add** → same edit form as local import → save into Featured/Latest/… (Local flag on). After import, the list shows a green **Added** tag instead of **View & add** (pencil opens the CMS article). Importing the same item again is blocked.
 
-Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. AI keys: `GEMINI_API_KEY` and/or `OPENAI_API_KEY`. Default provider `gemini` tries Gemini first and falls back to OpenAI when Gemini is flaky (set `AI_VERIFY_PROVIDER=openai` to use OpenAI only).
+Uses **Google News RSS** (`https://news.google.com/rss/search`) by default. Optional: `NEWS_API_KEY` for NewsAPI.org. **Verify** uses **OpenRouter** (`OPENROUTER_API_KEY`, same `OPENROUTER_MODELS` as Agent).
 
 ---
 
@@ -174,7 +175,7 @@ You can create from:
 | Title | Required |
 | Slug | Required (unique per language) |
 | Short description | Summary |
-| Content | Full article — use **Enhance content** (polish draft) or **Regenerate content** (new AI draft from title + summary) above the editor; needs `GEMINI_API_KEY` or `OPENAI_API_KEY` in backend `.env` |
+| Content | **Enhance content** = light polish (same length/facts, fixes grammar only); **Regenerate content** = new draft from title + summary. Both use OpenRouter (`OPENROUTER_API_KEY`) |
 | **News image** | **Required** — upload first |
 | News type | Locked if you came from Featured/Latest/…; from **All news** you can pick any type |
 
@@ -201,6 +202,16 @@ You can create from:
 1. Click **Delete** (trash)
 2. Confirm in popup
 3. Item is removed from CMS lists (soft delete on backend)
+
+### 3F) Agent (AI news assistant)
+
+1. Sidebar → **Agent** (opens with agent **Start** if it was stopped).
+2. Toolbar: **Start** / **Pause** / **Resume** / **Stop** / **Refetch** — while **running**, headlines refresh every ~15 minutes.
+2a. Toolbar pill toggles (saved in browser): **Answer details**, **Form title**, **Model name**, **Status bar** — click to turn on/off.
+3. Left: **Suggestions** (trending / latest / viral) with **source** name; click one to chat.
+4. Right: type your own headline or notes → **Send**. Your pink bubble is **title only** when you pick a suggestion. The agent reply shows **title + short description**, trust %, and draft.
+5. On each agent reply, **Add to CMS** (top of the message) opens a **centered modal** (title + close icon, like Add category): same create fields as News (AI enhance/regenerate, image, category, tags, SEO). Footer **Cancel** / **Add news** saves without leaving the Agent page. Toggle **Form title** switches the header between “Add news from agent” and “Add news”.
+6. Backend needs `OPENROUTER_API_KEY` in `backend/.env` (models listed in `OPENROUTER_MODELS`).
 
 ### 3E) Useful list tools
 
